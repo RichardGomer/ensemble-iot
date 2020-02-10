@@ -1,0 +1,27 @@
+{
+    "name": "xebre.net/ensemble-iot",
+    "description": "Ensemble is a framework for creating distributed IoT machines",
+    "type": "project",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Richard Gomer",
+            "email": "richard@richardgomer.co.uk"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^6.5",
+        "vanilla/garden-cli": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ensemble\\": "lib/core/",
+            "Ensemble\\Remote\\": "lib/core/",
+            "Ensemble\\Storage\\": "lib/core/",
+            "Ensemble\\Device\\": ["lib/devices/", "mod"],
+            "Ensemble\\GPIO\\": "lib/support",
+            "Ensemble\\System\\": "lib/support",
+            "Ensemble\\Log\\": "lib/support"
+        }
+    }
+}
