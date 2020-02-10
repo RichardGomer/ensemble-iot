@@ -4,7 +4,7 @@ namespace Ensemble;
 
 ini_set('memory_limit', '256M');
 
-require 'lib/setup.php';
+require dirname(__DIR__).'/lib/setup.php';
 
 // Record runtime status information
 $status = new Storage\JsonStore('devicestatus');
@@ -25,11 +25,12 @@ $broker->setInputQueue($inputQueue);
 // The announcement device tells other endpoints about our local devices
 // so that they can route commands to them
 $announce = new Device\AnnouncerDevice($conf['endpoint_url']);
+$broker->addDevice($announce);
+
 // If there's a default endpoint configured, we'll announce to it
 if($conf['default_endpoint'] !== false) {
     $announce->addRemote($conf['default_endpoint']);
 }
-$broker->addDevice($announce);
 
 // ** DISABLE DIRECT LOCAL DELIVERY **
 // Direct local delivery can be disabled, in which case the message broker

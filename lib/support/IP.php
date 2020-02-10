@@ -10,7 +10,7 @@ namespace Ensemble\System;
 class IP {
     public static function getIPs() {
         $out = array();
-        $data = exec("ip address | grep \"inet \"", $out);
+        $data = exec("ip address 2>&1 | grep \"inet \"", $out);
         $ips = array();
         foreach($out as $line) {
             if(preg_match('/^inet ([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\/([0-9]{1,2})/', trim($line), $matches))

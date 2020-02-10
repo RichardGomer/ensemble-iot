@@ -46,6 +46,14 @@ class RemoteDeliveryDevice implements \Ensemble\Module {
 
             $cmd = $this->queue->shift();
 
+            // Commands may expiry while in the remote queue, they need to be
+            // discarded to prevent connectivity problems overwhelming the node
+            if($cmd->isExpired()) {
+                echo "TX ".$cmd." [DISCARDED, EXPIRED]\n";
+                $b->send($cmd->reply(new \Ensemble\ExpiredException("Command expired before action");));
+                continue;
+            }
+
             $device = $cmd->getTarget();
             if(!$this->map->contains($device)) {
                 $endpoint = $this->defaultEndpoint;

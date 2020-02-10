@@ -1,0 +1,17 @@
+[Unit]
+Description=PiOT Framework
+Before=systemd-user-sessions.service
+
+[Service]
+TimeoutStartSec=0
+
+ExecStart=BINPATH/run.sh
+Type=oneshot
+RemainAfterExit=yes
+User=USER
+
+ExecStop=
+User=USER
+
+[Install]
+WantedBy=multi-user.target
