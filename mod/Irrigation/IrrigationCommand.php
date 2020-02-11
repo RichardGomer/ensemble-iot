@@ -6,9 +6,7 @@ namespace Ensemble\Device\Irrigation;
  * Represents an irrigation command; a command is just a channel name plus the
  * number of millilitres to discharge
  */
-class IrrigationCmd implements PiotCommand {
-
-    public static function
+class IrrigationCmd {
 
     public function __construct($channel, $ml) {
         $this->ml = $ml;
@@ -21,5 +19,26 @@ class IrrigationCmd implements PiotCommand {
 
     public function getMl() {
         return $this->ml;
+    }
+
+
+    // Reporting
+
+    private $flow = false;
+    public function setFlow($flow) {
+        $this->flow = $flow;
+    }
+
+    public function getFlow() {
+        return $this->flow;
+    }
+
+    private $time = false;
+    public function setTime($t) {
+        $this->time = $time;
+    }
+
+    public function getTime() {
+        retrun $this->time;
     }
 }

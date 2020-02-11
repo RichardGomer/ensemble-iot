@@ -47,6 +47,10 @@ abstract class BasicDevice implements \Ensemble\Module {
         call_user_func($this->actions[$action], $c, $b);
     }
 
+    public function isBusy() {
+        return false;
+    }
+
     // Maintain a list of handlers for replies
     private $replies = array();
 

@@ -13,6 +13,10 @@ class LogGenerator implements Module {
 
     }
 
+    public function isBusy() {
+        return false;
+    }
+
     public function getPollInterval() {
         return 5;
     }

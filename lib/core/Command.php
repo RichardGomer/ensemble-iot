@@ -61,7 +61,10 @@ class Command {
         }
 
         if(!is_array($json))
+        {
+            var_dump($json);
             throw new BadCommandException("Command string is not valid JSON");
+        }
 
         if(
             !array_key_exists('source', $json) ||

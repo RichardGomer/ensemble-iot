@@ -61,9 +61,17 @@ class CommandBroker {
                 throw new ExpiredException("Command expired before action");
             }
 
-            echo "RX ".$command." [EXECUTE]\n";
             $device = $this->getTargetDevice($command);
+
+            if($device->isBusy()) {
+                echo "RX ".$command." [QUEUE LOCAL, DEVICE BUSY]\n";
+                throw new DeviceBusyException("Device is busy");
+            }
+
+            echo "RX ".$command." [EXECUTE]\n";
             $device->action($command, $this);
+        } catch(DeviceBusyException $e) { // If the device is busy, return the command to the queue with a threshold
+            $this->local->push($cmd, time() + 10);
         } catch(DeviceNotFoundException $e) {
             $this->remote->push($cmd);
         } catch(\Exception $e) {
@@ -148,7 +156,7 @@ class CommandBroker {
             }
 
             if($this->input->isEmpty()) {
-                usleep(100000); // Sleep for 100 milliseconds
+                usleep(100000);
                 continue;
             }
 
@@ -160,4 +168,5 @@ class CommandBroker {
 }
 
 class DeviceNotFoundException extends \Exception {}
+class DeviceBusyException extends \Exception {}
 class ExpiredException extends \Exception {}

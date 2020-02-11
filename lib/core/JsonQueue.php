@@ -17,52 +17,68 @@ class JsonQueue implements Queue {
     }
 
     /**
-     * Add a command to the queue
+     * Add a command to the queue; optionally with a threshold time.
+     * Commands are essentially invisible until the threshold time is reached; they
+     * don't count towards the queue length and won't be returned by peeking or
+     * shifting
      */
-    public function push(Command $c) {
-        $this->json->queue = array_merge($this->json->queue, array($c->toJSON()));
+    public function push(Command $c, $threshold=0) {
+        $j = array('threshold'=>$threshold, 'cmd'=>$c->toJSON());
+        $this->json->queue = array_merge($this->json->queue, array($j));
     }
 
     /**
-     * Return the next command in the queue and remove it
+     * Return the next post-threshold command in the queue and remove it
      */
     public function shift() {
         $q = $this->json->queue;
-        $next = array_shift($q);
-        $this->json->queue = $q;
-        return Command::fromJSON($next);
-    }
 
-    /**
-     * Return the next command in the queue, but don't remove it
-     */
-    public function peek() {
-        return Command::fromJSON(array_shift($q = $this->json->queue));
-    }
-
-    /**
-     * Return all commands in the queue, but don't remove them
-     */
-    public function peekAll() {
-        $out = array();
-        foreach($this->json->queue as $c) {
-            $out[] = Command::fromJSON($c);
+        foreach($q as $i=>$c) {
+            if($c['threshold'] <= time()) {
+                array_splice($q, $i, 1);
+                $this->json->queue = $q;
+                return Command::fromJSON($c['cmd']);
+            }
         }
+    }
+
+    /**
+     * Return all post-threshold commands in the queue, but don't remove them
+     */
+    public function peekAll($max=INF) {
+        $out = array();
+        $q = $this->json->queue;
+
+        foreach($q as $i=>$c) {
+            if($c['threshold'] <= time()) {
+                $out[] = Command::fromJSON($c['cmd']);
+                if(count($out) == $max)
+                    break;
+            }
+        }
+
         return $out;
     }
 
     /**
-     * Count the number of commands in the queue
+     * Return the next post-threshold command in the queue, but don't remove it
      */
-    public function count() {
-        return count($this->json->queue);
+    public function peek() {
+        return $this->peekAll(1);
     }
 
     /**
-     * Check whether the queue is empty
+     * Count the number of post-threshold commands in the queue
+     */
+    public function count() {
+        return count($this->peekAll());
+    }
+
+    /**
+     * Check whether the queue is empty of post-threshold commands
      */
     public function isEmpty() {
-        return $this->count() < 1;
+        return count($this->peekAll(1)) == 0;
     }
 
 }

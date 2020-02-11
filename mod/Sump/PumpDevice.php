@@ -12,6 +12,10 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
         $this->name = $name;
         $this->pump = $pump;
         $this->depth = $depth;
+
+        // TODO: Allow pumping requests when water is required; as long as level
+        // is above minimum? OR allow pumping to be inhibited for a time?
+        //$this->registerAction('pump', $this, 'action_pump');
     }
 
     /**

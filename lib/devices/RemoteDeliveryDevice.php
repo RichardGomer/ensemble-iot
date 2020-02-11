@@ -50,7 +50,7 @@ class RemoteDeliveryDevice implements \Ensemble\Module {
             // discarded to prevent connectivity problems overwhelming the node
             if($cmd->isExpired()) {
                 echo "TX ".$cmd." [DISCARDED, EXPIRED]\n";
-                $b->send($cmd->reply(new \Ensemble\ExpiredException("Command expired before action");));
+                $b->send($cmd->reply(new \Ensemble\ExpiredException("Command expired before action")));
                 continue;
             }
 
@@ -78,7 +78,7 @@ class RemoteDeliveryDevice implements \Ensemble\Module {
                 echo "TX ".$cmd." [SENT] -> $endpoint\n";
             } catch(\Exception $e) {
                 $this->map->backoff($device);
-                $this->queue->push($cmd);
+                $this->queue->push($cmd, time() + 10);
                 echo "TX ".$cmd." [DELAYED BY ERROR]\n";
             }
 
@@ -87,6 +87,10 @@ class RemoteDeliveryDevice implements \Ensemble\Module {
 
 
     public function action(\Ensemble\Command $c, \Ensemble\CommandBroker $b) {
+        return false;
+    }
+
+    public function isBusy() {
         return false;
     }
 

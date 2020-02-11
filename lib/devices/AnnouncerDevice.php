@@ -55,4 +55,8 @@ class AnnouncerDevice implements \Ensemble\Module {
     public function action(\Ensemble\Command $c, \Ensemble\CommandBroker $b) {
         return false;
     }
+
+    public function isBusy() {
+        return false;
+    }
 }
