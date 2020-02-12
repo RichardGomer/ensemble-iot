@@ -137,7 +137,14 @@ class Command {
         $this->args[strtolower($name)] = $value;
     }
 
-    public function getArgs() {
+    // Get all args; if $check contains values, check that all those keys are
+    // defined else throw an ArgNotSetException
+    public function getArgs($check=array()) {
+
+        foreach($check as $k) {
+            $this->getArg($k);
+        }
+
         return $this->args;
     }
 
@@ -146,7 +153,7 @@ class Command {
         if(!array_key_exists($name, $this->args)) {
             throw new ArgNotSetException("'$name' argument is not set");
         } else {
-            return $this->args['name'];
+            return $this->args[$name];
         }
     }
 

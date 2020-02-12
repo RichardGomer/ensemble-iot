@@ -6,6 +6,8 @@
 use Ensemble\Device\Irrigation as Ir;
 use Ensemble\GPIO as GPIO;
 
+require __DIR__.'/home.php';
+
 $pump = new GPIO\Relay(23);
 $flow = new Ir\FlowMeter(26);
 $log = new Ensemble\Log\TextLog("irrigation.log");

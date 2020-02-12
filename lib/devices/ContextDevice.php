@@ -10,6 +10,8 @@ namespace Ensemble\Device;
 
 class ContextDevice extends BasicDevice {
 
+    private $data = array();
+
     public function __construct($name) {
         $this->name = $name;
 
@@ -20,6 +22,7 @@ class ContextDevice extends BasicDevice {
     /**
      * A supercontext will receive a copy of all our updates
      */
+    private $supers = array();
     public function addSuperContext($devicename) {
         $this->supers[] = $devicename;
     }
@@ -42,15 +45,17 @@ class ContextDevice extends BasicDevice {
      */
     public function action_update(\Ensemble\Command $cmd, \Ensemble\CommandBroker $b) {
 
+        $args = $cmd->getArgs(array('time', 'value', 'field'));
+
         // If the field exists, only update it if this value is newer than the last
         if(array_key_exists($args['field'], $this->data)) {
-            if($args['time'] <= $this->data[$args['field']]['mtime']) {
+            if($args['time'] <= $this->data[$args['field']]['time']) {
                 return;
             }
         }
 
         $this->data[$args['field']] = array(
-            'mtime'=>$args['time'],
+            'time'=>$args['time'],
             'source'=>$cmd->getSource(),
             'value'=>$args['value']
         );

@@ -6,6 +6,8 @@
 
 namespace Ensemble;
 
+require __DIR__.'/home.php';
+
 $sensors = new \Ensemble\Device\Temperature\OregonSensorSet("temperature.sensors");
 
 $lounge = $sensors->getChannelSensor("temperature.sensors.lounge", 1);

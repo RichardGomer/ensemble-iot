@@ -1,21 +1,19 @@
 <?php
 
 /**
- * Extend the basic context device by logging all updates to a database
+ * Extend the basic context device by logging all updates to a database using
+ * a PDO statement
  */
 namespace Ensemble\Device;
-
-// Need to be able to pass received messages up to a parent context; so we can
-// have local contexts for locally-coupled devices and also remote contexts
 
 class LoggingContextDevice extends ContextDevice {
 
     private $pdo;
 
-    public function __construct($name, \PDO $insertStatement) {
+    public function __construct($name, \PDOStatement $insertStatement) {
         parent::__construct($name);
 
-
+        $this->logger = $insertStatement;
     }
 
     /**
@@ -31,8 +29,12 @@ class LoggingContextDevice extends ContextDevice {
     public function action_update(\Ensemble\Command $cmd, \Ensemble\CommandBroker $b) {
         parent::action_update($cmd, $b);
 
-        $this->pdo->bindParam($cmd['field'], ':field');
-        $this->pdo->bindParam($cmd['value'], ':field');
+        $this->logger->bindValue(':source', $src = $cmd->getSource());
+        $this->logger->bindValue(':field', $f = $cmd->getArg('field'));
+        $this->logger->bindValue(':value', $v = $cmd->getArg('value'));
+        $this->logger->bindValue(':time', $t = $cmd->getArg('time'));
+
+        $this->logger->execute();
     }
 
 }

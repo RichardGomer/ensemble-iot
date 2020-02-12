@@ -7,6 +7,8 @@
 namespace Ensemble\Device\Heating;
 use Ensemble\GPIO as GPIO;
 
+require __DIR__.'/home.php';
+
 $heatsched  = new Schedule($heatstore = new \Ensemble\Storage\JsonStore('heating'));
 $hwsched = new Schedule($hwstore = new \Ensemble\Storage\JsonStore('hwater'));
 
