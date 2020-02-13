@@ -26,7 +26,7 @@ class JsonReader
         $this->datafn = $dir.$name.'.json';
     }
 
-    protected function getData()
+    public function getData()
     {
         $data = json_decode(file_get_contents($this->datafn), true);
 

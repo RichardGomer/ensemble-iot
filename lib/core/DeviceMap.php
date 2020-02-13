@@ -64,4 +64,13 @@ class DeviceMap {
     function getMap() {
         return $this->map->getData();
     }
+
+    function getEndpoints() {
+        $devices = $this->map->getData();
+        $eps = array();
+        foreach($devices as $d) {
+            $eps[] = $d['url'];
+        }
+        return array_values(array_unique($eps));
+    }
 }

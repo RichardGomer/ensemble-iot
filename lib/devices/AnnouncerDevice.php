@@ -14,10 +14,13 @@ class AnnouncerDevice implements \Ensemble\Module {
     /**
      * Construct with our own endpoint URL (this is what will get registered remotely)
      * and, optionally, a list of remote endpoints to notify
+     *
+     * Our own devicemap can also be passed in, and we'll notify devices reciprocally
      */
-    public function __construct($endpointURL, $remotes=array()) {
+    public function __construct($endpointURL, $remotes=array(), \Ensemble\Remote\DeviceMap $map = null) {
         $this->endpointURL = $endpointURL;
         $this->remotes = $remotes;
+        $this->map = $map;
     }
 
     public function announce() {
@@ -42,7 +45,13 @@ class AnnouncerDevice implements \Ensemble\Module {
         // We notify the remote of all local devices
         $devices = $broker->getLocalDevices();
 
-        foreach($this->remotes as $r) {
+        // Combine manually added remotes with those from the device map
+        $remotes = $this->remotes;
+        if($this->map instanceof \Ensemble\Remote\DeviceMap) {
+            $remotes = array_unique(array_merge($this->map->getEndpoints(), $remotes));
+        }
+
+        foreach($remotes as $r) {
             try {
                 $client = \Ensemble\Remote\ClientFactory::factory($r);
                 $client->registerDevices($devices, $this->endpointURL);

@@ -24,7 +24,7 @@ $broker->setInputQueue($inputQueue);
 
 // The announcement device tells other endpoints about our local devices
 // so that they can route commands to them
-$announce = new Device\AnnouncerDevice($conf['endpoint_url']);
+$announce = new Device\AnnouncerDevice($conf['endpoint_url'], array(), $deviceMap);
 $broker->addDevice($announce);
 
 // If there's a default endpoint configured, we'll announce to it
