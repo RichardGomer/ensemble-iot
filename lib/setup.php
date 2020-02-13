@@ -7,15 +7,12 @@
 namespace Ensemble;
 use Garden\Cli\Cli;
 
-// Constant for easy access to the /var/ directory
-define('_VAR', dirname(__DIR__).'/var/');
-
-// Libs
-$wd = getcwd();
-chdir(__DIR__);
-
-require '../vendor/autoload.php';
-
+/**
+ * Basic configuration
+ * Set some common environment stuff up; this is shared between the API and the
+ * daemon
+ */
+require 'setup-common.php';
 
 // Command line options
 if(php_sapi_name() === 'cli') {
@@ -34,17 +31,6 @@ if(php_sapi_name() === 'cli') {
         'config' => false
     );
 }
-
-chdir($wd);
-
-/**
- * Basic configuration
- * Set some common environment stuff up; this is shared between the API and the
- * daemon
- */
-$conf['queue_in'] = new JsonQueue('q_in.json'); // Messages received by the API are stored in this queue
-$conf['queue_remote'] = new JsonQueue('q_remote.json'); // Messages to be delivered remotely are stored in this queue
-$conf['device_map'] = new Remote\DeviceMap(new Storage\JsonStore('device_map.json')); // A map of remote devices is maintained in here
 
 $conf['disable-direct-local'] = false; // If true, the CommandBroker will be configured to route all messages via the local endpoint, mostly useful for testing
 
