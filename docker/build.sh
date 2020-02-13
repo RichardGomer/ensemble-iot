@@ -3,6 +3,7 @@
 SCRIPT=`realpath $0`
 BASEPATH=`dirname $SCRIPT`
 cd $BASEPATH/..
+rm var/* #We don't want to build temporary state into the docker image!
 docker build -f docker/Dockerfile -t ensemble-iot:latest .
 
 echo ""

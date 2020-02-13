@@ -13,4 +13,7 @@ COPY --chown=pi . /home/pi/ensemble-iot/
 # Install ensemble-iot
 RUN /home/pi/ensemble-iot/bin/install.sh
 
+# Additional software useful on a major node
+RUN apt install php-pdo-mysql
+
 CMD /home/pi/ensemble-iot/bin/runDocker.sh
