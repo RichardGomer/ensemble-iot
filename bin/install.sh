@@ -33,8 +33,8 @@ chmod 0777 $VARPATH -R
 
 # Install deps
 apt-get update
-apt-get -y install php-cli lighttpd php-cgi php-json curl
-apt-get -y install wiringpi # Run separately because it doesn't exist on most platforms
+apt-get --assume-yes install php-cli lighttpd php-cgi php-json curl
+apt-get --assume-yes install wiringpi # Run separately because it doesn't exist on most platforms
 
 # Set lighttpd document root
 cp /etc/lighttpd/lighttpd.conf /etc/lighttpd/lighttpd.conf.orig
