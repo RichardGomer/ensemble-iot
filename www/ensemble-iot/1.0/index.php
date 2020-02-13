@@ -10,7 +10,7 @@
 namespace Ensemble\API\HTTP;
 use QuickAPI as API;
 
-require '../../../lib/setup.php'; // Load basic libs & config
+require '../../../lib/setup-common.php'; // Load basic libs & config
 require '../../../lib/quapi/api.lib.php'; // API framework
 require 'auth.lib.php';
 
