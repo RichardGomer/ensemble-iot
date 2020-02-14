@@ -67,7 +67,7 @@ if(!$args['config']) {
     $ips = getIPs();
     foreach($ips as $ip) {
         if(file_exists($cfn = dirname(__DIR__)."/config/{$ip}.php")) {
-            echo "Loaded config {$fn} based on IP address\n";
+            echo "Loaded config {$cfn} based on IP address\n";
             include($cfn);
             $configured = true;
             break;
@@ -80,7 +80,7 @@ if(!$args['config']) {
 } else {
     $fn = $args['config'];
     if(file_exists($cfn = dirname(__DIR__)."/config/{$fn}.php")) {
-        echo "Loaded specified configuration, {$fn}\n";
+        echo "Loaded specified configuration, {$cfn}\n";
         include($cfn);
     } else {
         echo "Config file '$cfn' does not exist\n";

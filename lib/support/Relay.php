@@ -6,7 +6,7 @@ namespace Ensemble\GPIO;
  * Control something via a relay
  */
 class Relay {
-    public function __construct(GPIO\OutputPin $pin, $offState = 1) {
+    public function __construct(OutputPin $pin, $offState = 1) {
         $this->pin = $pin;
         $this->offState = $offState;
     }

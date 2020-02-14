@@ -6,6 +6,13 @@ namespace Ensemble\System;
 /**
  * Based on class from https://gist.github.com/scribu/4736329
  */
+
+/**
+ * NB: If lines aren't being read from a C++ program, maybe need to add:
+ *		   setbuf(stdout,NULL);
+ *     at the start of main()
+ */
+
 class Thread
 {
 	var $process; // process reference

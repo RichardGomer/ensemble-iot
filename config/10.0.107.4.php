@@ -19,4 +19,4 @@ $ic->addChannel(2, new Relay(Pin::BCM(18, Pin::OUT)));
 $ic->addChannel(3, new Relay(Pin::BCM(27, Pin::OUT)));
 $ic->addChannel(4, new Relay(Pin::BCM(22, Pin::OUT)));
 
-$devices[] = $ic;
+$conf['devices'][] = $ic;
