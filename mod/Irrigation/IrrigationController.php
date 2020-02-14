@@ -11,7 +11,6 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
     public function __construct($name, Relay $pump, FlowMeter $flow) {
         $this->pump = $pump;
         $this->flow = $flow;
-        $this->log = $log;
         $this->name = $name;
 
         $this->registerAction('water', $this, 'action_water');

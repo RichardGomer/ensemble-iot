@@ -97,7 +97,7 @@ class Pin
 			}
 		}
 
-		throw new InvalidPinException("GPIO pin BCM $ppn doesn't seem to exist");
+		throw new InvalidPinException("GPIO pin BCM $bpn doesn't seem to exist");
 	}
 
 	public static function phys($ppn, $mode)

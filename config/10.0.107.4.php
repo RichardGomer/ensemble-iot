@@ -4,17 +4,19 @@
  * Irrigation controller
  */
 use Ensemble\Device\Irrigation as Ir;
-use Ensemble\GPIO as GPIO;
+use Ensemble\GPIO\Pin;
+use Ensemble\GPIO\Relay;
 
 require __DIR__.'/home.php';
 
-$pump = new GPIO\Relay(23);
+$pump = new Relay(Pin::BCM(23, Pin::OUT));
 $flow = new Ir\FlowMeter(26);
-$log = new Ensemble\Log\TextLog("irrigation.log");
 
-$ic = $MOD['icontrol'] = new IR\Irrigation($pump, $flow, $log);
+$ic = new IR\IrrigationController('irrigation.controller', $pump, $flow);
 
-$ic->addChannel(1, new GPIO\Relay(GPIO\Pin::BCM(17)));
-$ic->addChannel(2, new GPIO\Relay(GPIO\Pin::BCM(18)));
-$ic->addChannel(3, new GPIO\Relay(GPIO\Pin::BCM(27)));
-$ic->addChannel(4, new GPIO\Relay(GPIO\Pin::BCM(22)));
+$ic->addChannel(1, new Relay(Pin::BCM(17, Pin::OUT)));
+$ic->addChannel(2, new Relay(Pin::BCM(18, Pin::OUT)));
+$ic->addChannel(3, new Relay(Pin::BCM(27, Pin::OUT)));
+$ic->addChannel(4, new Relay(Pin::BCM(22, Pin::OUT)));
+
+$devices[] = $ic;

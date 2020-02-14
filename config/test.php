@@ -4,23 +4,8 @@
 
 namespace Ensemble;
 
-// Logging device
-$conf['devices'][] = new Device\LoggerDevice('global.log', new Log\TextLog(_VAR.'global.log'));
+$conf['default_endpoint'] = 'http://10.0.0.8:3107/ensemble-iot/1.0/';
 
-$dbf = dirname(__DIR__).'/var/context.sqlite3';
-
-$db = new \PDO('sqlite:'.$dbf);
-$db->query("CREATE TABLE IF NOT EXISTS `context` (
-    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-	`source` TEXT,
-	`field` TEXT,
-	`value`,
-	`time` INTEGER
-); ");
-
-$st = $db->prepare("INSERT INTO context(`source`, `field`, `value`, `time`) VALUES (:source, :field, :value, :time)");
-
-$conf['devices'][] = new Device\LoggingContextDevice('global.context', $st);
 
 // Create a test device that just generates log messages
 class LogGenerator implements Module {
