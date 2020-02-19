@@ -71,7 +71,7 @@ class CommandBroker {
             echo "RX ".$command." [EXECUTE]\n";
             $device->action($command, $this);
         } catch(DeviceBusyException $e) { // If the device is busy, return the command to the queue with a threshold
-            $this->local->push($command, time() + 10);
+            $this->input->push($command, time() + 10);
         } catch(DeviceNotFoundException $e) {
             $this->remote->push($command); // Route commands for unknown devices via the remote queue
         } catch(\Exception $e) {
