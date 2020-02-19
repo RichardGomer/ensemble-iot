@@ -60,9 +60,9 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         if($this->isBusy())
         {
             if(($flow = $this->checkEndPump($this->currentCmd)) !== false) {
-                $this->currentCmd = false;
                 // Reply with the actual flow
                 $b->send($this->currentEnsembleCmd->reply(array('flow'=>$this->currentCmd->getFlow().'ml', 'time'=>$this->currentCmd->getTime())));
+                $this->currentCmd = false;
             }
         }
     }
@@ -164,7 +164,7 @@ class IrrigationCmd {
 
     private $time = false;
     public function setTime($t) {
-        $this->time = $time;
+        $this->time = $t;
     }
 
     public function getTime() {
