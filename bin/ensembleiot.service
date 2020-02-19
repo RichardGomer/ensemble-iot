@@ -1,6 +1,8 @@
 [Unit]
 Description=PiOT Framework
 Before=systemd-user-sessions.service
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 TimeoutStartSec=0
@@ -8,9 +10,6 @@ TimeoutStartSec=0
 ExecStart=BINPATH/run.sh
 Type=oneshot
 RemainAfterExit=yes
-User=USER
-
-ExecStop=
 User=USER
 
 [Install]

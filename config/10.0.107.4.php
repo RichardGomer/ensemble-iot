@@ -3,9 +3,9 @@
 /**
  * Irrigation controller
  */
-use Ensemble\Device\Irrigation as Ir;
-use Ensemble\GPIO\Pin;
-use Ensemble\GPIO\Relay;
+use \Ensemble\Device\Irrigation as Ir;
+use \Ensemble\GPIO\Pin;
+use \Ensemble\GPIO\Relay;
 
 require __DIR__.'/home.php';
 
