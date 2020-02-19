@@ -17,7 +17,9 @@ class FlowMeter
 
     public function __construct($bcmpin) {
         // Start the background process
-        $this->proc = new \Ensemble\System\Thread("sudo ./mods-bin/yfs201flow $bcmpin");
+        $bin = __DIR__.'/YFS201/yfs201flow';
+        $cmd = "$bin $bcmpin";
+        $this->proc = new \Ensemble\System\Thread($cmd);
     }
 
     /**
@@ -26,14 +28,18 @@ class FlowMeter
     protected function read() {
         $lines = $this->proc->read();
 
+        var_dump($lines);
+
         foreach($lines as $line) {
-            if(preg_match('([0-9]+):([0-9]+)', $line, $parts)) {
+            if(preg_match('/([0-9]+):([0-9]+)/', $line, $parts)) {
                 $ms = $parts[1];
                 $revs = $parts[2];
                 $flow = $this->calculateFlow($revs, $ms);
                 $this->totalFlow += $flow;
             }
         }
+
+        return $this->totalFlow;
     }
 
     /**
@@ -52,7 +58,12 @@ class FlowMeter
 
     // Get flow since last reset
     public function getFlow() {
-        $this->read();
-        return $this->$totalFlow;
+        $flow = $this->read();
+        echo "Flow is {$flow}ml\n";
+        return $this->totalFlow;
+    }
+
+    public function measure() {
+        return $this->getFlow();
     }
 }

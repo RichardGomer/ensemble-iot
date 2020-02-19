@@ -1,15 +1,18 @@
 [Unit]
-Description=PiOT Framework
+Description=Ensemble IoT Daemon
 Before=systemd-user-sessions.service
-After=network-online.target
-Wants=network-online.target
+After=network.target
+Requires=network.target
 
 [Service]
 TimeoutStartSec=0
 
 ExecStart=BINPATH/run.sh
-Type=oneshot
-RemainAfterExit=yes
+Type=simple
+RemainAfterExit=no
+User=USER
+
+ExecStop=
 User=USER
 
 [Install]

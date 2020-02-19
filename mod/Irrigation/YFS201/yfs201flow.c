@@ -26,7 +26,7 @@ void setup(int argc, char *argv[])
   sensorPin = strtol(argv[1], &p, 10);
 
   printf("Freq monitor attached to BCM pin %i\n", sensorPin);
-  printf("Format is period:pulses - period is measured in milliseconds, and is usually about 1 second");
+  printf("Format is period:pulses - period is measured in milliseconds, and is usually about 1 second\n");
 
   pinMode(sensorPin, INPUT);
   digitalWrite(sensorPin, HIGH);
@@ -44,9 +44,9 @@ void loop()
 
   if((now - oldTime) >= 1000)    // Only process counters once per second
   {
-    time = (now - oldTime);
+    int time = (now - oldTime);
 
-    printf("%f:%f\n", time, pulseCount);
+    printf("%u:%u\n", time, pulseCount);
 
     oldTime = now;
 
@@ -56,6 +56,8 @@ void loop()
 
 int main(int argc, char *argv[])
 {
+  setbuf(stdout,NULL);
+
   setup(argc, argv);
 
   while(1) {

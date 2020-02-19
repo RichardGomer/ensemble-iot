@@ -3,6 +3,7 @@
 namespace Ensemble\Device\Irrigation;
 use Ensemble\GPIO\Relay;
 
+
 /**
  * This is the main irrigation controller
  */
@@ -37,7 +38,7 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
             $this->beginPump($this->currentCmd);
         } catch (\Exception $e) {
             $this->currentCmd = false;
-            $this->log->log($e->getMessage());
+            echo "Can't pump: ".$e->getMessage()."\n";
         }
     }
 
@@ -83,6 +84,8 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
 
         $this->startTime = time();
 
+        echo "Begin pumping on channel $channel\n";
+
         // Open the valve
         $valve->on();
         usleep(100000); // Wait for valve to open and let power supply settle down
@@ -92,10 +95,11 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         sleep(3); // 3 seconds should be enough for something to happen!
 
         // Check that there's flow, otherwise abort
-        if($this->flow->measure() < 10) {
+        $min = 10;
+        if($this->flow->measure() < $min) {
             $this->pump->off();
             $valve->off();
-            throw new LowFlowException("Detected less than 10ml flow in 3 seconds on channel '$channel' - aborted");
+            throw new LowFlowException("Detected less than {$min}ml flow in 3 seconds on channel '$channel' - aborted");
         }
     }
 
@@ -125,6 +129,49 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
     }
 
 }
+
+
+/**
+ * Represents an irrigation command; a command is just a channel name plus the
+ * number of millilitres to discharge
+ */
+class IrrigationCmd {
+
+    public function __construct($channel, $ml) {
+        $this->ml = $ml;
+        $this->channel = $channel;
+    }
+
+    public function getChannel() {
+        return $this->channel;
+    }
+
+    public function getMl() {
+        return $this->ml;
+    }
+
+
+    // Reporting
+
+    private $flow = false;
+    public function setFlow($flow) {
+        $this->flow = $flow;
+    }
+
+    public function getFlow() {
+        return $this->flow;
+    }
+
+    private $time = false;
+    public function setTime($t) {
+        $this->time = $time;
+    }
+
+    public function getTime() {
+        return $this->time;
+    }
+}
+
 
 class LowFlowException extends \Exception {}
 class BadChannelException extends \Exception {}
