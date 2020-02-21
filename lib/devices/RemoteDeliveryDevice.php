@@ -46,6 +46,9 @@ class RemoteDeliveryDevice implements \Ensemble\Module {
 
             $cmd = $this->queue->shift();
 
+            if(!$cmd instanceof \Ensemble\Command)
+                continue;
+
             // Commands may expiry while in the remote queue, they need to be
             // discarded to prevent connectivity problems overwhelming the node
             if($cmd->isExpired()) {
