@@ -10,14 +10,14 @@ require __DIR__.'/home.php';
 
 $sensors = new \Ensemble\Device\Temperature\OregonSensorSet("temperature.sensors");
 
-$lounge = $sensors->getChannelSensor("temperature.sensors.lounge", 1);
-$lounge->addDestination('home.context');
+$lounge = $sensors->getChannelSensor("temperature.lounge", 1);
+$lounge->addDestination('global.context');
 
-$landing = $sensors->getChannelSensor("temperature.sensors.landing", 2);
-$landing->addDestination('home.context');
+$landing = $sensors->getChannelSensor("temperature.landing", 2);
+$landing->addDestination('global.context');
 
-$office = $sensors->getChannelSensor("temperature.sensors.office", 3);
-$office->addDestination('home.context');
+$office = $sensors->getChannelSensor("temperature.office", 3);
+$office->addDestination('global.context');
 
 
 $conf['devices'][] = $sensors;

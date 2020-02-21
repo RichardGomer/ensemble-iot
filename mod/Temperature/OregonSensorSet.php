@@ -40,7 +40,8 @@ class OregonSensorSet extends \Ensemble\Device\BasicDevice
     public function __construct($name)
     {
         $this->name = $name;
-        $this->proc = new \Ensemble\System\Thread('sudo ./mods-bin/oregonrcv');
+        $bin = __DIR__.'/OregonPi/oregonrcv';
+        $this->proc = new \Ensemble\System\Thread($bin);
     }
 
     public function getPollInterval() {
