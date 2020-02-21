@@ -61,17 +61,16 @@ class OregonSensorSet extends \Ensemble\Device\BasicDevice
             {
                 $channel = $matches[1];
                 $temp = $matches[2];
-                if(!array_key_exists($channel, $readings)){
+                if(!array_key_exists($channel, $this->readings)){
                     $this->readings[$channel] = array();
                 }
 
-                while(count($readings[$channel]) > $this->maxreadings)
+                while(count($this->readings[$channel]) > $this->maxreadings)
                 {
-                    unset($readings[$channel][array_keys($readings[$channel])[0]]);
+                    unset($this->readings[$channel][array_keys($this->readings[$channel])[0]]);
                 }
 
-                $time = floor(time() / $this->resolution) * $this->resolution;
-                $this->readings[$channel][$time] = $temp;
+                $this->readings[$channel][time()] = $temp;
             }
         }
     }
