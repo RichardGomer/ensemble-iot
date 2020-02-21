@@ -4,7 +4,23 @@
 
 namespace Ensemble;
 
-$conf['default_endpoint'] = 'http://10.0.0.8:3107/ensemble-iot/1.0/';
+//$conf['default_endpoint'] = 'http://10.0.0.8:3107/ensemble-iot/1.0/';
+
+/**
+ * global.context is intended as the master context device
+ */
+if(!file_exists(__DIR__.'/dbcreds.php')) {
+        echo "Set \$dbhost, \$dbname, \$dbuser and \$dbpass in config/dbcreds.php\n";
+        exit;
+}
+
+require 'dbcreds.php';
+
+$db = new \PDO("mysql:host=$dbhost;dbname=$dbname;charset=utf8", $dbuser, $dbpass);
+
+$st = $db->prepare("INSERT INTO context(`source`, `field`, `value`, `time`) VALUES (:source, :field, :value, :time)");
+
+$conf['devices'][] = new Device\LoggingContextDevice('global.context', $st);
 
 
 // Create a test device that just generates log messages

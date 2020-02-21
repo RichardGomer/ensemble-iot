@@ -34,7 +34,13 @@ class LoggingContextDevice extends ContextDevice {
         $this->logger->bindValue(':value', $v = $cmd->getArg('value'));
         $this->logger->bindValue(':time', $t = $cmd->getArg('time'));
 
-        $this->logger->execute();
+        $res = $this->logger->execute();
+
+        if(!$res) {
+            $err = $this->logger->errorInfo();
+            throw new \Exception("SQL Error [{$err[0]}]: {$err[2]}");
+        }
+
     }
 
 }

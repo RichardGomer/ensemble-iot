@@ -23,13 +23,6 @@ if(!file_exists(__DIR__.'/dbcreds.php')) {
 require 'dbcreds.php';
 
 $db = new \PDO("mysql:host=$dbhost;dbname=$dbname;charset=utf8", $dbuser, $dbpass);
-$db->query("CREATE TABLE IF NOT EXISTS `context` (
- `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-	`source` TEXT,
-	`field` TEXT,
-	`value`,
-	`time` INTEGER
-); ");
 
 $st = $db->prepare("INSERT INTO context(`source`, `field`, `value`, `time`) VALUES (:source, :field, :value, :time)");
 
