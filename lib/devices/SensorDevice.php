@@ -12,7 +12,16 @@ abstract class SensorDevice extends BasicDevice  {
 
     final public function poll(\Ensemble\CommandBroker $broker) {
         $m = $this->measure();
+        $this->pushToDestinations($m, $broker);
+    }
 
+    final public function getAndPush(\Ensemble\CommandBroker $broker) {
+        $m = $this->measure();
+        $this->pushToDestinations($m, $broker);
+        return $m;
+    }
+
+    protected function pushToDestinations($m, \Ensemble\CommandBroker $broker) {
         if(is_null($m) || $m === false) {
             return;
         }
@@ -22,15 +31,16 @@ abstract class SensorDevice extends BasicDevice  {
         }
 
         foreach($this->destinations as $d) {
-            $cmd = \Ensemble\Command::create($this, $d, 'updateContext');
+            $cmd = \Ensemble\Command::create($this, $d['device'], 'updateContext');
+            $cmd->setArg('field', $d['field']);
             $cmd->setArg('time', $m['time']);
             $cmd->setArg('value', $m['value']);
             $broker->send($cmd);
         }
     }
 
-    public function addDestination($name) {
-        $this->destinations[] = $name;
+    public function addDestination($device, $field) {
+        $this->destinations[] = array('device'=>$device, 'field'=>$field);
     }
 
 }

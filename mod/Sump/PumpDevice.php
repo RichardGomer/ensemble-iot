@@ -22,7 +22,7 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
      * Polling interval is increased when pumping so that we can detect when to
      * stop
      */
-    public getPollInterval() {
+    public function getPollInterval() {
         if($this->pumping()) {
             return 3;
         } else {
@@ -35,12 +35,16 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
     }
 
     private $lastpump = 0;
-    public function poll() {
-        $depth = $this->depth->measure();
+    public function poll(\Ensemble\CommandBroker $b) {
+        $m = $this->depth->getAndPush($b); 
+        $depth = $m['value'];
+
+        echo "Depth: {$depth}cm\n";
 
         // If we're pumping, just decide when to stop
         if($this->pump->isOn()) {
             if($depth <= $this->min) {
+                echo "Stop pumping\n";
                 $this->pump->off();
             }
             return;
@@ -48,12 +52,14 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
 
         // Otherwise, decide whether to start
         if($depth > $this->mandatory) {
+            echo "Begin pump - Level exceeds mandatory pumping threshold\n";
             $this->pump->on();
             $this->lastpump = time();
             return;
         }
 
         if($depth > $this->advisory && (time() - $this->lastpump) > $this->advisoryInterval) {
+            echo "Begin pump - Level exceeds advisory pumping threshold\n";
             $this->pump->on();
             $this->lastpump = time();
             return;

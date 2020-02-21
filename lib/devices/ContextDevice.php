@@ -62,8 +62,8 @@ class ContextDevice extends BasicDevice {
 
         // Copy the update to supercontexts
         foreach($this->supers as $s) {
-            $cmd->copyTo($s);
-            $b->send($cmd);
+            $scmd = $cmd->copyTo($s);
+            $b->send($scmd);
         }
     }
 

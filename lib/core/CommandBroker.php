@@ -75,6 +75,8 @@ class CommandBroker {
         } catch(DeviceNotFoundException $e) {
             $this->remote->push($command); // Route commands for unknown devices via the remote queue
         } catch(\Exception $e) {
+            $t = get_class($e);
+            echo "Exception during execution: [{$t}] {$e->getMessage()}";
             $this->send($command->reply($e)); // If there's an exception, reply with it
         }
 

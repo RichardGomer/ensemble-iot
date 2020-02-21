@@ -21,14 +21,14 @@ class DepthSensor extends \Ensemble\Device\SensorDevice
         $this->maxDepth = $maxDepth;
     }
 
-    public function measure()
+    public function measure($send=false)
     {
         $lines = $this->runMeasurements($this->pinT, $this->pinE, 10);
 
         $m = array();
         foreach($lines as $l){
             if(preg_match('/^\.*Distance: ([0-9]+\.[0-9]+) cm/i', $l, $matches)) {
-                $m[] = $matches[1];
+                $m[] = (double) $matches[1];
             }
         }
 
@@ -38,8 +38,14 @@ class DepthSensor extends \Ensemble\Device\SensorDevice
 
         $dist = $this->median($m);
 
+        $res = array('time'=>time(), 'value'=> $this->maxDepth - $dist);
+
+        if($send) {
+            $this->pushToDestinations($res);
+        }
+
         // The depth of the water is the maxdepth minus the distance we measured
-        return $this->maxDepth - $dist;
+        return $res;
     }
 
     protected function runMeasurements($pinT, $pinE, $n)
@@ -47,7 +53,9 @@ class DepthSensor extends \Ensemble\Device\SensorDevice
         $pinT = (int) $pinT;
         $pinE = (int) $pinE;
         $n = (int) $n;
-        $proc = new \Ensemble\System\Thread("python ./mods-bin/distance.py $pinT $pinE $n");
+        $bin = __DIR__.'/HCSR04/distance.py';
+        $cmd = "python $bin {$this->pinT} {$this->pinE} 7";
+        $proc = new \Ensemble\System\Thread($cmd);
         $proc->waitForExit();
         return $proc->read();
     }
