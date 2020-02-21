@@ -95,7 +95,7 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         sleep(3); // 3 seconds should be enough for something to happen!
 
         // Check that there's flow, otherwise abort
-        $min = 10;
+        $min = 6;
         if($this->flow->measure() < $min) {
             $this->pump->off();
             $valve->off();
