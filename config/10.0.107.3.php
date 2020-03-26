@@ -23,6 +23,9 @@ $pump_on_interval = 3600;
 $pump_off = 15; // And goes off when this level is reached (in cm)
 $pump_force = 55; // Pump always operates when level goes above this
 
+$width = 36;
+$length = 56;
+
 $depth = new Device\Sump\DepthSensor("sump.depth", 31, 33, $hole_depth);
 $depth->addDestination(_NAME.'.context', 'sumpdepth'); // Push depth measurements to context
 $conf['devices'][] = $depth;
@@ -35,8 +38,10 @@ $relay = new Device\Sump\DblRelay($r1, $r2);
 $relay->off();
 
 $pumpdevice = new Device\Sump\PumpDevice(_NAME.'.pump', $relay, $depth);
+$pumpdevice->setDimensions($width, $length);
 $pumpdevice->setMinimumDepth($pump_off);
 $pumpdevice->setAdvisoryPumping($pump_on, $pump_on_interval);
 $pumpdevice->setMandatoryPumping($pump_force);
+$pumpdevice->setLogger('global.log');
 
 $conf['devices'][] = $pumpdevice;

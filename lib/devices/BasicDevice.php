@@ -79,4 +79,19 @@ abstract class BasicDevice implements \Ensemble\Module {
         }
     }
 
+    /**
+     * Allow a logging device to be set, and used for logging
+     */
+    private $logger = false;
+    public function setLogDevice($name) {
+        $this->logger = $name;
+    }
+
+    public function log($message,  \Ensemble\CommandBroker $via) {
+        if(!$this->logger)
+            return;
+
+        $c = \Ensemble\Command::create($this, $this->logger, 'log', array('message'=>$message));
+        $via->send($c);
+    }
 }

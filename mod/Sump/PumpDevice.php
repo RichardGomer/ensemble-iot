@@ -34,36 +34,76 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
         return $this->pump->isOn();
     }
 
+    private $request = false; // Hold the current pumping request, if any
+
     private $lastpump = 0;
     public function poll(\Ensemble\CommandBroker $b) {
-        $m = $this->depth->getAndPush($b); 
+        $m = $this->depth->getAndPush($b);
         $depth = $m['value'];
 
-        echo "Depth: {$depth}cm\n";
+        //echo "Depth: {$depth}cm\n";
 
         // If we're pumping, just decide when to stop
         if($this->pump->isOn()) {
-            if($depth <= $this->min) {
-                echo "Stop pumping\n";
+
+            // Off depth can be overriden
+            $min = $this->requestMin !== false ? $this->requestMin : $this->min;
+
+            if($depth <= $min) {
+                $diff = $this->startDepth - $this->depth;
+                $diffMl = $diff * $this->length * $this->width;
+                $this->log("Stop pumping. Level {$depth}cm is below {$min}cm. Pumped {$diff}cm / {$diffMl}ml", $b);
                 $this->pump->off();
             }
             return;
         }
 
+        $this->startDepth = $depth; // Make a note of starting depth so we can calculate total change at the end
+
+        if($this->request !== false) {
+            $volume = $this->request->getArgOrValue('ml', 10000);
+            $cm = $volume / ($this->length * $this->width); // Convert volume to cm of water using hole dimensions
+
+            $this->requestMin = max($depth - $amount, $this->min);
+
+            $this->log("Begin pumping. Request for {$volume}ml, reduce by {$cm}cm to depth $this->requestMin", $b);
+
+            $this->request = false;
+            $this->pump->on();
+            $this->lastpump = time();
+        }
+
         // Otherwise, decide whether to start
         if($depth > $this->mandatory) {
-            echo "Begin pump - Level exceeds mandatory pumping threshold\n";
+            $this->log("Begin pumping. Level ($depth) exceeds mandatory pumping threshold ($this->mandatory)", $b);
             $this->pump->on();
             $this->lastpump = time();
             return;
         }
 
         if($depth > $this->advisory && (time() - $this->lastpump) > $this->advisoryInterval) {
-            echo "Begin pump - Level exceeds advisory pumping threshold\n";
+            $this->log("Begin pumping. Level ($depth) exceeds advisory pumping threshold ($this->advisory)", $b);
             $this->pump->on();
             $this->lastpump = time();
             return;
         }
+    }
+
+    // Block actions while a request is in progress
+    public function isBusy() {
+        return $this->requested;
+    }
+
+    public function a_pump(\Ensemble\Command $c, \Ensemble\CommandBroker $b) {
+        $this->request = $c;
+    }
+
+    /**
+     * Set sump dimensions
+     */
+    public function setDimensions($width, $length) {
+        $this->width = $width;
+        $this->length = $length;
     }
 
     /**
