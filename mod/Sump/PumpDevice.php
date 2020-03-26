@@ -13,9 +13,7 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
         $this->pump = $pump;
         $this->depth = $depth;
 
-        // TODO: Allow pumping requests when water is required; as long as level
-        // is above minimum? OR allow pumping to be inhibited for a time?
-        //$this->registerAction('pump', $this, 'action_pump');
+        $this->registerAction('pump', $this, 'a_pump');
     }
 
     /**
@@ -41,16 +39,18 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
         $m = $this->depth->getAndPush($b);
         $depth = $m['value'];
 
-        //echo "Depth: {$depth}cm\n";
+        echo "Depth: {$depth}cm\n";
 
         // If we're pumping, just decide when to stop
         if($this->pump->isOn()) {
+
+		echo "Pumping";
 
             // Off depth can be overriden
             $min = $this->requestMin !== false ? $this->requestMin : $this->min;
 
             if($depth <= $min) {
-                $diff = $this->startDepth - $this->depth;
+                $diff = $this->startDepth - $depth;
                 $diffMl = $diff * $this->length * $this->width;
                 $this->log("Stop pumping. Level {$depth}cm is below {$min}cm. Pumped {$diff}cm / {$diffMl}ml", $b);
                 $this->pump->off();
@@ -64,7 +64,7 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
             $volume = $this->request->getArgOrValue('ml', 10000);
             $cm = $volume / ($this->length * $this->width); // Convert volume to cm of water using hole dimensions
 
-            $this->requestMin = max($depth - $amount, $this->min);
+            $this->requestMin = max($depth - $cm, $this->min);
 
             $this->log("Begin pumping. Request for {$volume}ml, reduce by {$cm}cm to depth $this->requestMin", $b);
 
@@ -91,7 +91,7 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
 
     // Block actions while a request is in progress
     public function isBusy() {
-        return $this->requested;
+        return $this->request !== false;
     }
 
     public function a_pump(\Ensemble\Command $c, \Ensemble\CommandBroker $b) {
