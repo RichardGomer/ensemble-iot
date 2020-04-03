@@ -42,6 +42,6 @@ $pumpdevice->setDimensions($width, $length);
 $pumpdevice->setMinimumDepth($pump_off);
 $pumpdevice->setAdvisoryPumping($pump_on, $pump_on_interval);
 $pumpdevice->setMandatoryPumping($pump_force);
-$pumpdevice->setLogger('global.log');
+$pumpdevice->setLogDevice('global.log');
 
 $conf['devices'][] = $pumpdevice;
