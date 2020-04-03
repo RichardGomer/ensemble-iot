@@ -11,9 +11,20 @@ class JsonQueue implements Queue {
         $q = new Storage\JsonStore($fn);
         $this->json = $q;
 
-        if($this->json->queue === false) {
+        if(!is_array($this->json->queue)) {
             $this->json->queue = array();
         }
+    }
+
+    protected function getQueue() {
+        $q = $this->json->queue;
+
+        if(!is_array($q)) {
+            $q = $this->json->queue = array();
+            trigger_error("Queue was corrupted - it has been fixed", E_USER_WARNING);
+        }
+
+        return $q;
     }
 
     /**
@@ -24,14 +35,14 @@ class JsonQueue implements Queue {
      */
     public function push(Command $c, $threshold=0) {
         $j = array('threshold'=>$threshold, 'cmd'=>$c->toJSON());
-        $this->json->queue = array_merge($this->json->queue, array($j));
+        $this->json->queue = array_merge($this->getQueue(), array($j));
     }
 
     /**
      * Return the next post-threshold command in the queue and remove it
      */
     public function shift() {
-        $q = $this->json->queue;
+        $q = $this->getQueue();
 
         foreach($q as $i=>$c) {
             if($c['threshold'] <= time()) {
@@ -47,7 +58,7 @@ class JsonQueue implements Queue {
      */
     public function peekAll($max=INF) {
         $out = array();
-        $q = $this->json->queue;
+        $q = $this->getQueue();
 
         foreach($q as $i=>$c) {
             if($c['threshold'] <= time()) {
