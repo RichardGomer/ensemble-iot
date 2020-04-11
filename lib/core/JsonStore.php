@@ -68,49 +68,55 @@ class JsonStore extends JsonReader
    private $locked = false;
    public function lock()
    {
-       if($this->locked)
-           return;
+       $this->locked++;
+
+       if($this->locked > 1) // Needn't lock again
+            return;
 
        flock($this->datalockfh, LOCK_EX);
-       $this->locked = true;
+   }
+
+   public function getData()
+   {
+       $this->lock();
+       $res = parent::getData();
+       $this->release();
+       return $res;
    }
 
    public function release()
    {
-       if(!$this->locked)
+       $this->locked = max(0, $this->locked - 1);
+
+       if($this->locked > 0)
            return;
 
        flock($this->datalockfh, LOCK_UN);
-       $this->locked = false;
    }
 
    public function isLocked()
    {
-       return $this->locked;
+       return $this->locked > 0;
    }
 
    public function clear()
    {
-       if(!($locked = $this->isLocked()))
-           $this->lock();
+       $this->lock();
 
        file_put_contents($this->datafn, '[]');
        chmod($this->datafn, 0777); // So web server can edit!
 
-       if(!$locked)
-            $this->release();
+       $this->release();
    }
 
    public function __set($k, $v)
    {
-       if(!($locked = $this->isLocked()))
-           $this->lock();
+       $this->lock();
 
        $data = $this->getData();
        $data[$k] = $v;
        file_put_contents($this->datafn, json_encode($data));
 
-       if(!$locked)
-           $this->release();
+       $this->release();
    }
 }

@@ -7,9 +7,9 @@ namespace Ensemble\Device\Sump;
  */
 class DblRelay
 {
-    public function __construct(\GPIO\OutputPin $a, \GPIO\OutputPin $b, $reverse=true)
+    public function __construct(\Ensemble\GPIO\OutputPin $a, \Ensemble\GPIO\OutputPin $b, $reverse=true)
     {
-            $this->reverse = $reverse;
+            $this->reverse = (bool) $reverse;
             $this->a = $a;
             $this->b = $b;
     }
@@ -34,7 +34,7 @@ class DblRelay
     }
 
     public function isOn() {
-        return $this->a->getValue() == !$reverse;
+        return $this->a->getValue() == !$this->reverse;
     }
 
 }

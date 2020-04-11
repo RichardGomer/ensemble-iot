@@ -28,6 +28,7 @@ class Command {
     public function copyTo($target) {
         $cmd = clone $this;
         $cmd->target = $target;
+        return $cmd;
     }
 
     // Get a reply command
@@ -35,7 +36,7 @@ class Command {
     public function reply($args) {
         if($args instanceof \Exception) {
             $action = "_exception";
-            $args = array('message' => get_class($e).": ".$e->getMessage());
+            $args = array('message' => get_class($args).": ".$args->getMessage());
         } else {
             $action = "_reply";
         }
