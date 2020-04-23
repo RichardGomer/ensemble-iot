@@ -127,7 +127,12 @@ class Command {
     }
 
     public function isExpired() {
-        return $this->expires == false ? false : $this->expires > time();
+        if($this->expires == false)
+		return false;
+
+	if($this->expires < time()) {
+		return true;
+	}
     }
 
     public function setArgs($args) {
