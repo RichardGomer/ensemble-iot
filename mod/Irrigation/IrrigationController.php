@@ -142,7 +142,10 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         $channel = $cmd->getChannel();
         $this->logContext($channel, $flow);
 
-        if($flow < $target) {
+	if(time() - $this->startTime > 15 * 60) {
+	    // Maximum pumping time of 15 mins exceeded
+	}
+	elseif($flow < $target) {
             return false;
         }
 
