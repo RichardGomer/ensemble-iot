@@ -13,6 +13,7 @@ $pump = new Relay(Pin::BCM(23, Pin::OUT));
 $flow = new Ir\FlowMeter(26);
 
 $ic = new IR\IrrigationController('irrigation.controller', $pump, $flow);
+$ic->setDestination('global.context'); // Send flow information to context broker
 
 $ic->addChannel(1, new Relay(Pin::BCM(17, Pin::OUT)));
 $ic->addChannel(2, new Relay(Pin::BCM(18, Pin::OUT)));

@@ -24,12 +24,38 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         $this->channels[$name] = $valve;
     }
 
+    /**
+     * Add a context device
+     */
+    private $destination = false;
+    public function setDestination($cd) {
+        $this->destination = $cd;
+    }
+
+    private $broker = null;
+    protected function logContext($channel, $flow) {
+        if($this->destination === false)
+            return;
+
+        if(!is_object($this->broker)) {
+            trigger_error("Can't logContext(), broker isn't set", E_USER_WARNING);
+            return;
+        }
+
+        $cmd = \Ensemble\Command::create($this, $this->destination, 'updateContext');
+        $cmd->setArg('time', time());
+        $cmd->setArg('value', $flow);
+        $cmd->setArg('field', "channel-".$channel);
+        $this->broker->send($cmd);
+    }
 
     /**
      * Queue an irrigation command
      */
     private $queue = array();
-    protected function action_water(\Ensemble\Command $cmd) {
+    protected function action_water(\Ensemble\Command $cmd, $broker) {
+
+        $this->broker = $broker;
 
         $this->currentCmd = new IrrigationCmd($cmd->getArg('channel'), $cmd->getArg('ml'));
         $this->currentEnsembleCmd = $cmd;
@@ -85,6 +111,7 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         $this->startTime = time();
 
         echo "Begin pumping on channel $channel\n";
+        $this->logContext($channel, 0);
 
         // Open the valve
         $valve->on();
@@ -96,9 +123,10 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
 
         // Check that there's flow, otherwise abort
         $min = 6;
-        if($this->flow->measure() < $min) {
+        if(($flow = $this->flow->measure()) < $min) {
             $this->pump->off();
             $valve->off();
+            $this->logContext($channel, $flow);
             throw new LowFlowException("Detected less than {$min}ml flow in 3 seconds on channel '$channel' - aborted");
         }
     }
@@ -111,19 +139,27 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         $flow = $this->flow->measure();
         $target = $cmd->getMl();
 
-        if($flow < $target) {
+        $channel = $cmd->getChannel();
+        $this->logContext($channel, $flow);
+
+	if(time() - $this->startTime > 15 * 60) {
+	    // Maximum pumping time of 15 mins exceeded
+	}
+	elseif($flow < $target) {
             return false;
         }
 
         $this->pump->off();
         usleep(100000); //100msec pause
 
-        $channel = $cmd->getChannel();
         $valve = $this->channels[$channel];
         $valve->off();
 
         $cmd->setFlow($flow);
         $cmd->setTime(time() - $this->startTime);
+
+        usleep(9000000);
+        $this->logContext($channel, 0);
 
         return true;
     }
