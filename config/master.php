@@ -31,5 +31,5 @@ $conf['devices'][] = new Device\LoggingContextDevice('global.context', $st);
 /**
  * The Shower Socket limits use of the power shower using a tasmota smart socket
  */
-$client = new MQTTClient('10.0.0.8', 1883);
-$conf['devices'][] = $socket = new Device\Socket\ShowerSocket("socket", $client, "socket4");
+$client = new \Ensemble\MQTT\Client('mosquitto', 1883); // mosquitto is the name of the docker container that's running mqtt
+$conf['devices'][] = $socket = new Device\Socket\ShowerSocket("showersocket", $client, "socket4");
