@@ -13,6 +13,7 @@ class ShowerSocket extends Socket  {
     public function __construct($name, MQTTClient $client, $deviceName) {
         parent::__construct($name, $client, $deviceName);
         $this->on();
+        $this->current = $this->getPowerMeter();
     }
 
     public function getPollInterval() {
@@ -40,7 +41,7 @@ class ShowerSocket extends Socket  {
 
     protected function program() {
 
-        $current = $this->getPowerMeter();
+        $current = $this->current;
 
         // 1: Wait for the socket to go above threshold power
         $power = $current->measure();
