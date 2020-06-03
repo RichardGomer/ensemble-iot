@@ -31,5 +31,5 @@ $conf['devices'][] = new Device\LoggingContextDevice('global.context', $st);
 /**
  * The Shower Socket limits use of the power shower using a tasmota smart socket
  */
-$client = new MQTTClient('10.0.0.8', 1883);
+$client = new \Ensemble\MQTT\Client('10.0.0.8', 1883);
 $conf['devices'][] = $socket = new Device\Socket\ShowerSocket("socket", $client, "socket4");
