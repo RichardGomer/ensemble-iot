@@ -21,7 +21,9 @@
             "Ensemble\\Device\\": ["lib/devices/", "mod"],
             "Ensemble\\GPIO\\": "lib/support",
             "Ensemble\\System\\": "lib/support",
-            "Ensemble\\Log\\": "lib/support"
+            "Ensemble\\Log\\": "lib/support",
+            "Ensemble\\KeyValue\\": "lib/support",
+            "Ensemble\\MQTT\\": "lib/support"
         }
     }
 }

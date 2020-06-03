@@ -123,7 +123,7 @@ class Command {
     }
 
     public function setExpires($expires) {
-        $tihs->expires = $expires;
+        $this->expires = (int) $expires;
     }
 
     public function isExpired() {

@@ -78,8 +78,11 @@ echo "ARGS: \n$pas\n";
 echo "TARGET: $devicename via $endpoint\n";
 
 $command = Command::create(new DummySource(), $devicename, $action, $pargs);
+$command->setExpires(time() + 120); // Expire in two minutes
 
 $client = Remote\ClientFactory::factory($endpoint);
+
+echo $command->toJSON();
 
 echo "Sending... ";
 $client->sendCommand($command);
