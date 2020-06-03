@@ -42,7 +42,7 @@ class Client {
 
 class MQTTSubscription {
     public function __construct($host, $port, $topic) {
-        $this->thread = new Thread("mosquitto_sub", array(
+        $this->thread = new Thread("stdbuf -i0 -o0 -e0 mosquitto_sub", array(
                     'h' => $host,
                     'p' => $port,
                     'F' => '%j',
