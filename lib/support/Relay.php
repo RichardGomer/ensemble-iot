@@ -25,6 +25,8 @@ class Relay {
     }
 
     public function isOn() {
-        return !($this->pin->getPinStatus() == $this->offState);
+        $s = $this->pin->getStatus();
+        var_dump($s);
+        return !($s['V'] == $this->offState);
     }
 }

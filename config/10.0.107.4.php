@@ -12,7 +12,7 @@ require __DIR__.'/home.php';
 $pump = new Relay(Pin::BCM(23, Pin::OUT));
 $flow = new Ir\FlowMeter(26);
 
-$ps = new Ir\PressureSensor($pump);
+$ps = new Ir\PressureSensor('irrigation.pressure', $pump);
 $ps->addDestination('global.context', 'buttpressure');
 
 $ic = new IR\IrrigationController('irrigation.controller', $pump, $flow);
