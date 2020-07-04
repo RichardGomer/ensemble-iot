@@ -16,9 +16,10 @@
     "autoload": {
         "psr-4": {
             "Ensemble\\": "lib/core/",
-            "Ensemble\\Remote\\": "lib/core/",
-            "Ensemble\\Storage\\": "lib/core/",
-            "Ensemble\\Device\\": ["lib/devices/", "mod"],
+            "Ensemble\\Remote\\": "lib/core",
+            "Ensemble\\Storage\\": "lib/core",
+            "Ensemble\\Device\\": ["lib/devices", "mod"],
+            "Ensemble\\Async\\": "mod/Async",
             "Ensemble\\GPIO\\": "lib/support",
             "Ensemble\\System\\": "lib/support",
             "Ensemble\\Log\\": "lib/support",
