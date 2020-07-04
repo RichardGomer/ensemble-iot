@@ -16,18 +16,15 @@ def bprint(list):
 # Read MCP3008 data
 def analogInput():
   spi.max_speed_hz = 100000
-  msg = [1, (7)<<4, 0, 0]
+  msg = [1, (8+7)<<4, 0, 0] # single ended reading on channel 7
   bprint(msg)
   adc = spi.xfer2(msg)
   bprint(adc)
-  data = ((adc[1]&3) << 8) + adc[2]
-  return data
+  data1 = ((adc[1]) << 8) & 0b1111111111 # this shifts the 2 LSBs to the correct position @ bit10/9 and truncates it to 10 bits
+  data2 = adc[2] # to be added to the remaining bits to give the final 10-bit answer
 
-# Below function will convert data to voltage
-def Volts(data):
-  volts = (data * 3.3) / float(1023)
-  volts = round(volts, ) # Round off to 2 decimal places
-  return volts
+  bprint([data1, data2])
+  return data1 + data2
 
 while True:
   output = analogInput()
