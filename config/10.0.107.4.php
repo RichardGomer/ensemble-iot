@@ -12,6 +12,8 @@ require __DIR__.'/home.php';
 $pump = new Relay(Pin::BCM(23, Pin::OUT));
 $flow = new Ir\FlowMeter(26);
 
+$ps = new Ir\PressureSensor($pump);
+
 $ic = new IR\IrrigationController('irrigation.controller', $pump, $flow);
 $ic->setDestination('global.context'); // Send flow information to context broker
 
