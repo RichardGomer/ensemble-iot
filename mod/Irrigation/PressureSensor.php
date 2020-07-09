@@ -35,20 +35,20 @@ class PressureSensor extends \Ensemble\Device\SensorDevice
     public function measure() {
         $lines = $this->proc->read();
 
-        // Don't measure pressure if pump is on
-        if($this->pump instanceof Relay && $this->pump->isOn()) {
-            //echo "Pump is active; skipping pressure measurement\n";
-            return false;
-        }
-
-        //var_dump($lines);
-
         foreach($lines as $line) {
             if(preg_match('/:: ([0-9]+)/', $line, $parts)) {
                 var_dump($line, $parts);
-                $this->last = $parts[1];
+                $last = $parts[1];
             }
         }
+
+        // Don't measure pressure if pump is on
+        if($this->pump instanceof Relay && $this->pump->isOn()) {
+            echo "Pump is active; skipping pressure measurement\n";
+            return false;
+        }
+
+        $this->last = $last;
 
         return array('time'=>time(), 'value'=>$this->last);
     }
