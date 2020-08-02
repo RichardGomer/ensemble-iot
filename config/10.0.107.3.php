@@ -17,11 +17,11 @@ $context->addSuperContext('global.context'); // Pass all measurements up to glob
 // to avoid flip-flopping, and to ensure water is actually drained (instead of just going
 // up and down hose, for instance...)
 
-$hole_depth = 64; // Depth of hole (from sensor) in cm
+$hole_depth = 65; // Depth of hole (from sensor) in cm
 $pump_on = 30; // Pump comes on when this level is reached (in cm)
 $pump_on_interval = 3600;
-$pump_off = 15; // And goes off when this level is reached (in cm)
-$pump_force = 55; // Pump always operates when level goes above this
+$pump_off = 3; // And goes off when this level is reached (in cm)
+$pump_force = 40; // Pump always operates when level goes above this
 
 $width = 36;
 $length = 56;

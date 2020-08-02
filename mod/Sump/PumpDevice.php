@@ -35,6 +35,7 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
     private $request = false; // Hold the current pumping request, if any
 
     private $lastpump = 0;
+    private $maxTime = 600; // Ten minutes
     public function poll(\Ensemble\CommandBroker $b) {
         $m = $this->depth->getAndPush($b);
         $depth = $m['value'];
@@ -48,6 +49,11 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
 
             // Off depth can be overriden
             $min = $this->requestMin !== false ? $this->requestMin : $this->min;
+
+	    if(time() > $this->lastpump + $this->maxTime) {
+ 		$this->log("Max pump time exceeded; stopping", $b);
+		$this->pump->off();
+            }
 
             if($depth <= $min) {
                 $diff = $this->startDepth - $depth;
