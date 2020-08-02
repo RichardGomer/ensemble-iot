@@ -37,6 +37,7 @@ class DepthSensor extends \Ensemble\Device\SensorDevice
         }
 
         $dist = $this->median($m);
+	echo "Median(".implode("  ", $m).") = ".$dist."\n";
 
         $res = array('time'=>time(), 'value'=> $this->maxDepth - $dist);
 
@@ -54,7 +55,7 @@ class DepthSensor extends \Ensemble\Device\SensorDevice
         $pinE = (int) $pinE;
         $n = (int) $n;
         $bin = __DIR__.'/HCSR04/distance.py';
-        $cmd = "python $bin {$this->pinT} {$this->pinE} 7";
+        $cmd = "python $bin {$this->pinT} {$this->pinE} 15";
         $proc = new \Ensemble\System\Thread($cmd);
         $proc->waitForExit();
         return $proc->read();

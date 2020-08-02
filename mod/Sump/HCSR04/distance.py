@@ -36,10 +36,14 @@ while n < NUM:
         try:
                 mstart = time.time()
 
+		pulse_started = False
+		pulse_ended = False
+
                 i = 0
                 pulse_start = time.time()
                 while GPIO.input(ECHO)==0:
                         pulse_start = time.time()
+			pulse_started = True
                         i += 1
                         if(i > 50000 and pulse_start > mstart + 0.2 ):
                                 raise SenseException("Timed out during echo wait")
@@ -47,12 +51,19 @@ while n < NUM:
                 i = 0
                 while GPIO.input(ECHO)==1:
                         pulse_end = time.time()
+			pulse_ended = True
                         i += 1
                         if(i > 50000 and pulse_end > mstart + 0.2 ):
                                 raise SenseException("Timed out during echo phase")
                                 
-                n = n + 1
-                
+		if(pulse_started == False):
+			raise SenseException("Missed echo period start");
+
+		if(pulse_ended == False):
+			raise SenseException("Missed echo period end");
+
+                n = n + 1                
+
                 pulse_duration = pulse_end - pulse_start
                 distance = pulse_duration * 34300 / 2;
                 distance = round(distance, 2)
