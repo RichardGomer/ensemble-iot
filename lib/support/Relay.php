@@ -23,4 +23,10 @@ class Relay {
         $this->pin->setValue($this->offState ? 1 : 0);
         usleep(100000);
     }
+
+    public function isOn() {
+        $s = $this->pin->getStatus();
+        var_dump($s);
+        return !($s['V'] == $this->offState);
+    }
 }

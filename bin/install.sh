@@ -35,6 +35,7 @@ chmod 0777 $VARPATH -R
 apt-get update
 apt-get --assume-yes install php-cli lighttpd php-cgi php-json curl
 apt-get --assume-yes install wiringpi # Run separately because it doesn't exist on most platforms
+apt-get --assume-yes install mosquitto-clients
 
 # Set lighttpd document root
 cp /etc/lighttpd/lighttpd.conf /etc/lighttpd/lighttpd.conf.orig

@@ -7,7 +7,7 @@ BASEPATH=`dirname $( dirname $SCRIPT )`
 cd $BASEPATH
 
 cd www
-php -S 10.0.1.1:8182 &
+php -S 10.0.0.51:8182 &
 
 if [ $# -eq 0 ]; then
     conf='test';
@@ -16,6 +16,6 @@ else
 fi
 
 cd ../bin
-php run.php --local-ep=http://10.0.1.1:8182/ensemble-iot/1.0/index.php --config=$conf
+php run.php --local-ep=http://10.0.0.51:8182/ensemble-iot/1.0/index.php --config=$conf
 
 kill %1

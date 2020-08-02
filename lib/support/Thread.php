@@ -23,15 +23,26 @@ class Thread
 	var $timeout;
 	var $start_time;
 
-	public function __construct($command)
+	/**
+	 * Start a background task by running $command
+	 * Optionally, an associative $args can contain arguments; in the form
+	 * array ( "flag" => "value", "flag2" => "value2" )
+	 * Values are escaped
+	 */
+	public function __construct($command, $args=array())
 	{
 		$this->process = false;
 		$this->pipes = array();
 
+		$astr = "";
+		foreach($args as $flag=>$value) {
+			$astr .= " -{$flag} ".escapeshellarg($value);
+		}
+
 		$descriptor = array ( 0 => array ( "pipe", "r" ), 1 => array ( "pipe", "w" ), 2 => array ( "pipe", "w" ) );
 
 		// Open the resource to execute $command
-		$this->process = proc_open( $command, $descriptor, $this->pipes );
+		$this->process = proc_open( $command.$astr, $descriptor, $this->pipes );
 
 		// Set STDOUT and STDERR to non-blocking
 		stream_set_blocking( $this->pipes[1], 0 );

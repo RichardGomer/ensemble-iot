@@ -68,7 +68,7 @@ class Pin
 
 	protected function getPinStatus($wpn){
 
-		$all = self::getStatusAll();
+		$all = self::getAllStatus();
 
 		foreach($all as $pin){
 

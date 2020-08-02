@@ -88,7 +88,7 @@ abstract class BasicDevice implements \Ensemble\Module {
     }
 
     public function log($message,  \Ensemble\CommandBroker $via) {
-	echo '['.$this->getDeviceName().'] LOG: '.$message."\n";
+        echo '['.$this->getDeviceName().'] LOG: '.$message."\n";
 
         if(!$this->logger)
             return;
