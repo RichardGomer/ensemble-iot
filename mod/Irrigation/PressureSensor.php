@@ -37,7 +37,7 @@ class PressureSensor extends \Ensemble\Device\SensorDevice
 
         foreach($lines as $line) {
             if(preg_match('/:: ([0-9]+)/', $line, $parts)) {
-                var_dump($line, $parts);
+                //var_dump($line, $parts);
                 $last = $parts[1];
             }
         }
