@@ -1,20 +1,23 @@
 <?php
 
 /**
- * The Socket Module is for interfacing with Tasmota smart sockets using MQTT
- * Tasmota can be used on hardware like Sonoff and Tuya WiFi switches
+ * The Socket Module is for interfacing with Tasmota smart sockets using MQTT.
+ * Tasmota can be used on hardware like Sonoff and Tuya WiFi switches.
  *
  * State and telemetry data are stored in a SubscriptionStore so changes can be
- * detected
+ * detected.
+ *
+ * This is implemented on top of the AsyncModule, so override getRoutine() to
+ * implement custom control logic.
  */
 
 namespace Ensemble\Device\Socket;
 use Ensemble\MQTT\Client as MQTTClient;
+use Ensemble\Async as Async;
 
+class Socket extends Async\Device {
 
-class Socket extends \Ensemble\Device\BasicDevice {
-
-    private $t_interval = 10; // Telemetry interval
+    private $t_interval = 5; // Telemetry interval
 
     public function __construct($name, MQTTClient $client, $deviceName) {
 
@@ -37,6 +40,16 @@ class Socket extends \Ensemble\Device\BasicDevice {
         return $this->t_interval;
     }
 
+    public function poll(\Ensemble\CommandBroker $b) {
+        $this->pollMQTT(); // We want to process outstanding MQTT data on each poll
+        parent::poll($b);
+    }
+
+    // Override this method to add custom logic
+    public function getRoutine() {
+        return new Async\NullRoutine();
+    }
+
     public function on() {
         $this->send($this->topic_command.'POWER', 'ON');
     }
@@ -49,10 +62,6 @@ class Socket extends \Ensemble\Device\BasicDevice {
         $this->mqtt->publish($topic, $message, 0);
         usleep(500000); // Wait 1/2 second
         $this->pollMQTT(); // Poll for outstanding messages
-    }
-
-    public function poll(\Ensemble\CommandBroker $b) {
-        $this->pollMQTT();
     }
 
     /**
@@ -107,7 +116,6 @@ class Socket extends \Ensemble\Device\BasicDevice {
     public function getPowerMeter() {
         return new PowerMeter($this->name.'_POWER', $this, 'SENSOR.ENERGY.POWER');
     }
-
 }
 
 // A sensor device that reads current information from an MQTT socket

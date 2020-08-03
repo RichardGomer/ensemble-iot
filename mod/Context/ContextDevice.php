@@ -10,6 +10,8 @@ namespace Ensemble\Device;
 
 class ContextDevice extends BasicDevice {
 
+    private $valuetimelimit = 3600 * 2; // Values older than this may be discarded
+
     private $data = array();
 
     public function __construct($name) {
@@ -31,13 +33,33 @@ class ContextDevice extends BasicDevice {
      * Respond to context requests
      */
     public function action_get(\Ensemble\Command $cmd, \Ensemble\CommandBroker $b) {
+
+        $args = $cmd->getArgs(array('field'));
+
+        $args['num'] = $cmd->getArgOrValue('num', 1);
+
         if(array_key_exists($args['field'], $this->data)) {
-            $reply = $cmd->reply($this->data[$args['field']]);
+            $data = $this->get($args['field'], $args['num']);
+            $reply = $cmd->reply(array('values'=>$data));
         } else {
             $reply = $cmd->reply(new \Exception("Field {$args['field']} isn't set"));
         }
 
         $b->send($reply);
+    }
+
+    public function get($field, $num=1) {
+        if(!array_key_exists($field, $this->data)) {
+            return array();
+        }
+
+        $all = $this->data[$field];
+
+        usort($all, function($a, $b) {
+            return $b['time'] - $a['time'];
+        });
+
+        return array_slice($all, count($all) - $num, $num);
     }
 
     /**
@@ -47,18 +69,34 @@ class ContextDevice extends BasicDevice {
 
         $args = $cmd->getArgs(array('time', 'value', 'field'));
 
-        // If the field exists, only update it if this value is newer than the last
-        if(array_key_exists($args['field'], $this->data)) {
-            if($args['time'] <= $this->data[$args['field']]['time']) {
-                return;
-            }
+        $this->update($args['field'], $args['value'], $args['time'], $cmd->getSource());
+    }
+
+    public function update($field, $value, $time=false, $source='') {
+        if($time === false) {
+            $time = time();
         }
 
-        $this->data[$args['field']] = array(
-            'time'=>$args['time'],
-            'source'=>$cmd->getSource(),
-            'value'=>$args['value']
+        if(!array_key_exists($field, $this->data)) {
+            $this->data[$field] = array();
+        }
+
+        echo "Set $field = $value\n";
+
+        $data = &$this->data[$field];
+
+        $data[] = array(
+            'time'=>$time,
+            'source'=>$source,
+            'value'=>$value
         );
+
+        // Clean up expired values
+        foreach($data as $i=>$record) {
+            if($record['time'] < time() - $this->valuetimelimit) {
+                unset($data[$i]);
+            }
+        }
 
         // Copy the update to supercontexts
         foreach($this->supers as $s) {

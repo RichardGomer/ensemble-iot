@@ -7,7 +7,7 @@ class Command {
     protected $source;
     protected $target;
     protected $action;
-    protected $args;
+    protected $args = array();
     protected $expires;
     protected $follows;
 
@@ -42,7 +42,7 @@ class Command {
         }
 
         $cmd = new Command($this->getTarget(), $this->getSource(), $action);
-        $cmd->Args = $args;
+        $cmd->args = $args;
         $cmd->follows = $this->getID();
 
         return $cmd;
@@ -112,6 +112,14 @@ class Command {
 
     public function getAction() {
         return $this->action;
+    }
+
+    public function isReply() {
+        return $this->getAction() == '_reply';
+    }
+
+    public function isException() {
+        return $this->getAction() == '_exception';
     }
 
     public function getSource() {

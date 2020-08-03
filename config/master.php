@@ -33,3 +33,29 @@ $conf['devices'][] = new Device\LoggingContextDevice('global.context', $st);
  */
 $client = new \Ensemble\MQTT\Client('mosquitto', 1883);
 $conf['devices'][] = $socket = new Device\Socket\ShowerSocket("socket", $client, "socket4");
+
+
+/**
+ * Scheduling!
+ */
+// Create a context device to broker schedules
+$conf['devices'][] = $ctx = new Device\ContextDevice('global.schedules');
+
+/**
+* Create some schedules
+*/
+
+// Daily offpeak
+$bsched = new Schedule\Schedule();
+$bsched->setPoint('00:00:00', 'OFF');
+$bsched->setPoint('08:00:00', 'ON');
+$bsched->setPoint('16:00:00', 'OFF');
+$bsched->setPoint('19:00:00', 'ON');
+$bsched->setPoint('21:00:00', 'OFF');
+$sd = new Schedule\DailyScheduler('daily.scheduler', 'global.schedules', 'dailyoffpeak', $bsched);
+$conf['devices'][] = $sd;
+
+
+// Office ventilator
+$client = new MQTTClient('10.0.0.8', 1883);
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket6", $client, "socket5", 'global.schedules', 'dailyoffpeak');
