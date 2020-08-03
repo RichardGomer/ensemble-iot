@@ -32,7 +32,7 @@ $conf['devices'][] = new Device\LoggingContextDevice('global.context', $st);
  * The Shower Socket limits use of the power shower using a tasmota smart socket
  */
 $client = new \Ensemble\MQTT\Client('mosquitto', 1883);
-$conf['devices'][] = $socket = new Device\Socket\ShowerSocket("socket", $client, "socket4");
+$conf['devices'][] = $socket = new Device\Socket\ShowerSocket("showersocket", $client, "socket4");
 
 
 /**
@@ -58,4 +58,4 @@ $conf['devices'][] = $sd;
 
 // Office ventilator
 $client = new MQTTClient('10.0.0.8', 1883);
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket6", $client, "socket5", 'global.schedules', 'dailyoffpeak');
+$conf['devices'][] = new Device\Socket\ScheduledSocket("socket-vent-office", $client, "socket5", 'global.schedules', 'dailyoffpeak');
