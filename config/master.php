@@ -57,5 +57,5 @@ $conf['devices'][] = $sd;
 
 
 // Office ventilator
-$client = new MQTTClient('10.0.0.8', 1883);
+$client = new \Ensemble\MQTT\Client('mosquitto', 1883);
 $conf['devices'][] = new Device\Socket\ScheduledSocket("socket-vent-office", $client, "socket5", 'global.schedules', 'dailyoffpeak');

@@ -2,6 +2,7 @@
 
 namespace Ensemble\Device\Socket;
 use Ensemble\MQTT\Client as MQTTClient;
+use Ensemble\Async as Async;
 
 /**
  * Time the socket on the shower pump
@@ -23,15 +24,15 @@ class ShowerSocket extends Socket  {
         $this->on();
     }
 
-    protected function getRoutine() {
-
-        return new Async\Lambda(function() use ($this) {
-            $current = $this->current;
+    public function getRoutine() {
+        $dev = $this;
+        return new Async\Lambda(function() use ($dev) {
+            $current = $dev->current;
 
             // 1: Wait for the socket to go above threshold power
             $power = $current->measure();
 
-            while($power < $this->threshold) {
+            while($power < $dev->threshold) {
                 echo "Yield to wait for current\n";
                 yield;
                 $power = $current->measure();
@@ -47,7 +48,7 @@ class ShowerSocket extends Socket  {
                 while(time() - $time < 56) {
                     // If power drops, exit the program
                     $zerocount = 0;
-                    while($current->measure() < $this->threshold) {
+                    while($current->measure() < $dev->threshold) {
                         $zerocount++;
 
                         if($zerocount <= 3) {
@@ -64,9 +65,9 @@ class ShowerSocket extends Socket  {
                 }
 
                 if($i < $mins) {
-                    $this->warn();
+                    $dev->warn();
                 } else {
-                    $this->off();
+                    $dev->off();
                 }
             }
 
@@ -78,7 +79,7 @@ class ShowerSocket extends Socket  {
                 yield;
             }
 
-            $this->on();
-        }
-    });
+            $dev->on();
+        });
+    }
 }
