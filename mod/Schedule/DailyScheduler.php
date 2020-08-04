@@ -21,6 +21,7 @@ class DailyScheduler extends SchedulerDevice {
         echo "Begin rescheduling\n";
 
         // Get the timestamp at the start of today
+        date_default_timezone_set('Europe/London');
         $todaystart = strtotime('today midnight');
         $tomorrowstart = strtotime('tomorrow midnight');
 
