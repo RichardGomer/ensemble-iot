@@ -33,7 +33,7 @@ $conf['devices'][] = new Device\LoggingContextDevice('global.context', $st);
  */
 $client = new \Ensemble\MQTT\Client('mosquitto', 1883);
 $conf['devices'][] = $socket = new Device\Socket\ShowerSocket("showersocket", $client, "socket4");
-
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-shower');
 
 /**
  * Scheduling!
@@ -52,10 +52,46 @@ $bsched->setPoint('08:00:00', 'ON');
 $bsched->setPoint('16:00:00', 'OFF');
 $bsched->setPoint('19:00:00', 'ON');
 $bsched->setPoint('21:00:00', 'OFF');
-$sd = new Schedule\DailyScheduler('daily.scheduler', 'global.schedules', 'dailyoffpeak', $bsched);
+$sd = new Schedule\DailyScheduler('daytime.scheduler', 'global.schedules', 'daytimeoffpeak', $bsched);
 $conf['devices'][] = $sd;
 
+// offpeak
+$bsched = new Schedule\Schedule();
+$bsched->setPoint('00:00:00', 'ON');
+$bsched->setPoint('16:00:00', 'OFF');
+$bsched->setPoint('19:00:00', 'ON');
+$sd = new Schedule\DailyScheduler('offpeak.scheduler', 'global.schedules', 'offpeak', $bsched);
+$conf['devices'][] = $sd;
+
+// offpeak oppoff
+$bsched = new Schedule\Schedule();
+$bsched->setPoint('00:00:00', 'ON');
+$bsched->setPoint('14:00:00', 'OPOFF');
+$bsched->setPoint('16:00:00', 'OFF');
+$bsched->setPoint('19:00:00', 'ON');
+$sd = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'offpeak_opoff', $bsched);
+$conf['devices'][] = $sd;
+
+/**
+ * Attach sockets to schedules
+ */
 
 // Office ventilator
-$client = new \Ensemble\MQTT\Client('mosquitto', 1883);
-$conf['devices'][] = new Device\Socket\ScheduledSocket("socket-vent-office", $client, "socket5", 'global.schedules', 'dailyoffpeak');
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-vent-office", $client, "socket5", 'global.schedules', 'daytimeoffpeak');
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-officevent');
+
+// Tumble dryer
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dryer", $client, "socket1", 'global.schedules', 'offpeak');
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-dryer');
+
+// Washing machine
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-washingmachine", $client, "socket2", 'global.schedules', 'offpeak_opoff');
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-washingmachine');
+
+// Dishwasher
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dishwasher", $client, "socket3", 'global.schedules', 'offpeak_opoff');
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-dishwasher');
+
+// Network socket is for power monitoring only
+$conf['devices'][] = $socket = new Device\Socket\Socket("socket-network", $client, "socket6");
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-network');

@@ -27,7 +27,7 @@ abstract class SensorDevice extends BasicDevice  {
         }
 
         if(!is_array($m) || !array_key_exists('time', $m) || !array_key_exists('value', $m)) {
-            throw new BadValueException("Sensors must return a time/value array - check ".get_class($this)."->measure()");
+            $m = array('time'=>time(), 'value'=>$m);
         }
 
         foreach($this->destinations as $d) {

@@ -15,7 +15,7 @@ use Ensemble\Async as Async;
 class ScheduledSocket extends Socket {
 
     public $opoff_threshold = 5; // OPOFF threshold in watts
-    public $opoff_time = 120; // OPOFF threshold time in seconds
+    public $opoff_time = 180; // OPOFF threshold time in seconds
 
     public $sched_polltime = 60 * 15; // Poll for a schedule this often
 
@@ -54,15 +54,17 @@ class ScheduledSocket extends Socket {
             while(time() < $start + $this->sched_polltime) {
 
                 $mode = strtoupper($socket->schedule->getNow());
-                echo "Mode is $mode\n";
 
                 // OPOFF Mode
                 if($mode == 'OPOFF') {
-                    yield $this->getOpoffRoutine(); // Yield an OpOff routine
+                    if($this->isOn()) {
+                        yield $this->getOpoffRoutine(); // Yield an OpOff routine
+                    } else {
+                        yield;
+                    }
                 }
 
                 if($mode == 'ON') {
-                    echo "Switch on\n";
                     $this->on();
                 }
 
@@ -80,14 +82,15 @@ class ScheduledSocket extends Socket {
      */
     protected function getOpoffRoutine() {
         $socket = $this;
-        return new Async\TimeoutController(new Async\Lambda(function() use ($socket) {
+        $current = $this->getPowerMeter();
+        return new Async\TimeoutController(new Async\Lambda(function() use ($socket, $current) {
 
             // 1: Wait for the socket to go below threshold power
-            $power = $this->current->measure();
+            $power = $current->measure();
             while($power > $socket->opoff_threshold) {
                 echo "Yield to wait for initial low current\n";
                 yield;
-                $power = $socket->current->measure();
+                $power = $current->measure();
             }
 
             $lowtime = time();
@@ -97,7 +100,7 @@ class ScheduledSocket extends Socket {
                 echo "Yield to wait for continuously low current\n";
                 yield; // Yield to wait for next measurement
 
-                $power = $socket->current->measure();
+                $power = $current->measure();
 
                 if($power > $socket->opoff_threshold) {
                     echo "Opportunistic off was interrupted\n";
