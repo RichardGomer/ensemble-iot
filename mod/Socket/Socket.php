@@ -114,14 +114,14 @@ class Socket extends Async\Device {
     /**
      * Get a Current sensor for the socket
      */
+    private $meter = false;
     public function getPowerMeter() {
-        static $meter = false;
 
-        if(!$meter) {
-            $meter = new PowerMeter($this->name.'_POWER', $this, 'SENSOR.ENERGY.POWER');
+        if(!$this->meter) {
+            $this->meter = new PowerMeter($this->name.'_POWER', $this, 'SENSOR.ENERGY.POWER');
         }
 
-        return $meter;
+        return $this->meter;
     }
 }
 
