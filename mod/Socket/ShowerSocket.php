@@ -14,7 +14,6 @@ class ShowerSocket extends Socket  {
     public function __construct($name, MQTTClient $client, $deviceName) {
         parent::__construct($name, $client, $deviceName);
         $this->on();
-        $this->current = $this->getPowerMeter();
     }
 
     // Interrupt flow briefly as a warning
@@ -26,7 +25,8 @@ class ShowerSocket extends Socket  {
 
     public function getRoutine() {
         $dev = $this;
-        $current = $this->current;
+        $current = $this->getPowerMeter();
+        
         return new Async\Lambda(function() use ($dev, $current) {
 
             // 1: Wait for the socket to go above threshold power

@@ -146,7 +146,7 @@ class PowerMeter extends \Ensemble\Device\SensorDevice {
         try {
             $power = $this->socket->getStatus()->get($this->key);
         } catch(\Exception $e) {
-            trigger_error($e->getMessage(), 'E_USER_NOTICE');
+            trigger_error($e->getMessage(), E_USER_NOTICE);
             $power = 0;
         }
 
