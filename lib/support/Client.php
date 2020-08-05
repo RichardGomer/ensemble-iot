@@ -51,6 +51,11 @@ class MQTTSubscription {
     }
 
     public function getMessages() {
+        if(!$this->thread->isRunning()) {
+            echo "Thread has stopped. STDERR:\n";
+            echo implode("\n", $this->thread->error());
+        }
+
         $lines = $this->thread->read();
 
         $messages = array();

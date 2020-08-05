@@ -63,6 +63,11 @@ class Thread
 		return proc_get_status( $this->process );
 	}
 
+	function isRunning() {
+		$status = $this->getStatus();
+		return $status['running'];
+	}
+
 	// Wait for the process to exit
 	function waitForExit()
 	{

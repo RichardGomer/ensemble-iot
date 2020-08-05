@@ -11,10 +11,10 @@ class LoggerDevice extends BasicDevice {
         $this->log = $log;
         $this->name = $name;
 
-        $this->registerAction('log', $this, 'log');
+        $this->registerAction('log', $this, 'a_log');
     }
 
-    public function log(\Ensemble\Command $c, \Ensemble\CommandBroker $b) {
+    public function a_log(\Ensemble\Command $c, \Ensemble\CommandBroker $b) {
         $this->log->log("[{$c->getSource()}] ".$c->getArgs()['message']);
     }
 }

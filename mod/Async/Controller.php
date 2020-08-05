@@ -125,6 +125,9 @@ class Controller {
     }
 
     protected function dbgid($r) {
+        if($r == null)
+            return "(NULL)";
+
         $id = get_class($r)."#".spl_object_id($r);
 
         if(array_key_exists($id, $this->genprov)) {

@@ -26,14 +26,14 @@ class ShowerSocket extends Socket  {
     public function getRoutine() {
         $dev = $this;
         $current = $this->getPowerMeter();
-        
+
         return new Async\Lambda(function() use ($dev, $current) {
 
             // 1: Wait for the socket to go above threshold power
             $power = $current->measure();
 
             while($power < $dev->threshold) {
-                echo "Yield to wait for current\n";
+                $dev->log("Yield to wait for current\n");
                 yield;
                 $power = $current->measure();
             }
@@ -42,7 +42,7 @@ class ShowerSocket extends Socket  {
             $mins = 4;
             for($i = 0; $i <= $mins; $i++) {
                 $time = time();
-                echo "Yield at start of period $i\n";
+                $dev->log("Yield at start of period $i\n");
                 yield;
 
                 while(time() - $time < 56) {
@@ -52,7 +52,7 @@ class ShowerSocket extends Socket  {
                         $zerocount++;
 
                         if($zerocount <= 3) {
-                            echo "Yield to verify current is off\n";
+                            $dev->log("Yield to verify current is off\n");
                             yield;
                         }
                         else {
@@ -60,7 +60,7 @@ class ShowerSocket extends Socket  {
                         }
                     }
 
-                    echo "Yield to wait for next warning\n";
+                    $dev->log("Yield to wait for next warning\n");
                     yield;
                 }
 
@@ -73,7 +73,7 @@ class ShowerSocket extends Socket  {
 
             // 3: Wait three minutes before resetting
             $time = time();
-            echo "Yield to wait for reset\n";
+            $dev->log("Yield to wait for reset\n");
             yield;
             while(time() - $time < 180) {
                 yield;

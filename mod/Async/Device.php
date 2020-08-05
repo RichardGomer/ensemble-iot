@@ -10,6 +10,8 @@ namespace Ensemble\Async;
 
 abstract class Device implements \Ensemble\Module {
 
+    use \Ensemble\Device\DeviceLogging;
+
     /**
      * Basic module support
      */
@@ -48,6 +50,10 @@ abstract class Device implements \Ensemble\Module {
 
     final public function getBroker() {
         return $this->broker;
+    }
+
+    public function log($msg, \Ensemble\CommandBroker $broker=null) {
+        $broker = $broker == null ? $this->getBroker() : $broker;
     }
 
     /**

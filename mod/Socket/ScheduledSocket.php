@@ -88,7 +88,7 @@ class ScheduledSocket extends Socket {
             // 1: Wait for the socket to go below threshold power
             $power = $current->measure();
             while($power > $socket->opoff_threshold) {
-                echo "Yield to wait for initial low current\n";
+                $socket->log("Yield to wait for initial low current");
                 yield;
                 $power = $current->measure();
             }
@@ -97,20 +97,20 @@ class ScheduledSocket extends Socket {
 
             // 2: Wait for it to stay there
             do {
-                echo "Yield to wait for continuously low current\n";
+                $socket->log("Yield to wait for continuously low current\n");
                 yield; // Yield to wait for next measurement
 
                 $power = $current->measure();
 
                 if($power > $socket->opoff_threshold) {
-                    echo "Opportunistic off was interrupted\n";
+                    $socket->log("Opportunistic off was interrupted\n");
                     return; // Opoff attempt failed, it will be restarted if still required
                 }
             }
             while(time() <= $lowtime + $socket->opoff_time);
 
             $socket->off();
-            echo "Opportunistic off completed\n";
+            $socket->log("Opportunistic off completed\n");
 
         }) , $this->sched_polltime);
     }
@@ -123,13 +123,11 @@ class ScheduledSocket extends Socket {
             $rep = yield new Async\WaitForReply($socket, $c);
 
             if($rep->isException()) {
-                echo "Couldn't fetch schedule: ".$rep->getArg('message')."\n";
+                $socket->log("Couldn't fetch schedule: ".$rep->getArg('message'), );
                 return;
             }
 
             $json = $rep->getArg('values')[0]['value'];
-            echo "Got schedule\n";
-            print_r($json);
             $socket->schedule = Schedule::fromJSON($json);
         }), 60);
     }

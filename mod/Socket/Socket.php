@@ -68,7 +68,7 @@ class Socket extends Async\Device {
     /**
      * Receive and process MQTT messages
      */
-    protected function pollMQTT() {
+    public function pollMQTT() {
 
         foreach($this->mqttsub->getMessages() as $m) {
             // Split topic into components
@@ -131,19 +131,15 @@ class PowerMeter extends \Ensemble\Device\SensorDevice {
         $this->name = $name;
         $this->socket = $socket;
         $this->key = $key;
-        $socket->getStatus()->sub($key, array($this, 'change'));
     }
 
     public function getPollInterval() {
         return 30;
     }
 
-    public function change($key, $value) {
-        echo "CURRENT $value\n";
-    }
-
     public function measure() {
         try {
+            $this->socket->pollMQTT();
             $power = $this->socket->getStatus()->get($this->key);
         } catch(\Exception $e) {
             trigger_error($e->getMessage(), E_USER_NOTICE);

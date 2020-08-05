@@ -81,8 +81,6 @@ class ContextDevice extends BasicDevice {
             $this->data[$field] = array();
         }
 
-        echo "Set $field = $value\n";
-
         $data = &$this->data[$field];
 
         $data[] = array(

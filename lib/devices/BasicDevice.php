@@ -7,6 +7,8 @@ namespace Ensemble\Device;
 
 abstract class BasicDevice implements \Ensemble\Module {
 
+    use DeviceLogging;
+
     protected $name = false;
 
     public function announce() {
@@ -78,7 +80,9 @@ abstract class BasicDevice implements \Ensemble\Module {
             unset($this->replies[$follows]);
         }
     }
+}
 
+trait DeviceLogging {
     /**
      * Allow a logging device to be set, and used for logging
      */
@@ -88,7 +92,7 @@ abstract class BasicDevice implements \Ensemble\Module {
     }
 
     public function log($message,  \Ensemble\CommandBroker $via) {
-        echo '['.$this->getDeviceName().'] LOG: '.$message."\n";
+        echo '['.$this->getDeviceName().'] LOG: '.trim($message)."\n";
 
         if(!$this->logger)
             return;

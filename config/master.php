@@ -31,7 +31,8 @@ $conf['devices'][] = new Device\LoggingContextDevice('global.context', $st);
 /**
  * The Shower Socket limits use of the power shower using a tasmota smart socket
  */
-$client = new \Ensemble\MQTT\Client('mosquitto', 1883);
+$mqtthost = gethostbyname('mosquitto') == 'mosquitto' ? '10.0.0.8' : 'mosquitto'; // Hostname used in docker, IP used when testing
+$client = new \Ensemble\MQTT\Client($mqtthost, 1883);
 $conf['devices'][] = $socket = new Device\Socket\ShowerSocket("showersocket", $client, "socket4");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-shower');
 
