@@ -42,6 +42,7 @@ class Socket extends Async\Device {
 
     public function poll(\Ensemble\CommandBroker $b) {
         $this->pollMQTT(); // We want to process outstanding MQTT data on each poll
+        $this->send($this->topic_command."teleperiod", $this->t_interval); // And set the telemetry period, just in case!
         parent::poll($b);
     }
 
@@ -114,7 +115,13 @@ class Socket extends Async\Device {
      * Get a Current sensor for the socket
      */
     public function getPowerMeter() {
-        return new PowerMeter($this->name.'_POWER', $this, 'SENSOR.ENERGY.POWER');
+        static $meter = false;
+
+        if(!$meter) {
+            $meter = new PowerMeter($this->name.'_POWER', $this, 'SENSOR.ENERGY.POWER');
+        }
+
+        return $meter;
     }
 }
 
@@ -139,6 +146,7 @@ class PowerMeter extends \Ensemble\Device\SensorDevice {
         try {
             $power = $this->socket->getStatus()->get($this->key);
         } catch(\Exception $e) {
+            trigger_error($e->getMessage(), 'E_USER_NOTICE');
             $power = 0;
         }
 

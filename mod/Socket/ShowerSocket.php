@@ -26,8 +26,8 @@ class ShowerSocket extends Socket  {
 
     public function getRoutine() {
         $dev = $this;
-        return new Async\Lambda(function() use ($dev) {
-            $current = $dev->current;
+        $current = $this->current;
+        return new Async\Lambda(function() use ($dev, $current) {
 
             // 1: Wait for the socket to go above threshold power
             $power = $current->measure();
