@@ -7,6 +7,8 @@
 
 namespace Ensemble;
 
+date_default_timezone_set('Europe/London');
+
 /**
  * global.log is intended as a central logging device
  */
