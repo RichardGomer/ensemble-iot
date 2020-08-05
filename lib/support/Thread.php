@@ -17,7 +17,8 @@ class Thread
 {
 	var $process; // process reference
 	var $pipes; // stdio
-	var $buffer; // output buffer
+	var $buffer = array(); // stdout buffer
+	var $bufferlen = 15; // Lines to store in buffer
 	var $output;
 	var $error;
 	var $timeout;
@@ -58,14 +59,29 @@ class Thread
 	}
 
 	//Get the status of the current runing process
+	private $exitcode = false;
 	function getStatus()
 	{
-		return proc_get_status( $this->process );
+		$status = proc_get_status( $this->process );
+
+		// Exit code is only returned by proc_get_status once, so cache it
+		if($status['running'] == false && $this->exitcode === false) {
+			$this->exitcode = $status['exitcode'];
+		}
+
+		if($this->exitcode !== false)
+			$status['exitcode'] = $this->exitcode;
+
+		return $status;
 	}
 
 	function isRunning() {
 		$status = $this->getStatus();
 		return $status['running'];
+	}
+
+	function getExitCode() {
+		return $this->exitcode;
 	}
 
 	// Wait for the process to exit
@@ -94,7 +110,15 @@ class Thread
 			$buffer[] = $r;
 		}
 
+		// Cache buffer
+		$this->buffer = array_slice(array_merge($this->buffer, $buffer), -1 * $this->bufferlen, $this->bufferlen);
+
 		return $buffer;
+	}
+
+	// Get buffered lines
+	public function getBuffer() {
+		return $this->buffer;
 	}
 
 	// What command wrote to STDERR
