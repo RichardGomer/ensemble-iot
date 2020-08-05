@@ -98,3 +98,7 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dishwas
 // Network socket is for power monitoring only
 $conf['devices'][] = $socket = new Device\Socket\Socket("socket-network", $client, "socket6");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-network');
+
+// TV socket is for power monitoring only
+$conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $client, "socket7");
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-tv');
