@@ -51,10 +51,10 @@ $conf['devices'][] = $ctx = new Device\ContextDevice('global.schedules');
 // Daily offpeak
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', 'OFF');
-$bsched->setPoint('08:00:00', 'ON');
+$bsched->setPoint('07:00:00', 'ON');
 $bsched->setPoint('16:00:00', 'OFF');
 $bsched->setPoint('19:00:00', 'ON');
-$bsched->setPoint('21:00:00', 'OFF');
+$bsched->setPoint('22:00:00', 'OFF');
 $sd = new Schedule\DailyScheduler('daytime.scheduler', 'global.schedules', 'daytimeoffpeak', $bsched);
 $conf['devices'][] = $sd;
 
@@ -74,6 +74,7 @@ $bsched->setPoint('16:00:00', 'OFF');
 $bsched->setPoint('19:00:00', 'ON');
 $sd = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'offpeak_opoff', $bsched);
 $conf['devices'][] = $sd;
+
 
 /**
  * Attach sockets to schedules
@@ -102,3 +103,20 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-network", $clien
 // TV socket is for power monitoring only
 $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $client, "socket7");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-tv');
+
+/**
+ * Additional Pump
+ */
+
+$bsched = new Schedule\Schedule();
+$bsched->setPoint('04:00:00', 'ON');
+$bsched->setPoint('04:01:30', 'OFF');
+$bsched->setPoint('12:00:00', 'ON');
+$bsched->setPoint('12:01:30', 'OFF');
+$bsched->setPoint('20:00:00', 'ON');
+$bsched->setPoint('20:01:30', 'OFF');
+$sd = new Schedule\DailyScheduler('pump2.scheduler', 'global.schedules', 'pump2', $bsched);
+$conf['devices'][] = $sd;
+
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-pump2", $client, "socket8", 'global.schedules', 'pump');
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pump2');
