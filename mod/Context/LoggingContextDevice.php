@@ -2,7 +2,7 @@
 
 /**
  * Extend the basic context device by logging all updates to a database using
- * a PDO statement
+ * PDO statements
  */
 namespace Ensemble\Device;
 
@@ -10,10 +10,13 @@ class LoggingContextDevice extends ContextDevice {
 
     private $pdo;
 
-    public function __construct($name, \PDOStatement $insertStatement) {
+    /**
+     * $statements is an array of PDO statements to execute on each update
+     */
+    public function __construct($name, $statements) {
         parent::__construct($name);
 
-        $this->logger = $insertStatement;
+        $this->statements = $statements;
     }
 
     /**
@@ -26,19 +29,21 @@ class LoggingContextDevice extends ContextDevice {
     /**
      * Update a field
      */
-    public function action_update(\Ensemble\Command $cmd, \Ensemble\CommandBroker $b) {
-        parent::action_update($cmd, $b);
+    public function update($field, $value, $time=false, $source='') {
+        parent::update($field, $value, $time, $source);
 
-        $this->logger->bindValue(':source', $src = $cmd->getSource());
-        $this->logger->bindValue(':field', $f = $cmd->getArg('field'));
-        $this->logger->bindValue(':value', $v = $cmd->getArg('value'));
-        $this->logger->bindValue(':time', $t = $cmd->getArg('time'));
+        foreach($this->statements as $s) {
+            $s->bindValue(':source', $source);
+            $s->bindValue(':field', $field);
+            $s->bindValue(':value', $value);
+            $s->bindValue(':time', $time);
 
-        $res = $this->logger->execute();
+            $res = $s->execute();
 
-        if(!$res) {
-            $err = $this->logger->errorInfo();
-            throw new \Exception("SQL Error [{$err[0]}]: {$err[2]}");
+            if(!$res) {
+                $err = $s->errorInfo();
+                throw new \Exception("SQL Error [{$err[0]}]: {$err[2]}");
+            }
         }
 
     }
