@@ -137,7 +137,7 @@ class WaitForCommand implements Routine {
 
 /**
  * Waits for a reply or exception to be received in response to the given command
- * the command must aleady have been sent!
+ * the command must already have been sent!
  */
 class WaitForReply implements Routine {
     public function __construct(Device $device, \Ensemble\Command $c) {

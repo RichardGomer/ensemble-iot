@@ -26,9 +26,17 @@ require 'dbcreds.php';
 
 $db = new \PDO("mysql:host=$dbhost;dbname=$dbname;charset=utf8", $dbuser, $dbpass);
 
-$st = $db->prepare("INSERT INTO context(`source`, `field`, `value`, `time`) VALUES (:source, :field, :value, :time)");
+$st = $db->prepare("
+DELETE FROM context WHERE `source`=:source AND `field`=:field AND `time`:=time;
+INSERT INTO context(`source`, `field`, `value`, `time`) VALUES (:source, :field, :value, :time)
+");
 
 $conf['devices'][] = new Device\LoggingContextDevice('global.context', $st);
+
+/**
+ * Forecast
+ */
+$conf['devices'][] = new Device\Forecast\ForecastDevice('forecast', $datapoint_key, '353868', 'test.context', 'forecast-');
 
 /**
  * The Shower Socket limits use of the power shower using a tasmota smart socket

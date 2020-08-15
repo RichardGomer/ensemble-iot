@@ -53,29 +53,29 @@ abstract class SchedulerDevice extends Async\Device {
             $start = time();
 
             // Yield to the rescheduler
-            echo "Reschedule...\n";
-            $d = $this;
+            //echo "Reschedule...\n";
+
             // We wrap it like this so that the value returned by reschedule() can be
             // either a literal, or a Routine
-            $sched = $d->reschedule();
+            $sched = $device->reschedule();
 
             if(!$sched instanceof Schedule) {
                 throw new SchedulerDeviceException("Scheduler did not return a Schedule object");
             }
 
-            $this->schedule = $sched;
+            $device->schedule = $sched;
 
-            echo "Received schedule. Push to context.\n";
+            //echo "Received schedule. Push to context.\n";
 
             // Send the schedule to the broker
-            $cmd = \Ensemble\Command::create($this, $this->contextdevice, 'updateContext');
-            $cmd->setArg('field', $this->contextfield);
+            $cmd = \Ensemble\Command::create($device, $this->contextdevice, 'updateContext');
+            $cmd->setArg('field', $device->contextfield);
             $cmd->setArg('time', time());
-            $cmd->setArg('value', $this->schedule->toJSON());
-            $this->getBroker()->send($cmd);
+            $cmd->setArg('value', $device->schedule->toJSON());
+            $device->getBroker()->send($cmd);
 
             // Wait until the next reschedule is due
-            yield new Async\waitUntil($start + $this->reschedint);
+            yield new Async\waitUntil($start + $device->reschedint);
         });
     }
 

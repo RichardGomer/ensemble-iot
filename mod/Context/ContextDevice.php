@@ -37,9 +37,10 @@ class ContextDevice extends BasicDevice {
         $args = $cmd->getArgs(array('field'));
 
         $args['num'] = $cmd->getArgOrValue('num', 1);
+        $args['time'] = $cmd->getArgOrValue('time', time());
 
         if(array_key_exists($args['field'], $this->data)) {
-            $data = $this->get($args['field'], $args['num']);
+            $data = $this->get($args['field'], $args['num'], $args['time']);
             $reply = $cmd->reply(array('values'=>$data));
         } else {
             $reply = $cmd->reply(new \Exception("Field {$args['field']} isn't set"));
@@ -48,12 +49,19 @@ class ContextDevice extends BasicDevice {
         $b->send($reply);
     }
 
-    public function get($field, $num=1) {
+    public function get($field, $num=1, $time=false) {
         if(!array_key_exists($field, $this->data)) {
             return array();
         }
 
         $all = $this->data[$field];
+
+        // Remove values greater than $time
+        foreach($all as $k=>$v) {
+            if($v['time'] > $time) {
+                unset($all[$k]);
+            }
+        }
 
         usort($all, function($a, $b) {
             return $b['time'] - $a['time'];
@@ -67,9 +75,17 @@ class ContextDevice extends BasicDevice {
      */
     public function action_update(\Ensemble\Command $cmd, \Ensemble\CommandBroker $b) {
 
-        $args = $cmd->getArgs(array('time', 'value', 'field'));
+        $series = $cmd->getArgOrValue('series', false);
 
-        $this->update($args['field'], $args['value'], $args['time'], $cmd->getSource());
+        if(!$series) { // Not a series, set a single value
+            $args = $cmd->getArgs(array('time', 'value', 'field'));
+            $this->update($args['field'], $args['value'], $args['time'], $cmd->getSource());
+        } else {
+            $args = $cmd->getArgs(array('field', 'series'));
+            foreach($series as $time=>$value) {
+                $this->update($args['field'], $value, $time, $cmd->getSource());
+            }
+        }
     }
 
     public function update($field, $value, $time=false, $source='') {
@@ -83,18 +99,19 @@ class ContextDevice extends BasicDevice {
 
         $data = &$this->data[$field];
 
+        // Clean up expired values and values for the same timestamp
+        foreach($data as $i=>$record) {
+            if(($record['time'] < time() - $this->valuetimelimit) || $record['time'] == $time) {
+                unset($data[$i]);
+            }
+        }
+
+        // Add the new record
         $data[] = array(
             'time'=>$time,
             'source'=>$source,
             'value'=>$value
         );
-
-        // Clean up expired values
-        foreach($data as $i=>$record) {
-            if($record['time'] < time() - $this->valuetimelimit) {
-                unset($data[$i]);
-            }
-        }
 
         // Copy the update to supercontexts
         foreach($this->supers as $s) {
