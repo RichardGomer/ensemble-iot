@@ -118,5 +118,5 @@ $bsched->setPoint('20:01:30', 'OFF');
 $sd = new Schedule\DailyScheduler('pump2.scheduler', 'global.schedules', 'pump2', $bsched);
 $conf['devices'][] = $sd;
 
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-pump2", $client, "socket8", 'global.schedules', 'pump');
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-pump2", $client, "socket8", 'global.schedules', 'pump2');
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pump2');
