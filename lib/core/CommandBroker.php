@@ -129,6 +129,8 @@ class CommandBroker {
      */
     public function run() {
 
+        $this->addDevice(new StatusReportDevice($this->input));
+
         // Set up initial poll times for each module
         // Poll times are staggered to try and avoid lumpy performance
         $polls = array();
@@ -161,9 +163,10 @@ class CommandBroker {
                 usleep(100000);
                 continue;
             }
-
-            $next = $this->input->shift();
-            $this->handle($next);
+            else {
+                $next = $this->input->shift();
+                $this->handle($next);
+            }
         }
     }
 
@@ -172,3 +175,22 @@ class CommandBroker {
 class DeviceNotFoundException extends \Exception {}
 class DeviceBusyException extends \Exception {}
 class ExpiredException extends \Exception {}
+
+class StatusReportDevice extends Device\BasicDevice {
+    public function __construct(JsonQueue $inq) {
+        $this->name = "_QSTATUS";
+        $this->in = $inq;
+    }
+
+    public function poll(\Ensemble\CommandBroker $b) {
+        echo "QUEUE STATUS:\n   Total Commands: {$this->in->countAll()}\n   Commands Due: {$this->in->count()}\n";
+    }
+
+    public function announce() {
+        return false;
+    }
+
+    public function getPollInterval() {
+        return 120;
+    }
+}
