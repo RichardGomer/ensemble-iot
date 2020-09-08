@@ -24,13 +24,7 @@ if(!file_exists(__DIR__.'/dbcreds.php')) {
 
 require 'dbcreds.php';
 
-$db = new \PDO("mysql:host=$dbhost;dbname=$dbname;charset=utf8", $dbuser, $dbpass);
-
-$st = array();
-$st[] = $db->prepare("DELETE FROM context WHERE `source`=:source AND `field`=:field AND `time`=:time AND (ISNULL(:value) OR NOT ISNULL(:value))");
-$st[] = $db->prepare("INSERT INTO context(`source`, `field`, `value`, `time`) VALUES (:source, :field, :value, :time)");
-
-$conf['devices'][] = new Device\LoggingContextDevice('global.context', $st);
+$conf['devices'][] = new Device\LoggingContextDevice('global.context', "mysql:host=$dbhost;dbname=$dbname;charset=utf8", $dbuser, $dbpass);
 
 /**
  * Forecast
@@ -114,7 +108,6 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $client, "s
 /**
  * Additional Pump
  */
-
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('04:00:00', 'ON');
 $bsched->setPoint('04:01:30', 'OFF');
