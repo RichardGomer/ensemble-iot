@@ -39,10 +39,10 @@ class CommandBroker {
         }
 
         if($local && !$this->disabledirectlocal) {
-            echo "TX ".$command." [QUEUE LOCAL]\n";
+            echo date('[Y-m-d H:i:s] ')."TX ".$command." [QUEUE LOCAL]\n";
             $this->input->push($command);
         } else {
-            echo "TX ".$command." [QUEUE REMOTE]\n";
+            echo date('[Y-m-d H:i:s] ')."TX ".$command." [QUEUE REMOTE]\n";
             $this->remote->push($command);
         }
     }
@@ -57,18 +57,18 @@ class CommandBroker {
 
             // Don't execute the command if it has expired
             if($command->isExpired()) {
-                echo "RX ".$command." [EXPIRED]\n";
+                echo date('[Y-m-d H:i:s] ')."RX ".$command." [EXPIRED]\n";
                 throw new ExpiredException("Command expired before action");
             }
 
             $device = $this->getTargetDevice($command);
 
             if($device->isBusy()) {
-                echo "RX ".$command." [QUEUE LOCAL, DEVICE BUSY]\n";
+                echo date('[Y-m-d H:i:s] ')."RX ".$command." [QUEUE LOCAL, DEVICE BUSY]\n";
                 throw new DeviceBusyException("Device is busy");
             }
 
-            echo "RX ".$command." [EXECUTE]\n";
+            echo date('[Y-m-d H:i:s] ')."RX ".$command." [EXECUTE]\n";
             $device->action($command, $this);
         } catch(DeviceBusyException $e) { // If the device is busy, return the command to the queue with a threshold
             $this->input->push($command, time() + 10);
@@ -76,7 +76,7 @@ class CommandBroker {
             $this->remote->push($command); // Route commands for unknown devices via the remote queue
         } catch(\Exception $e) {
             $t = get_class($e);
-            echo "Exception during execution: [{$t}] {$e->getMessage()}\n";
+            echo date('[Y-m-d H:i:s] ')."Exception during execution: [{$t}] {$e->getMessage()}\n";
             $this->send($command->reply($e)); // If there's an exception, reply with it
         }
 
@@ -111,10 +111,10 @@ class CommandBroker {
 
     protected function poll($name) {
         try {
-            echo "POLL $name\n";
+            echo date('[Y-m-d H:i:s] ')."POLL $name\n";
             $this->getDevice($name)->poll($this);
         } catch(\Exception $e) {
-            echo "Exception during device poll:\n  ".$e->getMessage()."\n";
+            echo date('[Y-m-d H:i:s] ')."Exception during device poll:\n  ".get_class($e)." ".$e->getMessage()."\n";
         }
     }
 
@@ -183,7 +183,7 @@ class StatusReportDevice extends Device\BasicDevice {
     }
 
     public function poll(\Ensemble\CommandBroker $b) {
-        echo "QUEUE STATUS:\n   Total Commands: {$this->in->countAll()}\n   Commands Due: {$this->in->count()}\n";
+        echo date('[Y-m-d H:i:s] ')."QUEUE STATUS:\n                 Total Commands: {$this->in->countAll()}\n                 Commands Due: {$this->in->count()}\n";
     }
 
     public function announce() {

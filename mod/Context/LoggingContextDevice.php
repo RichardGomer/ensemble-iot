@@ -8,7 +8,7 @@ namespace Ensemble\Device;
 
 class LoggingContextDevice extends ContextDevice {
 
-    private $pdo;
+    private $db = false;
 
     /**
      * $statements is an array of PDO statements to execute on each update
