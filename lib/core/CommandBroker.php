@@ -71,7 +71,7 @@ class CommandBroker {
             echo date('[Y-m-d H:i:s] ')."RX ".$command." [EXECUTE]\n";
             $device->action($command, $this);
         } catch(DeviceBusyException $e) { // If the device is busy, return the command to the queue with a threshold
-            $this->input->push($command, time() + 10);
+            $this->input->push($command, time() + 60);
         } catch(DeviceNotFoundException $e) {
             $this->remote->push($command); // Route commands for unknown devices via the remote queue
         } catch(\Exception $e) {
@@ -164,8 +164,17 @@ class CommandBroker {
                 continue;
             }
             else {
-                $next = $this->input->shift();
-                $this->handle($next);
+                /**
+                 * We don't want to block forever consuming commands, because some devices won't actually
+                 * consume them until the next poll; but we do want to make decent headway each time. This loop
+                 * will consume up to 100 commands, before checking whether polling is due
+                 */
+                $n = 0;
+                do {
+                    $next = $this->input->shift();
+                    $this->handle($next);
+                    $n++;
+                } while(!$this->input->isEmpty() && $n < 100);
             }
         }
     }
