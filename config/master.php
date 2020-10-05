@@ -7,6 +7,7 @@
 
 namespace Ensemble;
 use Ensemble\MQTT as MQTT;
+use Ensemble\Device\Light as Light;
 
 date_default_timezone_set('Europe/London');
 
