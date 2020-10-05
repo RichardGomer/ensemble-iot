@@ -76,6 +76,24 @@ $bsched->setPoint('19:00:00', 'ON');
 $sd = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'offpeak_opoff', $bsched);
 $conf['devices'][] = $sd;
 
+/**
+ * Smart lights
+ */
+$lsched = new Schedule\Schedule();
+$lsched->setPoint('00:00:00', 'auto 50%');
+$lsched->setPoint('05:00:00', 'auto 50%');
+$lsched->setPoint('06:00:00', 'auto 100%');
+$lsched->setPoint('22:00:00', 'auto 100%');
+$lsched->setPoint('23:00:00', 'auto 50%');
+
+$sd = new Schedule\DailyScheduler('light.scheduler', 'global.schedules', 'daylightschedule', $lsched);
+$conf['devices'][] = $sd;
+
+// Create a socket to be controlled and bind it to the schedule in the broker
+$client = new MQTTClient('10.0.0.8', 1883);
+$conf['devices'][] = $socket = new Light\RGBWCT("light1", $client, "light1", 'global.schedules', 'daylightschedule');
+$conf['devices'][] = $socket = new Light\RGBWCT("light2", $client, "light1", 'global.schedules', 'daylightschedule');
+$conf['devices'][] = $socket = new Light\RGBWCT("light3", $client, "light1", 'global.schedules', 'daylightschedule');
 
 /**
  * Attach sockets to schedules

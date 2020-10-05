@@ -15,40 +15,15 @@ namespace Ensemble\Device\Socket;
 use Ensemble\MQTT\Client as MQTTClient;
 use Ensemble\Async as Async;
 
-class Socket extends Async\Device {
+class Socket extends \Ensemble\Device\MQTTDevice {
 
     private $t_interval = 5; // Telemetry interval
 
     public function __construct($name, MQTTClient $client, $deviceName) {
 
-        $this->name = $name;
+        parent::__construct($name, $client, $deviceName);
 
-        $this->deviceName = $deviceName;
-
-        $this->topic_command = "cmnd/$deviceName/";
-        $this->topic = "+/$deviceName/+";
-        $this->mqttsub = $client->subscribe($this->topic);
-
-        $this->status = new \Ensemble\KeyValue\SubscriptionStore();
-
-        $this->mqtt = $client;
-
-        $this->send($this->topic_command."teleperiod", $this->t_interval);
-    }
-
-    public function getPollInterval() {
-        return $this->t_interval;
-    }
-
-    public function poll(\Ensemble\CommandBroker $b) {
-        $this->pollMQTT(); // We want to process outstanding MQTT data on each poll
-        $this->send($this->topic_command."teleperiod", $this->t_interval); // And set the telemetry period, just in case!
-        parent::poll($b);
-    }
-
-    // Override this method to add custom logic
-    public function getRoutine() {
-        return new Async\NullRoutine();
+        $this->setTeleInterval(5);
     }
 
     public function on() {
@@ -57,58 +32,6 @@ class Socket extends Async\Device {
 
     public function off() {
         $this->send($this->topic_command.'POWER', 'OFF');
-    }
-
-    protected function send($topic, $message) {
-        $this->mqtt->publish($topic, $message, 0);
-        usleep(500000); // Wait 1/2 second
-        $this->pollMQTT(); // Poll for outstanding messages
-    }
-
-    /**
-     * Receive and process MQTT messages
-     */
-    public function pollMQTT() {
-
-        foreach($this->mqttsub->getMessages() as $m) {
-            // Split topic into components
-            preg_match('@([a-z]{4})/(.+)/(.+)@i', $m['topic'], $matches);
-
-            $type = $matches[1];
-            $device = $matches[2];
-            $field = $matches[3];
-
-            if($device !== $this->deviceName) {
-                echo "Message is not for us. '{$device}' != '{$this->deviceName}' ";
-                continue;
-            }
-
-            switch($type) {
-                case 'stat': // stat contains single-field state updates
-                    $this->status->set("STATE.$field", $m['message']);
-                    break;
-                case 'tele': // Telemetry is a JSON message
-                    $json = json_decode($m['message'], true);
-
-                    if(!$json) {
-                        $this->status->set($field, $m['message']);
-                    } else {
-                        $this->status->setArray($json, array($field));
-                    }
-
-                    break;
-            }
-        }
-    }
-
-    public function getStatus() {
-        return $this->status;
-    }
-
-    public function isOn() {
-        $state = $this->getStatus()->get("STATE.POWER");
-        $on = $state === 'ON';
-        return $on;
     }
 
     /**

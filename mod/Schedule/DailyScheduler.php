@@ -18,8 +18,6 @@ class DailyScheduler extends SchedulerDevice {
 
     public function reschedule() {
 
-        echo "Begin rescheduling\n";
-
         // Get the timestamp at the start of today
         $todaystart = strtotime('today midnight');
         $tomorrowstart = strtotime('tomorrow midnight');
@@ -31,7 +29,7 @@ class DailyScheduler extends SchedulerDevice {
         $this->copyIntoWithOffset($this->basesched, $ns, $todaystart);
         $this->copyIntoWithOffset($this->basesched, $ns, $tomorrowstart);
 
-        echo "Generated Schedule: ".$ns->toJSON()."\n";
+        $this->log("Generated Schedule:\n".$ns->prettyPrint());
 
         return $ns;
     }

@@ -37,11 +37,21 @@ class Schedule {
     }
 
     public function toJSON() {
+        $out = [];
+
         foreach($this->getPeriods() as $p) {
             $out[$p['start']] = $p['status'];
         }
 
         return json_encode($out);
+    }
+
+    public function prettyPrint() {
+        $out = '';
+        foreach($this->getChangePoints() as $t) {
+            $out .= "    ".date('[Y-m-d H:i:s]', $t)." ".$this->getAt($t)."\n";
+        }
+        return $out;
     }
 
     /**
@@ -73,8 +83,9 @@ class Schedule {
      */
     public function setPoint($t, $status) {
         $this->checkStatus($status);
-        $t = $this->normaliseTime($t);
-        $this->periods[] = array('start' => $t, 'status' => $status);
+        $tn = $this->normaliseTime($t);
+        //echo "Normalise $t to $tn\n";
+        $this->periods[] = array('start' => $tn, 'status' => $status);
         usort($this->periods, function($a, $b) {
             return $a['start'] - $b['start'];
         });
@@ -96,6 +107,9 @@ class Schedule {
 
         if(is_int($t))
             return $t;
+
+        if(is_numeric($t))
+            return (int) $t;
 
         return strtotime($t);
     }
@@ -139,6 +153,20 @@ class Schedule {
 
     public function getNow() {
         return $this->getAt(time());
+    }
+
+    // Return the current period in the format array($lastChangeTime => $currentStatus, $nextChangeTime => $nextStatus)
+    public function getCurrentPeriod() {
+        $now = time();
+        foreach($this->getChangePoints() as $time) {
+            if($time > $now) {
+                if($lastTime == false) {
+                    return array($time=>$this->getAt($time));
+                }
+                return array($lastTime => $this->getAt($lastTime), $time=>$this->getAt($time));
+            }
+            $lastTime = $time;
+        }
     }
 
     /**
