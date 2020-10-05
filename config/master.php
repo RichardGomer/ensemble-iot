@@ -6,6 +6,7 @@
  */
 
 namespace Ensemble;
+use Ensemble\MQTT as MQTT;
 
 date_default_timezone_set('Europe/London');
 
@@ -90,7 +91,7 @@ $sd = new Schedule\DailyScheduler('light.scheduler', 'global.schedules', 'daylig
 $conf['devices'][] = $sd;
 
 // Create a socket to be controlled and bind it to the schedule in the broker
-$client = new MQTTClient('10.0.0.8', 1883);
+$client = new MQTT\Client('10.0.0.8', 1883);
 $conf['devices'][] = $socket = new Light\RGBWCT("light1", $client, "light1", 'global.schedules', 'daylightschedule');
 $conf['devices'][] = $socket = new Light\RGBWCT("light2", $client, "light1", 'global.schedules', 'daylightschedule');
 $conf['devices'][] = $socket = new Light\RGBWCT("light3", $client, "light1", 'global.schedules', 'daylightschedule');
