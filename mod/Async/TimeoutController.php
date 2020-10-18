@@ -19,7 +19,7 @@ class TimeoutController extends Controller implements Routine {
 
     public function continue() {
         $this->checkTimeout();
-        parent::continue();
+        return parent::continue();
     }
 
     protected function checkTimeout() {

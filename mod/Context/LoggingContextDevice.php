@@ -74,4 +74,27 @@ class LoggingContextDevice extends ContextDevice {
 
         $this->statements = $st;
     }
+
+    /**
+     * Repopulate context from the database
+     *
+     * SuperContexts ARE informed of all the "changes" as they're imported (if any are defined)
+     * so repopulation can cascade upwards. BUT, that will generate a lot of commands, so call this
+     * before adding supers unless that behaviour is intentional
+     */
+    protected function repopulate() {
+        $limit = $this->valuetimelimit; // This is the configured expiry time for values
+
+        $st = $this->db->prepare("SELECT FROM context WHERE `time`>=:time");
+        $st->bindValue(':time', time() - $limit);
+        $res = $st->execute();
+
+        if(!$res) {
+            $err = $s->errorInfo();
+            echo "Context could not be restored. SQL error: [{$err[0]}]: {$err[2]}\n";
+            throw new \Exception("SQL Error [{$err[0]}]: {$err[2]}");
+        }
+
+
+    }
 }

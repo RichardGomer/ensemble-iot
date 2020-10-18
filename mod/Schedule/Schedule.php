@@ -183,15 +183,19 @@ class Schedule {
     }
 
     /**
-     * Combine multiple schedules using a custom resolver function
-     * Schedules are matched up; for the whole period that exists in ALL the schedules,
-     * the resolver is used to compute a status for a combined Schedule, which is
-     * returned.
+     * Use the supplied translation function to create a new schedule from this one
+     * The translator function takes a single argument, a status, and returns a status
+     * for the new schedule
      */
-    public static function combine(callable $resolver, ...$scheds) {
+    public function translate($translator) {
+            $out = new Schedule();
 
+            foreach($this->getPeriods() as $p) {
+                $out->setPoint($p['start'], $translator($p['status']));
+            }
+
+            return $out;
     }
-
 }
 
 class ScheduleException extends \Exception {}

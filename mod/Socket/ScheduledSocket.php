@@ -2,7 +2,7 @@
 
 namespace Ensemble\Device\Socket;
 use Ensemble\MQTT\Client as MQTTClient;
-use Ensemble\Schedule\Schedule as Schedule;
+use Ensemble\Schedule as Schedule;
 use Ensemble\Async as Async;
 
 /**
@@ -44,9 +44,14 @@ class ScheduledSocket extends Socket {
             $start = time();
 
             // 1: Get the schedule from the configured context device
-            yield $socket->getRefreshScheduleRoutine();
+            try {
+                $schedule = yield $socket->getRefreshScheduleRoutine();
+            } catch(\Exception $e) {
+                $this->log("Couldn't fetch schedule: ".$e->getMessage());
+                $schedule = false;
+            }
 
-            if(!$this->schedule) {
+            if(!$schedule) {
                 return;
             }
 
@@ -116,19 +121,6 @@ class ScheduledSocket extends Socket {
     }
 
     protected function getRefreshScheduleRoutine() {
-        $socket = $this;
-        return new Async\TimeoutController(new Async\Lambda(function() use ($socket) {
-            $c = \Ensemble\Command::create($socket, $socket->context_device, 'getContext', array('field' => $socket->context_field));
-            $socket->getBroker()->send($c);
-            $rep = yield new Async\WaitForReply($socket, $c);
-
-            if($rep->isException()) {
-                $socket->log("Couldn't fetch schedule: ".$rep->getArg('message'), );
-                return;
-            }
-
-            $json = $rep->getArg('values')[0]['value'];
-            $socket->schedule = Schedule::fromJSON($json);
-        }), 60);
+        return new Async\TimeoutController(new Schedule\FetchRoutine($this, $this->context_device, $this->context_device), 60);
     }
 }

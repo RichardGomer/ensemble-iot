@@ -52,22 +52,22 @@ $conf['devices'][] = $ctx = new Device\ContextDevice('global.schedules');
 */
 
 // Daily offpeak
-$bsched = new Schedule\Schedule();
-$bsched->setPoint('00:00:00', 'OFF');
-$bsched->setPoint('07:00:00', 'ON');
-$bsched->setPoint('16:00:00', 'OFF');
-$bsched->setPoint('19:00:00', 'ON');
-$bsched->setPoint('22:00:00', 'OFF');
-$sd = new Schedule\DailyScheduler('daytime.scheduler', 'global.schedules', 'daytimeoffpeak', $bsched);
-$conf['devices'][] = $sd;
+$doffpeak = new Schedule\Schedule();
+$doffpeak->setPoint('00:00:00', 'OFF');
+$doffpeak->setPoint('07:00:00', 'ON');
+$doffpeak->setPoint('16:00:00', 'OFF');
+$doffpeak->setPoint('19:00:00', 'ON');
+$doffpeak->setPoint('22:00:00', 'OFF');
+$sd_doffpeak = new Schedule\DailyScheduler('daytime.scheduler', 'global.schedules', 'daytimeoffpeak', $doffpeak);
+$conf['devices'][] = $sd_doffpeak;
 
 // offpeak
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', 'ON');
 $bsched->setPoint('16:00:00', 'OFF');
 $bsched->setPoint('19:00:00', 'ON');
-$sd = new Schedule\DailyScheduler('offpeak.scheduler', 'global.schedules', 'offpeak', $bsched);
-$conf['devices'][] = $sd;
+$sd_offpeak = new Schedule\DailyScheduler('offpeak.scheduler', 'global.schedules', 'offpeak', $bsched);
+$conf['devices'][] = $sd_offpeak;
 
 // offpeak oppoff
 $bsched = new Schedule\Schedule();
@@ -75,27 +75,35 @@ $bsched->setPoint('00:00:00', 'ON');
 $bsched->setPoint('14:00:00', 'OPOFF');
 $bsched->setPoint('16:00:00', 'OFF');
 $bsched->setPoint('19:00:00', 'ON');
-$sd = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'offpeak_opoff', $bsched);
-$conf['devices'][] = $sd;
+$sd_opoff = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'offpeak_opoff', $bsched);
+$conf['devices'][] = $sd_opoff;
+
+// electric heater
+// Convert daily offpeak schedule to target temperatures
+$sched_heat = $doffpeak->translate(function($s){
+    return $s == 'ON' ? '18' : '12';
+});
+$sd_heat = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'electric_heat', $sched_heat);
+$conf['devices'][] = $sd_opoff;
 
 /**
  * Smart lights
  */
 $lsched = new Schedule\Schedule();
-$lsched->setPoint('00:00:00', 'auto 50%');
-$lsched->setPoint('05:00:00', 'auto 50%');
+$lsched->setPoint('00:00:00', 'auto 30%');
+$lsched->setPoint('05:00:00', 'auto 30%');
 $lsched->setPoint('06:00:00', 'auto 100%');
 $lsched->setPoint('22:00:00', 'auto 100%');
-$lsched->setPoint('23:00:00', 'auto 50%');
+$lsched->setPoint('23:00:00', 'auto 30%');
 
-$sd = new Schedule\DailyScheduler('light.scheduler', 'global.schedules', 'daylightschedule', $lsched);
-$conf['devices'][] = $sd;
+$sd_lights = new Schedule\DailyScheduler('light.scheduler', 'global.schedules', 'daylightschedule', $lsched);
+$conf['devices'][] = $sd_lights;
 
 // Create a socket to be controlled and bind it to the schedule in the broker
 $client = new MQTT\Client($mqtthost, 1883);
 $conf['devices'][] = $socket = new Light\RGBWCT("light1", $client, "light1", 'global.schedules', 'daylightschedule');
-$conf['devices'][] = $socket = new Light\RGBWCT("light2", $client, "light1", 'global.schedules', 'daylightschedule');
-$conf['devices'][] = $socket = new Light\RGBWCT("light3", $client, "light1", 'global.schedules', 'daylightschedule');
+$conf['devices'][] = $socket = new Light\RGBWCT("light2", $client, "light2", 'global.schedules', 'daylightschedule');
+$conf['devices'][] = $socket = new Light\RGBWCT("light3", $client, "light3", 'global.schedules', 'daylightschedule');
 
 /**
  * Attach sockets to schedules

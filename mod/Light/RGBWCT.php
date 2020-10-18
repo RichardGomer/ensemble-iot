@@ -74,19 +74,23 @@ class RGBWCT extends \Ensemble\Device\MQTTDevice {
 
                 if($next !== false && $current['mode'] == $next['mode']) { // If modes match, interpolate values
                     //$this->log("Interpolate from $currentStatus @ $currentTime to $nextStatus @ $nextTime\n");
+
+                    $bpc = $light->scale($current['%'], $next['%'], $currentTime, $nextTime);
+                    //$this->log(" => ".$bpc."%");
+
                     if($current['mode'] == 'rgb') { // RGB; interpolate each channel plus brightness
                         $this->setRGB(
                             $light->scale($current['r'], $next['r'], $currentTime, $nextTime),
                             $light->scale($current['g'], $next['g'], $currentTime, $nextTime),
                             $light->scale($current['b'], $next['b'], $currentTime, $nextTime)
                         );
-                        $light->setBrightness($light->scale($current['%'], $next['%'], $currentTime, $nextTime));
+                        $light->setBrightness($bpc);
                     } elseif($current['mode'] == 'ct') { // Manual colour temperature; scale temp and brightness
                         $light->setCT($this->getAutoCT());
-                        $light->setBrightness($light->scale($current['%'], $next['%'], $currentTime, $nextTime));
+                        $light->setBrightness($bpc);
                     } elseif($current['mode'] == 'auto') { // Auto CT mode, only scale brightness
                         $light->setCT($this->getAutoCT());
-                        $light->setBrightness($light->scale($current['%'], $next['%'], $currentTime, $nextTime));
+                        $light->setBrightness($bpc);
                     } else {
                         $light->setRGB(255,50,50); // Error!
                         $light->setBrightness(50);
@@ -202,7 +206,7 @@ class RGBWCT extends \Ensemble\Device\MQTTDevice {
 
     protected function parseStatus($s) {
 
-        if(preg_match('/([0-9]{1,3}),([0-9]{1,3}),([0-9]{1,3})( [0-9]{1,3})?/', $s, $matches)) {
+        if(preg_match('/^([0-9]{1,3}),([0-9]{1,3}),([0-9]{1,3})( [0-9]{1,3})?/', $s, $matches)) {
             return array(
                 'mode'=>'rgb',
                 'r'=>$matches[1],
@@ -210,13 +214,13 @@ class RGBWCT extends \Ensemble\Device\MQTTDevice {
                 'b'=>$matches[3],
                 '%'=>array_key_exists(4, $matches) ? (int) $matches[4] : 100
             );
-        } elseif (preg_match('/([0-9]{1,3})( [0-9]{1,3})?/', $s, $matches)) {
+        } elseif (preg_match('/^([0-9]{1,3})( [0-9]{1,3})?/', $s, $matches)) {
             return array(
                 'mode'=>'ct',
                 'ct'=>$matches[1],
                 '%'=>array_key_exists(2, $matches) ? (int) $matches[2] : 100
             );
-        } elseif (preg_match('/auto( [0-9]{1,3})?/i', $s, $matches)) {
+        } elseif (preg_match('/^auto( [0-9]{1,3})?/i', $s, $matches)) {
             return array(
                 'mode'=>'auto',
                 '%'=>array_key_exists(1, $matches) ? (int) $matches[1] : 100
