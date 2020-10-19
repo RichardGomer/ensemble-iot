@@ -14,7 +14,7 @@ class FetchRoutine implements Async\Routine {
      * $context_device: The name of the context device to request the schedule from
      * $context_field: The name of the context field containing the request
      */
-    public function __construct(AsyncDevice $device, $context_device, $context_field) {
+    public function __construct(Async\Device $device, $context_device, $context_field) {
         $this->device = $device;
         $this->context_device = $context_device;
         $this->context_field = $context_field;

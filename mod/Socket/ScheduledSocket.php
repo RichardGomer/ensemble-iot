@@ -121,6 +121,6 @@ class ScheduledSocket extends Socket {
     }
 
     protected function getRefreshScheduleRoutine() {
-        return new Async\TimeoutController(new Schedule\FetchRoutine($this, $this->context_device, $this->context_device), 60);
+        return new Async\TimeoutController(new Schedule\FetchRoutine($this, $this->context_device, $this->context_field), 60);
     }
 }
