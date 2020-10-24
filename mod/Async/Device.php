@@ -52,9 +52,8 @@ abstract class Device implements \Ensemble\Module {
         return $this->broker;
     }
 
-    public function log($msg, \Ensemble\CommandBroker $broker=null) {
-        $broker = $broker == null ? $this->getBroker() : $broker;
-        $this->__log($msg, $broker);
+    public function log($msg) {
+        $this->__log($msg);
     }
 
     /**

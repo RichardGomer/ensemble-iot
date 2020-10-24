@@ -33,8 +33,12 @@ class LoggingContextDevice extends ContextDevice {
     /**
      * Update a field
      */
-    public function update($field, $value, $time=false, $source='') {
+    public function update($field, $value, $time=false, $source='', $store=true) {
         parent::update($field, $value, $time, $source);
+
+        if(!$store) {
+            return;
+        }
 
         foreach($this->statements as $s) {
             $tries = 0;
@@ -82,19 +86,27 @@ class LoggingContextDevice extends ContextDevice {
      * so repopulation can cascade upwards. BUT, that will generate a lot of commands, so call this
      * before adding supers unless that behaviour is intentional
      */
-    protected function repopulate() {
+    public function repopulate() {
         $limit = $this->valuetimelimit; // This is the configured expiry time for values
 
-        $st = $this->db->prepare("SELECT FROM context WHERE `time`>=:time");
-        $st->bindValue(':time', time() - $limit);
+        $st = $this->db->prepare("SELECT `field`,`value`,`time`,`source` FROM context WHERE `time`>=:time");
+        $st->bindValue(':time', (int) time() - $limit);
         $res = $st->execute();
 
         if(!$res) {
-            $err = $s->errorInfo();
+            $err = $st->errorInfo();
             echo "Context could not be restored. SQL error: [{$err[0]}]: {$err[2]}\n";
             throw new \Exception("SQL Error [{$err[0]}]: {$err[2]}");
         }
 
+        $tot = $st->rowCount(); $n = 0;
+        //echo "Found {$tot} context values to restore\n";
+
+        while(($row = $st->fetch()) !== false) {
+            $n++;
+            //echo "$n / $tot   SET {$row['field']} = {$row['value']}\n";
+            $this->update($row['field'], $row['value'], $row['time'], $row['source'], false);
+        }
 
     }
 }

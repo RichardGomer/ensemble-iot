@@ -10,7 +10,7 @@ namespace Ensemble\Device;
 
 class ContextDevice extends BasicDevice {
 
-    private $valuetimelimit = 3600 * 2; // Values older than this may be discarded
+    protected $valuetimelimit = 3600 * 2; // Values older than this may be discarded
 
     private $data = array();
 
@@ -56,10 +56,12 @@ class ContextDevice extends BasicDevice {
 
         $all = $this->data[$field];
 
-        // Remove values greater than $time
-        foreach($all as $k=>$v) {
-            if($v['time'] > $time) {
-                unset($all[$k]);
+        // Remove values older than $time
+        if($time !== false) {
+            foreach($all as $k=>$v) {
+                if($v['time'] > $time) {
+                    unset($all[$k]);
+                }
             }
         }
 
@@ -68,6 +70,14 @@ class ContextDevice extends BasicDevice {
         });
 
         return array_slice($all, count($all) - $num, $num);
+    }
+
+    public function getAll($n=1, $time=false) {
+        $out = array();
+        foreach($this->data as $field=>$vals) {
+            $out[$field] = $this->get($field, $n, $time);
+        }
+        return $out;
     }
 
     /**

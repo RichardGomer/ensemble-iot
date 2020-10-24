@@ -42,6 +42,6 @@ $pumpdevice->setDimensions($width, $length);
 $pumpdevice->setMinimumDepth($pump_off);
 $pumpdevice->setAdvisoryPumping($pump_on, $pump_on_interval);
 $pumpdevice->setMandatoryPumping($pump_force);
-$pumpdevice->setLogDevice('global.log');
+$pumpdevice->setLogDevice('global.log', $conf['broker']); // Log to global.log via the main broker
 
 $conf['devices'][] = $pumpdevice;

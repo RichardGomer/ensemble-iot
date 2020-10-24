@@ -60,33 +60,3 @@ if(!$args['default-ep']) {
 }
 
 $conf['devices'] = array(); // Put device modules in here
-
-// Load device config, if any, based on IP address
-$configured = false;
-if(!$args['config']) {
-    do { // Keep trying until IP auto-config works; this allows time for the network interface to come up
-        $ips = getIPs();
-        foreach($ips as $ip) {
-            if(file_exists($cfn = dirname(__DIR__)."/config/{$ip}.php")) {
-                echo "Loaded config {$cfn} based on IP address\n";
-                include($cfn);
-                $configured = true;
-                break;
-            }
-        }
-
-        if(!$configured) {
-            echo "WARNING: No IP-based configuration was found for ".implode(" or ", $ips).". Will try again momentarily.\n";
-            sleep(10);
-        }
-    } while(!$configured);
-} else {
-    $fn = $args['config'];
-    if(file_exists($cfn = dirname(__DIR__)."/config/{$fn}.php")) {
-        echo "Loaded specified configuration, {$cfn}\n";
-        include($cfn);
-    } else {
-        echo "Config file '$cfn' does not exist\n";
-        exit;
-    }
-}
