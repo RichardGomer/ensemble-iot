@@ -6,10 +6,27 @@ namespace Ensemble;
 use Ensemble\MQTT\Client as MQTTClient;
 
 
+// Create a context device to broker schedules
+$conf['devices'][] = $ctx = new Device\ContextDevice('global.schedules');
+
+/**
+* Create some schedules
+*/
+
+// Daily offpeak
+$doffpeak = new Schedule\Schedule();
+$doffpeak->setPoint('00:00:00', 'OFF');
+$doffpeak->setPoint('07:00:00', 'ON');
+$doffpeak->setPoint('16:00:00', 'OFF');
+$doffpeak->setPoint('19:00:00', 'ON');
+$doffpeak->setPoint('22:00:00', 'OFF');
+$sd_doffpeak = new Schedule\DailyScheduler('daytime.scheduler', 'global.schedules', 'daytimeoffpeak', $doffpeak);
+$conf['devices'][] = $sd_doffpeak;
+
+
 $client = new MQTTClient('10.0.0.8', 1883);
 
-$conf['devices'][] = $socket = new Device\Socket\ShowerSocket("socket", $client, "socket4");
-
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-vent-office", $client, "socket5", 'global.schedules', 'daytimeoffpeak');
 
 
 class SocketTestDevice extends Device\BasicDevice {
@@ -47,4 +64,4 @@ class SocketTestDevice extends Device\BasicDevice {
     }
 }
 
-//$conf['devices'][] = new SocketTestDevice($socket);
+$conf['devices'][] = new SocketTestDevice($socket);

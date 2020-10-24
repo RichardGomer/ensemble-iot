@@ -192,7 +192,7 @@ class StatusReportDevice extends Device\BasicDevice {
     }
 
     public function poll(\Ensemble\CommandBroker $b) {
-        echo date('[Y-m-d H:i:s] ')."QUEUE STATUS:\n                 Total Commands: {$this->in->countAll()}\n                 Commands Due: {$this->in->count()}\n";
+        echo date('[Y-m-d H:i:s] ')."QUEUE STATUS: {$this->in->count()} due of {$this->in->countAll()} queued commands\n";
     }
 
     public function announce() {

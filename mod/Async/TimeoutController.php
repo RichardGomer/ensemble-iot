@@ -38,6 +38,9 @@ class TimeoutController extends Controller implements Routine {
             yield $res;
         }
 
+        $res = $this->getReturn();
+        //echo "Timeout routine exiting\n";
+        //var_dump($res);
         return $res;
     }
 }

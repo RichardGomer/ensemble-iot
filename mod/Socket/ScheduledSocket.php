@@ -55,10 +55,14 @@ class ScheduledSocket extends Socket {
                 return;
             }
 
+            $this->log("Schedule is set");
+
             // 2: Do the schedule
             while(time() < $start + $this->sched_polltime) {
 
-                $mode = strtoupper($socket->schedule->getNow());
+                $mode = strtoupper($schedule->getNow());
+
+                $this->log("Mode is $mode");
 
                 // OPOFF Mode
                 if($mode == 'OPOFF') {

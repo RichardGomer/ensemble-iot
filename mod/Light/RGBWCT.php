@@ -33,11 +33,17 @@ class RGBWCT extends \Ensemble\Device\MQTTDevice {
     }
 
     public function getPollInterval() {
-        return 10;
+        return 5;
     }
 
     /**
      * The async routine checks for schedule updates and handles current state
+     *
+     * A schedule can be set to control the light. Schedule should contain values in the format:
+     * R,G,B [dim%=100] or        (for RGB value plus brightness)
+     * CT [dim%=100] or           (for colour temperature and brightness)
+     * auto [dim%=100]                (for auto temperature based on sunset, manual brightness)
+     * Intermediate values are scaled linearly
      */
     public function getRoutine() {
         $light = $this;
@@ -48,9 +54,9 @@ class RGBWCT extends \Ensemble\Device\MQTTDevice {
             $light->log("Begin routine");
 
             // 1: Get the schedule from the configured context device
-            yield $light->getRefreshScheduleRoutine();
+            $schedule = yield $light->getRefreshScheduleRoutine();
 
-            if(!$this->schedule) {
+            if(!$schedule) {
                 $light->log("Schedule is not set");
                 return;
             }
@@ -58,7 +64,7 @@ class RGBWCT extends \Ensemble\Device\MQTTDevice {
             // 2: Do the schedule
             while(time() < $start + $this->sched_polltime) {
 
-                $period = $light->schedule->getCurrentPeriod();
+                $period = $schedule->getCurrentPeriod();
 
                 $currentTime = array_keys($period)[0];
                 $currentStatus = $period[$currentTime];
@@ -193,17 +199,6 @@ class RGBWCT extends \Ensemble\Device\MQTTDevice {
         //$this->send($this->topic_command.'Fade', "0");
     }
 
-    /**
-     * A schedule can be set to control the light. Schedule should contain values in the format:
-     * R,G,B [dim%=100] or        (for RGB value plus brightness)
-     * CT [dim%=100] or           (for colour temperature and brightness)
-     * auto [dim%=100]                (for auto temperature based on sunset, manual brightness)
-     * Intermediate values are scaled linearly
-     */
-    public function setSchedule(Schedule\Schedule $s) {
-        $this->schedule = $s;
-    }
-
     protected function parseStatus($s) {
 
         if(preg_match('/^([0-9]{1,3}),([0-9]{1,3}),([0-9]{1,3})( [0-9]{1,3})?/', $s, $matches)) {
@@ -231,19 +226,6 @@ class RGBWCT extends \Ensemble\Device\MQTTDevice {
     }
 
     protected function getRefreshScheduleRoutine() {
-        $light = $this;
-        return new Async\TimeoutController(new Async\Lambda(function() use ($light) {
-            $c = \Ensemble\Command::create($light, $light->context_device, 'getContext', array('field' => $light->context_field));
-            $light->getBroker()->send($c);
-            $rep = yield new Async\WaitForReply($light, $c);
-
-            if($rep->isException()) {
-                $light->log("Couldn't fetch schedule: ".$rep->getArg('message'), );
-                return;
-            }
-
-            $json = $rep->getArg('values')[0]['value'];
-            $light->setSchedule(Schedule\Schedule::fromJSON($json));
-        }), 60);
+        return new Async\TimeoutController(new Schedule\FetchRoutine($this, $this->context_device, $this->context_field), 60);
     }
 }

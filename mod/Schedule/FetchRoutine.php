@@ -32,6 +32,9 @@ class FetchRoutine implements Async\Routine {
         $json = $rep->getArg('values')[0]['value'];
         $schedule = Schedule::fromJSON($json);
 
+        //$this->device->log("Received schedule");
+        //var_dump($schedule);
+
         return $schedule;
     }
 }

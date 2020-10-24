@@ -106,6 +106,10 @@ class Controller {
         return count($this->stack) == 0;
     }
 
+    protected function getReturn() {
+        return $this->return;
+    }
+
     protected function pushRoutine($r) {
         $this->stack[] = $r;
     }
