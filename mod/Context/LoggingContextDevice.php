@@ -36,6 +36,10 @@ class LoggingContextDevice extends ContextDevice {
     public function update($field, $value, $time=false, $source='', $store=true) {
         parent::update($field, $value, $time, $source);
 
+        if($time == false) {
+            $time = time();
+        }
+
         if(!$store) {
             return;
         }

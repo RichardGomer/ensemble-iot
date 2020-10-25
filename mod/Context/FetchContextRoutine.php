@@ -26,8 +26,10 @@ class FetchContextRoutine implements Async\Routine {
         $rep = yield new Async\WaitForReply($this->device, $c);
 
         if($rep->isException()) {
-            throw new FetchException("Couldn't fetch schedule: ".$rep->getArg('message'));
+            throw new FetchException("Couldn't fetch context: ".$rep->getArg('message'));
         }
+
+        //var_dump($rep);
 
         return $rep->getArg('values')[0]['value'];
     }

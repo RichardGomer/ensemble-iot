@@ -41,7 +41,12 @@ class Driver extends Async\Device {
             while(time() < $expire) {
                 $current = $schedule->getNow();
                 $this->log("Current status is $current");
-                yield from ($this->setFunc)($this->target, $current); // Yield anything that the set function needs to do asynchronously
+
+                // If necessary, yield anything that the set function needs to do asynchronously
+                $res = ($this->setFunc)($this->target, $current);
+                if($res instanceof Traversable)
+                    yield from $res;
+
                 yield; // Then yield to allow control to return to main loop
             }
         });

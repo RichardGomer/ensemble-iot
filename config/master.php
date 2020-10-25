@@ -48,7 +48,7 @@ $conf['devices'][] = $socket = new Device\Socket\ShowerSocket("showersocket", $c
  * Scheduling!
  */
 // Create a context device to broker schedules
-$conf['devices'][] = $ctx = new Device\ContextDevice('global.schedules');
+$conf['devices'][] = $sctx = new Device\ContextDevice('global.schedules');
 
 /**
 * Create some schedules
@@ -136,16 +136,19 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $client, "s
 $sched_heat = $doffpeak->translate(function($s){
  return $s == 'ON' ? '19' : '10';
 });
-$sd_heat = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'electric_heat', $sched_heat);
-$conf['devices'][] = $sd_opoff;
+$sd_heat = new Schedule\DailyScheduler('electric_heat.scheduler', 'global.schedules', 'electric_heat', $sched_heat);
+$conf['devices'][] = $sd_heat;
+
+$ir1state = 'ir1-htr-temp-st';
 
 // Set the initial heater state to 18, if the context field isn't set already
-if(count($ctx->get('ir1-heater-temp-setting')) < 1) {
-    $ctx->update('ir1-heater-temp-setting', 18);
+if(count($s = $ctx->get($ir1state)) < 1) {
+    echo "Set $ir1state to 18\n";
+    $ctx->update($ir1state, 18);
 }
 
 // Configure the heater itself
-$conf['devices'][] = $ir1 = new Device\IR\NettaHeater("ir1-heater", $client, "ir1", 'global.context', 'ir1-heater-temp-setting');
+$conf['devices'][] = $ir1 = new Device\IR\NettaHeater("ir1-heater", $client, "ir1", 'global.context', $ir1state);
 
 // And add a driver to control the
 $conf['devices'][] = new Schedule\Driver($ir1, function($device, $temp) {
