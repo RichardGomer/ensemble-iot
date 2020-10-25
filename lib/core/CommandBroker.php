@@ -11,6 +11,17 @@ class CommandBroker {
 
     public function addDevice(Module $device) {
         $this->devices[] = $device;
+
+        // Add any child devices
+        $cds = $device->getChildDevices();
+        if(is_array($cds)) {
+            foreach($cds as $cd) {
+                if($cd instanceof Module) {
+                    echo "Add child device ".$cd->getDeviceName()."\n";
+                    $this->addDevice($cd);
+                }
+            }
+        }
     }
 
     public function setInputQueue(Queue $queue) {

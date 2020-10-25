@@ -11,6 +11,8 @@ use Ensemble\Async as Async;
  * ON
  * OFF
  * OPOFF - "Opportunistic off" socket will switch off when load drops below 5W for more than 120s
+ *
+ * Implemented using a schedule driver internally
  */
 class ScheduledSocket extends Socket {
 
@@ -31,59 +33,34 @@ class ScheduledSocket extends Socket {
 
         $this->context_device = $context_device;
         $this->context_field = $context_field;
+
+        $setFunc = function($device, $mode) {
+            $mode = strtoupper($mode);
+
+            // OPOFF Mode
+            if($mode == 'OPOFF') {
+                if($device->isOn()) {
+                    yield $device->getOpoffRoutine(); // Yield an OpOff routine
+                } else {
+                    yield;
+                }
+            }
+
+            if($mode == 'ON') {
+                $device->on();
+            }
+
+            if($mode == 'OFF') {
+                $device->off();
+            }
+        };
+
+        // Set up a schedule driver on this socket
+        $this->driver = new Schedule\Driver($this, $setFunc, $context_device, $context_field);
     }
 
-    /**
-     * The async routine checks for schedule updates and handles current state
-     */
-    private $schedule = false;
-    public function getRoutine() {
-        $socket = $this;
-        return new Async\Lambda(function() use ($socket) {
-
-            $start = time();
-
-            // 1: Get the schedule from the configured context device
-            try {
-                $schedule = yield $socket->getRefreshScheduleRoutine();
-            } catch(\Exception $e) {
-                $this->log("Couldn't fetch schedule: ".$e->getMessage());
-                $schedule = false;
-            }
-
-            if(!$schedule) {
-                return;
-            }
-
-            $this->log("Schedule is set");
-
-            // 2: Do the schedule
-            while(time() < $start + $this->sched_polltime) {
-
-                $mode = strtoupper($schedule->getNow());
-
-                $this->log("Mode is $mode");
-
-                // OPOFF Mode
-                if($mode == 'OPOFF') {
-                    if($this->isOn()) {
-                        yield $this->getOpoffRoutine(); // Yield an OpOff routine
-                    } else {
-                        yield;
-                    }
-                }
-
-                if($mode == 'ON') {
-                    $this->on();
-                }
-
-                if($mode == 'OFF') {
-                    $this->off();
-                }
-
-                yield;
-            }
-        });
+    public function getChildDevices() {
+        return array($this->driver);
     }
 
     /**
@@ -122,9 +99,5 @@ class ScheduledSocket extends Socket {
             $socket->log("Opportunistic off completed\n");
 
         }) , $this->sched_polltime);
-    }
-
-    protected function getRefreshScheduleRoutine() {
-        return new Async\TimeoutController(new Schedule\FetchRoutine($this, $this->context_device, $this->context_field), 60);
     }
 }

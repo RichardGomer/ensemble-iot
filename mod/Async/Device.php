@@ -31,6 +31,10 @@ abstract class Device implements \Ensemble\Module {
         return $this->name;
     }
 
+    public function getChildDevices() {
+        return false;
+    }
+
     public function getPollInterval() {
         return 5;
     }

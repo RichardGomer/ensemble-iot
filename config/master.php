@@ -81,14 +81,6 @@ $bsched->setPoint('19:00:00', 'ON');
 $sd_opoff = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'offpeak_opoff', $bsched);
 $conf['devices'][] = $sd_opoff;
 
-// electric heater
-// Convert daily offpeak schedule to target temperatures
-$sched_heat = $doffpeak->translate(function($s){
-    return $s == 'ON' ? '18' : '12';
-});
-$sd_heat = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'electric_heat', $sched_heat);
-$conf['devices'][] = $sd_opoff;
-
 /**
  * Smart lights
  */
@@ -128,6 +120,7 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-washing
 $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dishwasher", $client, "socket3", 'global.schedules', 'offpeak_opoff');
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-dishwasher');
 
+
 // Network socket is for power monitoring only
 $conf['devices'][] = $socket = new Device\Socket\Socket("socket-network", $client, "socket6");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-network');
@@ -135,6 +128,29 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-network", $clien
 // TV socket is for power monitoring only
 $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $client, "socket7");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-tv');
+
+/**
+ * Toilet Heater
+ */
+// Convert daily offpeak schedule to target temperatures
+$sched_heat = $doffpeak->translate(function($s){
+ return $s == 'ON' ? '19' : '10';
+});
+$sd_heat = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'electric_heat', $sched_heat);
+$conf['devices'][] = $sd_opoff;
+
+// Set the initial heater state to 18, if the context field isn't set already
+if(count($ctx->get('ir1-heater-temp-setting')) < 1) {
+    $ctx->update('ir1-heater-temp-setting', 18);
+}
+
+// Configure the heater itself
+$conf['devices'][] = $ir1 = new Device\IR\NettaHeater("ir1-heater", $client, "ir1", 'global.context', 'ir1-heater-temp-setting');
+
+// And add a driver to control the
+$conf['devices'][] = new Schedule\Driver($ir1, function($device, $temp) {
+    $device->setTemperature($temp);
+}, 'global.schedules', 'electric_heat');
 
 /**
  * Additional Pump

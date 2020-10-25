@@ -31,6 +31,10 @@ abstract class BasicDevice implements \Ensemble\Module {
         return $this->name;
     }
 
+    public function getChildDevices() {
+        return false;
+    }
+
     /**
      * To avoid writing routing code in action(), just use registerAction
      * to attach object methods to different actions
