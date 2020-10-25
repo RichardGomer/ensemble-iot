@@ -37,7 +37,7 @@ class ContextDevice extends BasicDevice {
         $args = $cmd->getArgs(array('field'));
 
         $args['num'] = $cmd->getArgOrValue('num', 1);
-        $args['time'] = $cmd->getArgOrValue('time', time());
+        $args['time'] = $cmd->getArgOrValue('time', false);
 
         if(array_key_exists($args['field'], $this->data)) {
             $data = $this->get($args['field'], $args['num'], $args['time']);
@@ -59,14 +59,14 @@ class ContextDevice extends BasicDevice {
         // Remove values older than $time
         if($time !== false) {
             foreach($all as $k=>$v) {
-                if($v['time'] > $time) {
+                if($v['time'] < $time) {
                     unset($all[$k]);
                 }
             }
         }
 
         usort($all, function($a, $b) {
-            return $b['time'] - $a['time'];
+            return $a['time'] - $b['time'];
         });
 
         return array_slice($all, count($all) - $num, $num);

@@ -149,7 +149,7 @@ class CommandBroker {
             $name = $d->getDeviceName();
             $ptime = $d->getPollInterval();
             if($ptime > 0) {
-                $polls[$name] = $n * 3 + time(); // Stagger offset + time now
+                $polls[$name] = $n * 1 + time(); // Stagger offset + time now
                 // We don't use the poll interval to begin with, because all devices get polled at startup
             }
         }
