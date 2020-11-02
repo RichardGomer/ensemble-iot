@@ -44,7 +44,7 @@ class Driver extends Async\Device {
 
                 // If necessary, yield anything that the set function needs to do asynchronously
                 $res = ($this->setFunc)($this->target, $current);
-                if($res instanceof Traversable)
+                if($res instanceof \Traversable)
                     yield from $res;
 
                 yield; // Then yield to allow control to return to main loop
