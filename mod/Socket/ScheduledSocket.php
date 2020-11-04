@@ -59,6 +59,10 @@ class ScheduledSocket extends Socket {
         $this->driver = new Schedule\Driver($this, $setFunc, $context_device, $context_field);
     }
 
+    public function getDriver() {
+        return $this->driver;
+    }
+
     public function getChildDevices() {
         return array($this->driver);
     }

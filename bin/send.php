@@ -69,6 +69,7 @@ class DummySource implements Module {
     public function isBusy() { return false; }
     public function getPollInterval() { return 0; }
     public function poll(CommandBroker $broker) { }
+    public function getChildDevices(){ return false; }
 }
 
 $pas = '';

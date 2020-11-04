@@ -105,7 +105,12 @@ $conf['devices'][] = $socket = new Light\RGBWCT("light3", $client, "light3", 'gl
  */
 
 // Office ventilator
+// Uses the daytime offpeak schedule, but translates to only be active May - September
 $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-vent-office", $client, "socket5", 'global.schedules', 'daytimeoffpeak');
+$socket->getDriver()->setTranslator(function($v) {
+    $m = (int) date('m');
+    return $m >= 5 && $m <= 9 ? $v : "OFF";
+});
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-officevent');
 
 // Tumble dryer
@@ -120,6 +125,9 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-washing
 $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dishwasher", $client, "socket3", 'global.schedules', 'offpeak_opoff');
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-dishwasher');
 
+// Greenhouse heating
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenhouse", $client, "socket9", 'global.schedules', 'offpeak');
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-greenhouse');
 
 // Network socket is for power monitoring only
 $conf['devices'][] = $socket = new Device\Socket\Socket("socket-network", $client, "socket6");

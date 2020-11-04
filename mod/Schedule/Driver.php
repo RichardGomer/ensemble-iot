@@ -8,14 +8,20 @@ namespace Ensemble\Schedule;
 use Ensemble\Async as Async;
 
 class Driver extends Async\Device {
-    public function __construct(\Ensemble\Module $target, $setFunc, $context_device, $context_field) {
+    public function __construct(\Ensemble\Module $target, $setFunc, $context_device, $context_field, $translator=false) {
         $this->target = $target;
         $this->setFunc = $setFunc;
 
         $this->context_device = $context_device;
         $this->context_field = $context_field;
 
+        $this->translator = $translator;
+
         $this->name = $this->target->getDeviceName().'-schedule_driver-'.random_int(100000,999999);
+    }
+
+    public function setTranslator($f) {
+        $this->translator = $f;
     }
 
     public $refreshTime = 600;
@@ -34,6 +40,11 @@ class Driver extends Async\Device {
 
             if(!$schedule) {
                 return;
+            }
+
+            if(is_callable($this->translator)) {
+                $schedule = $schedule->translate($this->translator);
+                $this->log("Translated schedule for local driver\n".$schedule->prettyPrint());
             }
 
             // Then use it to drive the device until it's time to refresh the schedule again
