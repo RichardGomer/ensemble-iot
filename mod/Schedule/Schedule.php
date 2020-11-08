@@ -66,16 +66,17 @@ class Schedule {
         $return = $this->getAt($t_to);
 
         // Delete interim periods
-        $periods = $this->getPeriods();
+        $periods = &$this->getPeriods();
         foreach($periods as $i=>$p) {
-            if($p['start'] > $t_from && $p['start'] < $t_to) {
+            if($p['start'] >= $t_from && $p['start'] <= $t_to) {
                 unset($periods[$i]);
             }
         }
 
-        // Ser the start
+        // Set the start
         $this->setPoint($t_from, $status);
         $this->setPoint($t_to, $return);
+        $this->tidy();
     }
 
     /**
@@ -89,6 +90,22 @@ class Schedule {
         usort($this->periods, function($a, $b) {
             return $a['start'] - $b['start'];
         });
+    }
+
+    /**
+     * Remove redundant points
+     */
+    protected function tidy() {
+        $last = false;
+        foreach($this->periods as $i=>$p) {
+            if($last !== false) {
+                if($last['status'] == $p['status']) {
+                    unset($this->periods[$i]);
+                }
+            }
+
+            $last = $p;
+        }
     }
 
     /**

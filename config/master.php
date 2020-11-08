@@ -142,7 +142,7 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $client, "s
  */
 // Convert daily offpeak schedule to target temperatures
 $sched_heat = $doffpeak->translate(function($s){
- return $s == 'ON' ? '19' : '10';
+ return $s == 'ON' ? '18' : '10';
 });
 $sd_heat = new Schedule\DailyScheduler('electric_heat.scheduler', 'global.schedules', 'electric_heat', $sched_heat);
 $conf['devices'][] = $sd_heat;
@@ -158,10 +158,29 @@ if(count($s = $ctx->get($ir1state)) < 1) {
 // Configure the heater itself
 $conf['devices'][] = $ir1 = new Device\IR\NettaHeater("ir1-heater", $client, "ir1", 'global.context', $ir1state);
 
-// And add a driver to control the
-$conf['devices'][] = new Schedule\Driver($ir1, function($device, $temp) {
+// And add a driver to control the temperature
+$conf['devices'][]  = $ir1driver = new Schedule\Driver($ir1, function($device, $temp) {
     $device->setTemperature($temp);
 }, 'global.schedules', 'electric_heat');
+
+// Link the light switch to turn the temperature up
+$conf['devices'][] = $sw_toilet = new Device\Light\LightSwitch("switch-toilet", $client, "lightswitch2");
+$sw_toilet->getStatus()->sub('STATE.POWER', function($key, $value) use ($sw_toilet, $ir1driver) {
+    // Clear the override
+    $ir1driver->getOverride()->setPeriod(0, time() + 3600, false);
+
+    $sw_toilet->log("Status set to $value");
+
+    // Boost temperature to 21 when light is ON (for three minutes)
+    if($value == 'ON') {
+        $sw_toilet->log("Boosting heater");
+        $ir1driver->getOverride()->setPeriod(time(), time() + 180, 21);
+    }
+
+    $ir1driver->continue(); // Apply immediately
+
+});
+
 
 /**
  * Additional Pump

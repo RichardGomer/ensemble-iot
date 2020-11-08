@@ -18,6 +18,9 @@ class Driver extends Async\Device {
         $this->translator = $translator;
 
         $this->name = $this->target->getDeviceName().'-schedule_driver-'.random_int(100000,999999);
+
+        $this->override = new Schedule();
+        $this->override->setPoint(0, false);
     }
 
     public function setTranslator($f) {
@@ -26,7 +29,6 @@ class Driver extends Async\Device {
 
     public $refreshTime = 600;
     public function getRoutine() {
-
         return new Async\Lambda(function(){
 
             // First, fetch the schedule
@@ -50,8 +52,16 @@ class Driver extends Async\Device {
             // Then use it to drive the device until it's time to refresh the schedule again
             $expire = time() + $this->refreshTime;
             while(time() < $expire) {
-                $current = $schedule->getNow();
-                $this->log("Current status is $current");
+
+                $over = $this->override->getNow();
+                if($over !== false) { // Apply the override, if set
+                    $current = $over;
+                    $this->log("Current status is $current (OVERRIDDEN)");
+                }
+                else {
+                    $current = $schedule->getNow();
+                    $this->log("Current status is $current");
+                }
 
                 // If necessary, yield anything that the set function needs to do asynchronously
                 $res = ($this->setFunc)($this->target, $current);
@@ -61,6 +71,12 @@ class Driver extends Async\Device {
                 yield; // Then yield to allow control to return to main loop
             }
         });
+    }
 
+    /**
+     * Get the override schedule
+     */
+    public function getOverride() {
+        return $this->override;
     }
 }

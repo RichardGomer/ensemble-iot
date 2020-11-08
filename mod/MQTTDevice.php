@@ -44,11 +44,11 @@ abstract class MQTTDevice extends Async\Device {
 
     public function setTeleInterval($t) {
         $this->t_interval = max((int) $t, 5);
+        $this->send($this->topic_command."teleperiod", $this->t_interval);
     }
 
     public function poll(\Ensemble\CommandBroker $b) {
         $this->pollMQTT(); // We want to process outstanding MQTT data on each poll
-        $this->send($this->topic_command."teleperiod", $this->t_interval); // And set the telemetry period, just in case!
         parent::poll($b);
     }
 
@@ -69,6 +69,9 @@ abstract class MQTTDevice extends Async\Device {
     public function pollMQTT() {
 
         foreach($this->mqttsub->getMessages() as $m) {
+
+            //$this->log($m['topic']." ".$m['message']);
+
             // Split topic into components
             preg_match('@([a-z]{4})/(.+)/(.+)@i', $m['topic'], $matches);
 

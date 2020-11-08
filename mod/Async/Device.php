@@ -102,6 +102,11 @@ abstract class Device implements \Ensemble\Module {
              $this->op = new Controller($this->getRoutine());
          }
 
+         $this->continue();
+     }
+
+     public function continue() {
+         if(!$this->op) return;
          $this->op->continue(); // Continue the async operation
          if($this->op->isComplete()) {
              $this->op = false;
