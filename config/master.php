@@ -138,6 +138,20 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $client, "s
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-tv');
 
 /**
+ * Greenhouse Growlight
+ */
+// Use a custom schedule, 0600-1600 = 10hours of light per day
+$bsched = new Schedule\Schedule();
+$bsched->setPoint('00:00:00', 'OFF');
+$bsched->setPoint('06:00:00', 'ON');
+$bsched->setPoint('16:00:00', 'OFF');
+$sd_growlight = new Schedule\DailyScheduler('growlight.scheduler', 'global.schedules', 'growlight', $bsched);
+$conf['devices'][] = $sd_growlight;
+
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-growlight", $client, "socket10", 'global.schedules', 'growlight');
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-growlight');
+
+/**
  * Toilet Heater
  */
 // Convert daily offpeak schedule to target temperatures
