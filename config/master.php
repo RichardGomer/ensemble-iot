@@ -34,6 +34,19 @@ $ctx->repopulate();
  */
 $conf['devices'][] = new Device\Forecast\ForecastDevice('forecast', $datapoint_key, '353868', 'global.context', 'forecast-');
 
+
+/**
+ * Octopus Utility Data
+ */
+$oct = new Schedule\Octopus($octo_key);
+$oct->setElecMeter($octo_elec_meter_mpan, $octo_elec_meter_serial);
+$oct->setGasMeter($octo_gas_meter_mprn, $octo_gas_meter_serial);
+$oct->setTariff($octo_prodcode, $octo_trfcode);
+
+$conf['devices'][] = new Schedule\OctopusTariffDevice('tariffscheduler', 'test.context', 'electariff', $oct);
+$conf['devices'][] = new Schedule\OctopusGasUsageDevice('gasusagescheduler', 'test.context', 'gasusage', $oct);
+$conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', 'test.context', 'elecusage', $oct);
+
 /**
  * The Shower Socket limits use of the power shower using a tasmota smart socket
  */

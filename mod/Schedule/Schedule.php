@@ -37,13 +37,19 @@ class Schedule {
     }
 
     public function toJSON() {
-        $out = [];
+        return json_encode($this->toArray());
+    }
 
+    /**
+     * This array is compatible with contextDevice series updates
+     */
+    public function toArray() {
+        $out = [];
         foreach($this->getPeriods() as $p) {
             $out[$p['start']] = $p['status'];
         }
 
-        return json_encode($out);
+        return $out;
     }
 
     public function prettyPrint() {
