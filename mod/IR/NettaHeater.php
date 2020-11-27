@@ -76,18 +76,17 @@ class NettaHeater extends IRDevice {
         $heater = $this;
         return new Async\Lambda(function() use ($heater) {
 
-            $start = time();
-
-            // 1: Get the schedule from the configured context device
-            try {
-                $this->lastTemp = yield $heater->refreshState();
-                $this->log("Obtained heater state from context, ".$this->lastTemp);
-            } catch(\Exception $e) {
-                $this->log("Couldn't fetch state: ".$e->getMessage());
-                $schedule = false;
+            if($this->lastTemp === false) { // Only fetch current setting once
+                // 1: Get the schedule from the configured context device
+                try {
+                    $this->lastTemp = yield $heater->refreshState();
+                    $this->log("Obtained heater state from context, ".$this->lastTemp);
+                } catch(\Exception $e) {
+                    $this->log("Couldn't fetch state: ".$e->getMessage());
+                    $schedule = false;
+                }
             }
 
-            return new Async\waitForDelay(600); // Wait for ten minutes
         });
     }
 

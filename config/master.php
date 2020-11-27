@@ -169,17 +169,16 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-growlig
  */
 // Convert daily offpeak schedule to target temperatures
 $sched_heat = $doffpeak->translate(function($s){
- return $s == 'ON' ? '18' : '10';
+ return $s == 'ON' ? '17' : '10';
 });
 $sd_heat = new Schedule\DailyScheduler('electric_heat.scheduler', 'global.schedules', 'electric_heat', $sched_heat);
 $conf['devices'][] = $sd_heat;
 
 $ir1state = 'ir1-htr-temp-st';
 
-// Set the initial heater state to 18, if the context field isn't set already
+// Set the initial heater state to 17, if the context field isn't set already
 if(count($s = $ctx->get($ir1state)) < 1) {
-    echo "Set $ir1state to 18\n";
-    $ctx->update($ir1state, 18);
+    $ctx->update($ir1state, 17);
 }
 
 // Configure the heater itself
@@ -192,17 +191,21 @@ $conf['devices'][]  = $ir1driver = new Schedule\Driver($ir1, function($device, $
 
 // Link the light switch to turn the temperature up
 $conf['devices'][] = $sw_toilet = new Device\Light\LightSwitch("switch-toilet", $client, "lightswitch2");
-$sw_toilet->getStatus()->sub('STATE.POWER', function($key, $value) use ($sw_toilet, $ir1driver) {
-    // Clear the override
-    $ir1driver->getOverride()->setPeriod(0, time() + 3600, false);
+$laststate = false;
+$sw_toilet->getStatus()->sub('STATE.POWER', function($key, $value) use ($sw_toilet, $ir1driver, $laststate) {
 
     $sw_toilet->log("Status set to $value");
 
-    // Boost temperature to 21 when light is ON (for three minutes)
-    if($value == 'ON') {
+    // Boost temperature when light switches ON (for three minutes)
+    if($value == 'ON' && $laststate == 'OFF') {
         $sw_toilet->log("Boosting heater");
-        $ir1driver->getOverride()->setPeriod(time(), time() + 180, 21);
+        $ir1driver->getOverride()->setPeriod(time(), time() + 180, 19);
+    } elseif($value == 'OFF') {
+        // Clear the override
+        $ir1driver->getOverride()->setPeriod(0, time() + 3600, false);
     }
+
+    $laststate = $value;
 
     $ir1driver->continue(); // Apply immediately
 
