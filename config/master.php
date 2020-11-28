@@ -191,10 +191,11 @@ $conf['devices'][]  = $ir1driver = new Schedule\Driver($ir1, function($device, $
 
 // Link the light switch to turn the temperature up
 $conf['devices'][] = $sw_toilet = new Device\Light\LightSwitch("switch-toilet", $client, "lightswitch2");
-$laststate = false;
-$sw_toilet->getStatus()->sub('STATE.POWER', function($key, $value) use ($sw_toilet, $ir1driver, $laststate) {
 
-    $sw_toilet->log("Status set to $value");
+$sw_toilet->getStatus()->sub('STATE.POWER', function($key, $value) use ($sw_toilet, $ir1driver) {
+    static $laststate = 'OFF';
+    
+    $sw_toilet->log("Status set to $value, previously $laststate");
 
     // Boost temperature when light switches ON (for three minutes)
     if($value == 'ON' && $laststate == 'OFF') {
