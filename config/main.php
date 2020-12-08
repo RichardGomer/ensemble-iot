@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Config for the master node, which is usually the default router and provides
- * a master context
+ * Config for the main node, which is usually the default router and provides
+ * the main context broker
  */
 
 namespace Ensemble;
@@ -138,10 +138,6 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-washing
 $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dishwasher", $client, "socket3", 'global.schedules', 'offpeak_opoff');
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-dishwasher');
 
-// Greenhouse heating
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenhouse", $client, "socket9", 'global.schedules', 'offpeak');
-($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-greenhouse');
-
 // Network socket is for power monitoring only
 $conf['devices'][] = $socket = new Device\Socket\Socket("socket-network", $client, "socket6");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-network');
@@ -194,13 +190,13 @@ $conf['devices'][] = $sw_toilet = new Device\Light\LightSwitch("switch-toilet", 
 
 $sw_toilet->getStatus()->sub('STATE.POWER', function($key, $value) use ($sw_toilet, $ir1driver) {
     static $laststate = 'OFF';
-    
+
     $sw_toilet->log("Status set to $value, previously $laststate");
 
     // Boost temperature when light switches ON (for three minutes)
     if($value == 'ON' && $laststate == 'OFF') {
         $sw_toilet->log("Boosting heater");
-        $ir1driver->getOverride()->setPeriod(time(), time() + 180, 19);
+        $ir1driver->getOverride()->setPeriod(time(), time() + 240, 20);
     } elseif($value == 'OFF') {
         // Clear the override
         $ir1driver->getOverride()->setPeriod(0, time() + 3600, false);
@@ -209,7 +205,6 @@ $sw_toilet->getStatus()->sub('STATE.POWER', function($key, $value) use ($sw_toil
     $laststate = $value;
 
     $ir1driver->continue(); // Apply immediately
-
 });
 
 
