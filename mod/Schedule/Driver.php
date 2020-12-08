@@ -79,4 +79,15 @@ class Driver extends Async\Device {
     public function getOverride() {
         return $this->override;
     }
+
+    /**
+     * Convenience methods to set or clear override
+     */
+    public function setOverride($value, $time) {
+        $this->getOverride()->setPeriod(time(), time() + $time, $value);
+    }
+
+    public function clearOverride($time) {
+        $this->getOverride()->setPeriod(0, time() + $time, false);
+    }
 }
