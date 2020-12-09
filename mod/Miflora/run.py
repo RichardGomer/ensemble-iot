@@ -72,7 +72,7 @@ def main():
         print("{} conductivity {}".format(current_time, poller.parameter_value(MI_CONDUCTIVITY, False)))
         print("{} battery {}".format(current_time, poller.parameter_value(MI_BATTERY, False)))
 
-        time.sleep(15)
+        time.sleep(60)
 
 
 if __name__ == "__main__":

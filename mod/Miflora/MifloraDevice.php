@@ -22,7 +22,7 @@ class MifloraSensor extends \Ensemble\Device\SensorDevice
         return $this->source->getPollInterval();
     }
 
-    private $maxAge = 30; // Readings can't be older than this
+    private $maxAge = 60; // Readings can't be older than this
     public function measure() {
         $readings = $this->source->getReadings();
 
@@ -54,7 +54,7 @@ class MifloraDevice extends \Ensemble\Device\BasicDevice
     }
 
     public function getPollInterval() {
-        return 15;
+        return 60;
     }
 
     private $readings = array();
@@ -72,7 +72,7 @@ class MifloraDevice extends \Ensemble\Device\BasicDevice
         {
             $l = trim($l);
             echo "Line: {$l}\n";
-            if(preg_match('/([0-9]+) ([a-z]+) ([0-9]{1,2}\.[0-9]+)/i', $l, $matches))
+            if(preg_match('/([0-9]+) ([a-z]+) ([0-9]{1,2}(\.[0-9]+)?)/i', $l, $matches))
             {
                 $time = $matches[1];
                 $field = $matches[2];
