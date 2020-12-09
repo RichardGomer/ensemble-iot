@@ -7,8 +7,10 @@ import re
 import sys
 import time
 import math
+import os
+from os.path import dirname, realpath
 
-sys.path.append('miflora')
+sys.path.append(dirname(realpath(__file__)) + '/miflora')
 
 from btlewrap import BluepyBackend, GatttoolBackend, PygattBackend, available_backends
 
@@ -21,7 +23,6 @@ from miflora.miflora_poller import (
     MI_TEMPERATURE,
     MiFloraPoller,
 )
-
 
 def valid_miflora_mac(
     mac, pat=re.compile(r"C4:7C:8D:[0-9A-F]{2}:[0-9A-F]{2}:[0-9A-F]{2}")

@@ -96,6 +96,12 @@ class ContextDevice extends BasicDevice {
                 $this->update($args['field'], $value, $time, $cmd->getSource());
             }
         }
+
+        // Copy the update to supercontexts
+        foreach($this->supers as $s) {
+            $scmd = $cmd->copyTo($s);
+            $b->send($scmd);
+        }
     }
 
     public function update($field, $value, $time=false, $source='') {
@@ -123,11 +129,6 @@ class ContextDevice extends BasicDevice {
             'value'=>$value
         );
 
-        // Copy the update to supercontexts
-        foreach($this->supers as $s) {
-            $scmd = $cmd->copyTo($s);
-            $b->send($scmd);
-        }
     }
 
 }

@@ -35,7 +35,7 @@ class MifloraSensor extends \Ensemble\Device\SensorDevice
             return false;
         }
 
-        return array('time'=>$last, 'value'=>$readings[$this->channel][$last]);
+        return array('time'=>$last, 'value'=>$readings[$this->field][$last]);
     }
 }
 
@@ -49,7 +49,7 @@ class MifloraDevice extends \Ensemble\Device\BasicDevice
     public function __construct($name, $mac)
     {
         $this->name = $name;
-        $bin = __DIR__."/run.py poll $mac"; // Based on https://github.com/basnijholt/miflora
+        $bin = "python3 -u ".__DIR__."/run.py $mac"; // Based on https://github.com/basnijholt/miflora
         $this->proc = new \Ensemble\System\Thread($bin);
     }
 
@@ -61,11 +61,17 @@ class MifloraDevice extends \Ensemble\Device\BasicDevice
     private $maxreadings = 30; // Maximum number of readings to store
     public function poll(\Ensemble\CommandBroker $b)
     {
+	if(!$this->proc->isRunning()) {
+		var_dump($this->proc->read());
+		var_dump($this->proc->error());
+		throw new \Exception("miflora process died");
+	}
+
         $lines = $this->proc->read();
         foreach($lines as $l)
         {
             $l = trim($l);
-
+            echo "Line: {$l}\n";
             if(preg_match('/([0-9]+) ([a-z]+) ([0-9]{1,2}\.[0-9]+)/i', $l, $matches))
             {
                 $time = $matches[1];
@@ -80,7 +86,7 @@ class MifloraDevice extends \Ensemble\Device\BasicDevice
                     unset($this->readings[$field][array_keys($this->readings[$channel])[0]]);
                 }
 
-                $this->readings[$channel][time()] = $temp;
+                $this->readings[$field][time()] = $value;
             }
         }
     }

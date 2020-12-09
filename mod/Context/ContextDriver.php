@@ -6,6 +6,7 @@
 
 namespace Ensemble\Device;
 use Ensemble\Async as Async;
+use Ensemble\Schedule\FetchRoutine as FetchRoutine;
 
 class ContextDriver extends Async\Device {
     public function __construct(\Ensemble\Module $target, $setFunc, $context_device, $context_field) {

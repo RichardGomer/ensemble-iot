@@ -20,10 +20,14 @@ $conf['devices'][] = $ctx;
  * Bluetooth data logger
  */
 $conf['devices'][] = $miflora = new Device\Miflora\MifloraDevice("sense1", "c4:7c:8d:6b:d3:48");
-$conf['devices'][] = $miflora->getSensor("sense1_temp", 'temperature');
-$conf['devices'][] = $miflora->getSensor("sense1_light", 'light');
-$conf['devices'][] = $miflora->getSensor("sense1_batt", 'battery');
-$conf['devices'][] = $miflora->getSensor("sense1_moisture", 'moisture');
+$conf['devices'][] = $s = $miflora->getSensor("sense1_temp", 'temperature');
+$s->addDestination("greenhouse.context", "greenhouse-temp");
+$conf['devices'][] = $s = $miflora->getSensor("sense1_light", 'light');
+$s->addDestination("greenhouse.context", "greenhouse-light");
+$conf['devices'][] = $s = $miflora->getSensor("sense1_batt", 'battery');
+$s->addDestination("greenhouse.context", "sense1-batt");
+$conf['devices'][] = $s = $miflora->getSensor("sense1_moisture", 'moisture');
+$s->addDestination("greenhouse.context", "greenhouse-moisture");
 
 
 /**
@@ -34,7 +38,7 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenho
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('greenhouse.context', 'power-greenhouse');
 $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable the heater until the driver can take over
 
-$conf['devices'] = $heatdriver = new Device\ContextDriver($socket, function($value) use ($socket) {
+$conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($value) use ($socket) {
     if($value > 5.2) { // When it's warm enough, disable the heater
         $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable for a long time; a little more failsafe?!
     } elseif ($value < 4.8) { // If it's too cool, allow the heater to come on (based on schedule)
