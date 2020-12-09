@@ -6,7 +6,7 @@
 
 namespace Ensemble\Device;
 use Ensemble\Async as Async;
-use Ensemble\Schedule\FetchRoutine as FetchRoutine;
+use Ensemble\Device\FetchContextRoutine as FetchRoutine;
 
 class ContextDriver extends Async\Device {
     public function __construct(\Ensemble\Module $target, $setFunc, $context_device, $context_field) {
@@ -48,15 +48,8 @@ class ContextDriver extends Async\Device {
             $expire = time() + $this->refreshTime;
             while(time() < $expire) {
 
-                $over = $this->override->getNow();
-                if($over !== false) { // Apply the override, if set
-                    $current = $over;
-                    $this->log("Current status is $current (OVERRIDDEN)");
-                }
-                else {
-                    $current = $schedule->getNow();
+                    $current = $schedule;
                     $this->log("Current status is $current");
-                }
 
                 // If necessary, yield anything that the set function needs to do asynchronously
                 $res = ($this->setFunc)($this->target, $current);

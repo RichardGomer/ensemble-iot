@@ -83,7 +83,7 @@ class MifloraDevice extends \Ensemble\Device\BasicDevice
 
                 while(count($this->readings[$field]) > $this->maxreadings)
                 {
-                    unset($this->readings[$field][array_keys($this->readings[$channel])[0]]);
+                    unset($this->readings[$field][array_keys($this->readings[$field])[0]]);
                 }
 
                 $this->readings[$field][time()] = $value;

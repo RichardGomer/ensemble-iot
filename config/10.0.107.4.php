@@ -38,13 +38,14 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenho
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('greenhouse.context', 'power-greenhouse');
 $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable the heater until the driver can take over
 
-$conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($value) use ($socket) {
+$conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($socket, $value) {
+    echo "temp is $value\n";
     if($value > 5.2) { // When it's warm enough, disable the heater
         $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable for a long time; a little more failsafe?!
     } elseif ($value < 4.8) { // If it's too cool, allow the heater to come on (based on schedule)
         $socket->getDriver()->clearOverride();
     }
-}, "greenhouse.context", "sense1_temp");
+}, "greenhouse.context", "greenhouse-temp");
 
 
 /**
