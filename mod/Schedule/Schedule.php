@@ -63,7 +63,7 @@ class Schedule {
     /**
      * Set the status for a period of time
      */
-    public function setPeriod($t_from, $t_to, $status) {
+    public function setPeriod($t_from, $t_to, $status, $tidy=true) {
 
         $t_from = $this->normaliseTime($t_from);
         $t_to = $this->normaliseTime($t_to);
@@ -82,7 +82,9 @@ class Schedule {
         // Set the start
         $this->setPoint($t_from, $status);
         $this->setPoint($t_to, $return);
-        $this->tidy();
+
+        if($tidy)
+            $this->tidy();
     }
 
     /**
