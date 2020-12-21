@@ -49,23 +49,30 @@ class MifloraDevice extends \Ensemble\Device\BasicDevice
     public function __construct($name, $mac)
     {
         $this->name = $name;
-        $bin = "python3 -u ".__DIR__."/run.py $mac"; // Based on https://github.com/basnijholt/miflora
-        $this->proc = new \Ensemble\System\Thread($bin);
+        $this->mac = $mac;
+        $this->startProc();
     }
 
     public function getPollInterval() {
         return 60;
     }
 
+    protected function startProc() {
+        $bin = "python3 -u ".__DIR__."/run.py {$this->mac}"; // Based on https://github.com/basnijholt/miflora
+        $this->proc = new \Ensemble\System\Thread($bin);
+    }
+
     private $readings = array();
     private $maxreadings = 30; // Maximum number of readings to store
     public function poll(\Ensemble\CommandBroker $b)
     {
-	if(!$this->proc->isRunning()) {
-		var_dump($this->proc->read());
-		var_dump($this->proc->error());
-		throw new \Exception("miflora process died");
-	}
+    	if(!$this->proc->isRunning()) {
+            echo "miflora process died, will restart\n";
+            var_dump($this->proc->read());
+    		var_dump($this->proc->error());
+            $this->startProc();
+    		//throw new \Exception("miflora process died");
+    	}
 
         $lines = $this->proc->read();
         foreach($lines as $l)
