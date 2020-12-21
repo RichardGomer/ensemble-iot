@@ -43,7 +43,7 @@ $conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($s
     if($value > 5.2) { // When it's warm enough, disable the heater
         $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable for a long time; a little more failsafe?!
     } elseif ($value < 4.8) { // If it's too cool, allow the heater to come on (based on schedule)
-        $socket->getDriver()->clearOverride();
+        $socket->getDriver()->clearOverride(365*24*3600+100);
     }
 }, "greenhouse.context", "greenhouse-temp");
 
