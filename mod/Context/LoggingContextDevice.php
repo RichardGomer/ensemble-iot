@@ -36,7 +36,7 @@ class LoggingContextDevice extends ContextDevice {
     public function update($field, $value, $time=false, $source='', $store=true) {
         parent::update($field, $value, $time, $source);
 
-        if($value === "")
+        if($value === "" || $value===false)
             return; // Don't save blank values!
 
         if($time == false) {
@@ -63,7 +63,6 @@ class LoggingContextDevice extends ContextDevice {
                     if($tries > 3) {
                         $err = $s->errorInfo();
                         echo "Persistent SQL error: [{$err[0]}]: {$err[2]}\n";
-                        throw new \Exception("SQL Error [{$err[0]}]: {$err[2]}");
                     } else {
                         sleep(1);
                         $this->connect();

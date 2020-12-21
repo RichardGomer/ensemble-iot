@@ -146,6 +146,11 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-network", $clien
 $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $client, "socket7");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-tv');
 
+// Pond pump
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dryer", $client, "socket11", 'global.schedules', 'offpeak');
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pond');
+
+
 /**
  * Greenhouse Growlight
  */

@@ -16,18 +16,28 @@ class Octopus {
         $this->client = new Client();
     }
 
+    private $days = 5;
+    /**
+     * Set the number of days of history to request from the API (tariff and usage data)
+     */
+    public function setTimeSpan($days) {
+        $this->days = (int) $days;
+    }
+
     // Format unix timestamp as ISO9601 for API
     protected function dateFormat($time) {
         return date(DateTime::ISO8601, $time);
     }
 
-    protected function request($path) {
+    protected function request($path, $params=[]) {
 
         if(!preg_match('@^/@', $path)) { // Ensure path has a leading slash
             $path = '/'.$path;
         }
 
-        $res = $this->client->request('GET', $this->url.$path, ['auth' => [$this->key,'']]);
+        $params['period_from'] = date('Y-m-d\T00:00:00\Z', strtotime("-{$this->days} days"));
+
+        $res = $this->client->request('GET', $this->url.$path, ['query' => $params, 'auth' => [$this->key,'']]);
 
         if(($s = $res->getStatusCode()) != '200') {
             throw new RequestException("HTTP Request returned status $s");
@@ -48,15 +58,17 @@ class Octopus {
     public function getTariffSchedule() {
 
         $path = "/v1/products/{$this->productcode}/electricity-tariffs/$this->tariffcode/standard-unit-rates";
-        $res = $this->request($path);
+        $res = $this->request($path, array('page_size'=>25000));
 
         $s = new Schedule();
 
+        //var_dump($res['results']);
+
         foreach($res['results'] as $segment) {
-            $s->setPeriod($segment['valid_from'], $segment['valid_to'], $segment['value_inc_vat']);
+            $s->setPeriod($segment['valid_from'], $segment['valid_to'], $segment['value_inc_vat'], false);
         }
 
-        echo $s->prettyPrint();
+        //echo $s->prettyPrint();
 
         return $s;
     }
@@ -70,12 +82,12 @@ class Octopus {
     protected function getUsage($type, $mpn, $serial) {
         $utype = $type == 'gas' ? 'gas-meter-points' : 'electricity-meter-points';
         $path = "/v1/{$utype}/{$mpn}/meters/$serial/consumption/";
-        $res = $this->request($path);
+        $res = $this->request($path, array('page_size'=>25000));
 
         $s = new Schedule();
 
         foreach($res['results'] as $segment) {
-            $s->setPeriod($segment['interval_start'], $segment['interval_end'], $segment['consumption']);
+            $s->setPeriod($segment['interval_start'], $segment['interval_end'], $segment['consumption'], false);
         }
 
         return $s;

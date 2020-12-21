@@ -16,7 +16,6 @@ class OctopusGasUsageDevice extends SchedulerDevice {
 
     public function reschedule() {
         $s = $this->client->getGasUsage();
-        echo $s->prettyPrint();
         return $s;
     }
 }
@@ -24,7 +23,6 @@ class OctopusGasUsageDevice extends SchedulerDevice {
 class OctopusElecUsageDevice extends OctopusGasUsageDevice {
     public function reschedule() {
         $s = $this->client->getElecUsage();
-        echo $s->prettyPrint();
         return $s;
     }
 }
