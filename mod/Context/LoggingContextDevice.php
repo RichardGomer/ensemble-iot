@@ -63,6 +63,7 @@ class LoggingContextDevice extends ContextDevice {
                     if($tries > 3) {
                         $err = $s->errorInfo();
                         echo "Persistent SQL error: [{$err[0]}]: {$err[2]}\n";
+                        $done = true;
                     } else {
                         sleep(1);
                         $this->connect();
