@@ -44,6 +44,7 @@ $oct->setGasMeter($octo_gas_meter_mprn, $octo_gas_meter_serial);
 $oct->setTariff($octo_prodcode, $octo_trfcode);
 
 $conf['devices'][] = new Schedule\OctopusTariffDevice('tariffscheduler', 'global.context', 'electariff', $oct);
+$conf['devices'][] = new Schedule\OctopusTariffDevice('tariffscheduler', 'global.schedules', 'electariff', $oct);
 $conf['devices'][] = new Schedule\OctopusGasUsageDevice('gasusagescheduler', 'global.context', 'gasusage', $oct);
 $conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', 'global.context', 'elecusage', $oct);
 
@@ -178,9 +179,10 @@ $conf['devices'][] = $sd_heat;
 $ir1state = 'ir1-htr-temp-st';
 
 // Set the initial heater state to 17, if the context field isn't set already
-if(count($s = $ctx->get($ir1state)) < 1) {
-    $ctx->update($ir1state, 17);
-}
+// This seems unreliable? maybe get is broken?
+//if(count($s = $ctx->get($ir1state)) < 1) {
+//    $ctx->update($ir1state, 17);
+//}
 
 // Configure the heater itself
 $conf['devices'][] = $ir1 = new Device\IR\NettaHeater("ir1-heater", $client, "ir1", 'global.context', $ir1state);
