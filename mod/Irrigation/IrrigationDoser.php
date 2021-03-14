@@ -16,6 +16,7 @@ class IrrigationDoser extends \Ensemble\Device\BasicDevice {
         $this->mlpersec = $mlpersec;
 
         $this->registerAction('setdose', $this, 'action_setdose');
+        $this->registerAction('prime', $this, 'action_prime');
     }
 
     /**
@@ -59,6 +60,10 @@ class IrrigationDoser extends \Ensemble\Device\BasicDevice {
         $this->dosed = 0;
 
         echo "Dose set to {$this->mlperlitre}ml/l\n";
+    }
+
+    protected function action_prime(\Ensemble\Command $cmd, $broker) {
+        $this->dose(10);
     }
 
     protected function dose($ml) {

@@ -9,8 +9,7 @@ use Ensemble\GPIO\Relay;
  */
 class IrrigationController extends \Ensemble\Device\BasicDevice {
 
-    public function __construct($name, Relay $pump, FlowMeter $flow) {
-        $this->pump = $pump;
+    public function __construct($name, FlowMeter $flow) {
         $this->flow = $flow;
         $this->name = $name;
 
@@ -20,8 +19,8 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
     /**
      * Add a named channel for pumping
      */
-    public function addChannel($name, Relay $valve) {
-        $this->channels[$name] = $valve;
+    public function addChannel($name, Relay $valve, Relay $pump) {
+        $this->channels[$name] = array('valve'=>$valve, 'pump'=>$pump);
     }
 
     /**
@@ -105,7 +104,8 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
             throw new BadChannelException("Channel '$channel' does not exist");
         }
 
-        $valve = $this->channels[$channel];
+        $valve = $this->channels[$channel]['valve'];
+        $pump = $this->channels[$channel]['pump'];
         $this->flow->reset(); // Reset the flow meter
 
         $this->startTime = time();
@@ -118,13 +118,13 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         usleep(100000); // Wait for valve to open and let power supply settle down
 
         // Start the pump
-        $this->pump->on();
+        $pump->on();
         sleep(3); // 3 seconds should be enough for something to happen!
 
         // Check that there's flow, otherwise abort
         $min = 6;
         if(($flow = $this->flow->measure()) < $min) {
-            $this->pump->off();
+            $pump->off();
             $valve->off();
             $this->logContext($channel, $flow);
             throw new LowFlowException("Detected less than {$min}ml flow in 3 seconds on channel '$channel' - aborted");
@@ -149,16 +149,17 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
             return false;
         }
 
-        $this->pump->off();
-        usleep(100000); //100msec pause
+        $valve = $this->channels[$channel]['valve'];
+        $pump = $this->channels[$channel]['pump'];
 
-        $valve = $this->channels[$channel];
+        $pump->off();
+        usleep(500000); //0.5sec pause
         $valve->off();
 
         $cmd->setFlow($flow);
         $cmd->setTime(time() - $this->startTime);
 
-        usleep(9000000);
+        usleep(700000);
         $this->logContext($channel, 0);
 
         return true;

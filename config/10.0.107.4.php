@@ -51,22 +51,27 @@ $conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($s
 /**
  * Irrigation
  */
-$pump = new Relay(Pin::BCM(23, Pin::OUT));
+$pump = new SoftStart(Pin::BCM(21, Pin::OUT), 100); # full pwoer pumping, using soft starter
+$pumplow = new SoftStart(Pin::BCM(21, Pin::OUT), 60); # low power pumping mode
 $flow = new Ir\FlowMeter(26);
 $dosepump = new Relay(Pin::BCM(6, Pin::OUT));
 
 $ps = new Ir\PressureSensor('irrigation.pressure', $pump);
 $ps->addDestination('greenhouse.context', 'buttpressure');
 
-$ic = new IR\IrrigationController('irrigation.controller', $pump, $flow);
+$ic = new IR\IrrigationController('irrigation.controller', $flow);
 $ic->setDestination('greenhouse.context'); // Send flow information to context broker
 
 $do = new IR\IrrigationDoser('irrigation.doser', $dosepump, $flow, 4/3); // doser discharges 4/3ml per second
 
-$ic->addChannel(1, new Relay(Pin::BCM(17, Pin::OUT)));
-$ic->addChannel(2, new Relay(Pin::BCM(18, Pin::OUT)));
-$ic->addChannel(3, new Relay(Pin::BCM(27, Pin::OUT)));
-$ic->addChannel(4, new Relay(Pin::BCM(22, Pin::OUT)));
+$ic->addChannel(1, new Relay(Pin::BCM(17, Pin::OUT)), $pump);
+$ic->addChannel(2, new Relay(Pin::BCM(18, Pin::OUT)), $pump);
+$ic->addChannel(3, new Relay(Pin::BCM(27, Pin::OUT)), $pump);
+$ic->addChannel(4, new Relay(Pin::BCM(22, Pin::OUT)), $pump);
+
+$ic->addChannel('h1', new Relay(Pin::BCM(12, Pin::OUT)), $pumplow);
+$ic->addChannel('h2', new Relay(Pin::BCM(5, Pin::OUT)), $pumplow);
+$ic->addChannel('h3', new Relay(Pin::BCM(13, Pin::OUT)), $pumplow);
 
 $conf['devices'][] = $ic;
 $conf['devices'][] = $ps;

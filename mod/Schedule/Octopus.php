@@ -16,7 +16,7 @@ class Octopus {
         $this->client = new Client();
     }
 
-    private $days = 5;
+    private $days = 15;
     /**
      * Set the number of days of history to request from the API (tariff and usage data)
      */
@@ -37,7 +37,10 @@ class Octopus {
 
         $params['period_from'] = date('Y-m-d\T00:00:00\Z', strtotime("-{$this->days} days"));
 
-        $res = $this->client->request('GET', $this->url.$path, ['query' => $params, 'auth' => [$this->key,'']]);
+        $url = $this->url.$path;
+        echo "GET {$url}\n";
+
+        $res = $this->client->request('GET', $url, ['query' => $params, 'auth' => [$this->key,'']]);
 
         if(($s = $res->getStatusCode()) != '200') {
             throw new RequestException("HTTP Request returned status $s");

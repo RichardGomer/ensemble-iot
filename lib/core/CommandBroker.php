@@ -24,6 +24,15 @@ class CommandBroker {
         }
     }
 
+    public function removeDevice(Module $device) {
+        foreach($this->devices as $k=>$d) {
+            if($d === $device) {
+                unset($this->devices[$k]); // Remove the device from the list
+                unset($this->polls[$device->getName()]); // Remove scheduled polls
+            }
+        }
+    }
+
     public function setInputQueue(Queue $queue) {
         $this->input = $queue;
     }
@@ -145,11 +154,13 @@ class CommandBroker {
         // Set up initial poll times for each module
         // Poll times are staggered to try and avoid lumpy performance
         $polls = array();
-        foreach($this->devices as $n=>$d) {
+        $n = 0;
+        foreach($this->devices as $k=>$d) {
             $name = $d->getDeviceName();
             $ptime = $d->getPollInterval();
             if($ptime > 0) {
                 $polls[$name] = $n * 1 + time(); // Stagger offset + time now
+                $n++;
                 // We don't use the poll interval to begin with, because all devices get polled at startup
             }
         }

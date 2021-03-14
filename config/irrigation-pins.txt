@@ -1,0 +1,15 @@
+pump1 phys16 gpio23    wpi4
+
+1	gpio17	wpi0
+2	gpio18	wpi1
+3	gpio27	wpi2
+4	gpio22	wpi3
+
+
+pump2 phys40 gpio21    wpi29
+
+h3 phys33 gpio13       wpi23
+h2 phys29 gpio5        wpi21
+h1 phys32 gpio12       wpi26
+
+one wire thermometers  phys7
