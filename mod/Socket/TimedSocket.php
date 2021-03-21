@@ -37,7 +37,7 @@ class TimedSocket extends Socket  {
         } elseif ($watts < 1) { // Power already off; do nothing
             $this->log("Power is still OFF ({$watts}W)");
         }
-        elseif(!$this->offOnly) { // Otherwise power is on, run indefinitely
+        else { // Otherwise power is on, run indefinitely
             $this->log("Power is ON ({$watts}W)");
             $this->lastTrigger = INF;
         }
@@ -51,7 +51,7 @@ class TimedSocket extends Socket  {
 
             $this->log("Timed socket last triggered: $t");
 
-            if(is_infinite($this->lastTrigger) || $dev->lastTrigger + $dev->runTime > time()) {
+            if((is_infinite($this->lastTrigger) && !$this->offOnly) || $dev->lastTrigger + $dev->runTime > time()) {
                 $dev->on();
             } else {
                 $dev->off();
