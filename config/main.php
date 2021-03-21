@@ -55,8 +55,25 @@ $host = gethostbyname('mosquitto');
 $mqtthost = $host == 'mosquitto' ? '10.0.0.8' : 'mosquitto'; // Hostname used in docker, IP used when testing
 echo "MQTT Host is $mqtthost (lookup=$host)\n";
 $client = new \Ensemble\MQTT\Client($mqtthost, 1883);
-$conf['devices'][] = $socket = new Device\Socket\ShowerSocket("showersocket", $client, "socket4");
-($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-shower');
+$conf['devices'][] = $swrsocket = new Device\Socket\ShowerSocket("showersocket", $client, "socket4");
+($conf['devices'][] = $swrsocket->getPowerMeter())->addDestination('global.context', 'power-shower');
+
+// Tie shower socket to shower extractor
+$conf['devices'][] = $extractor = new Device\Socket\TimedSocket("loftextractor", $client, "bathroom", "3"); // POWER3 on 'bathroom' MQTT device
+$swrsocket->getStatus()->sub('SENSOR.ENERGY.POWER', array($extractor, 'trigger')); // Trigger the extractor when the socket current draw changes
+
+// Wall extractor similar, but comes on AFTER the shower is turned off
+$conf['devices'][] = $extractor = new Device\Socket\TimedSocket("wallextractor", $client, "bathroom", "4"); // POWER3 on 'bathroom' MQTT device
+$swrsocket->getStatus()->sub('SENSOR.ENERGY.POWER', array($extractor, 'trigger')); // Trigger the extractor when the socket current draw changes
+$extractor->setOffOnly();
+
+// Turn the light on when the shower is switched on
+$brlight = new Device\Socket\Socket("bathroomlight", $client, "bathroom", "1");
+$swrsocket->getStatus()->sub('SENSOR.ENERGY.POWER', function($key, $value) use ($brlight) {
+    if($value > 1) {
+        $brlight->on();
+    }
+});
 
 /**
  * Scheduling!
@@ -120,7 +137,7 @@ $conf['devices'][] = $socket = new Light\RGBWCT("light3", $client, "light3", 'gl
 
 // Office ventilator
 // Uses the daytime offpeak schedule, but translates to only be active May - September
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-vent-office", $client, "socket5", 'global.schedules', 'daytimeoffpeak');
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-vent-office", $client, new Device\ContextPointer('global.schedules', 'daytimeoffpeak'), "socket5");
 $socket->getDriver()->setTranslator(function($v) {
     $m = (int) date('m');
     return $m >= 5 && $m <= 9 ? $v : "OFF";
@@ -128,15 +145,15 @@ $socket->getDriver()->setTranslator(function($v) {
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-officevent');
 
 // Tumble dryer
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dryer", $client, "socket1", 'global.schedules', 'offpeak');
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dryer", $client, new Device\ContextPointer('global.schedules', 'offpeak'), "socket1");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-dryer');
 
 // Washing machine
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-washingmachine", $client, "socket2", 'global.schedules', 'offpeak_opoff');
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-washingmachine", $client, new Device\ContextPointer('global.schedules', 'offpeak_opoff'), "socket2");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-washingmachine');
 
 // Dishwasher
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dishwasher", $client, "socket3", 'global.schedules', 'offpeak_opoff');
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dishwasher", $client, new Device\ContextPointer('global.schedules', 'offpeak_opoff'), "socket3");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-dishwasher');
 
 // Network socket is for power monitoring only
@@ -148,7 +165,7 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $client, "s
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-tv');
 
 // Pond pump
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dryer", $client, "socket11", 'global.schedules', 'offpeak');
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dryer", $client, new Device\ContextPointer('global.schedules', 'offpeak'), "socket11");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pond');
 
 
@@ -163,7 +180,7 @@ $bsched->setPoint('16:00:00', 'OFF');
 $sd_growlight = new Schedule\DailyScheduler('growlight.scheduler', 'global.schedules', 'growlight', $bsched);
 $conf['devices'][] = $sd_growlight;
 
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-growlight", $client, "socket10", 'global.schedules', 'growlight');
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-growlight", $client, new Device\ContextPointer('global.schedules', 'growlight'), "socket10");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-growlight');
 
 /**
@@ -190,7 +207,7 @@ $conf['devices'][] = $ir1 = new Device\IR\NettaHeater("ir1-heater", $client, "ir
 // And add a driver to control the temperature
 $conf['devices'][]  = $ir1driver = new Schedule\Driver($ir1, function($device, $temp) {
     $device->setTemperature($temp);
-}, 'global.schedules', 'electric_heat');
+}, new Device\ContextPointer('global.schedules', 'electric_heat'));
 
 // Link the light switch to turn the temperature up
 $conf['devices'][] = $sw_toilet = new Device\Light\LightSwitch("switch-toilet", $client, "lightswitch2");
@@ -228,5 +245,5 @@ $bsched->setPoint('20:01:30', 'OFF');
 $sd = new Schedule\DailyScheduler('pump2.scheduler', 'global.schedules', 'pump2', $bsched);
 $conf['devices'][] = $sd;
 
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-pump2", $client, "socket8", 'global.schedules', 'pump2');
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-pump2", $client, new Device\ContextPointer('global.schedules', 'pump2'), "socket8");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pump2');

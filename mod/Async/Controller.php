@@ -102,6 +102,19 @@ class Controller {
         }
     }
 
+    /**
+     * Continue for a period of time, specified in milliseconds
+     * Operations will be executed until the time limit is exceeded.
+     * Note that operations will not be interrupted, so the provided time limit
+     * is only a lower bound on the execution time
+     */
+    public function continueFor($msec) {
+        $start = microtime(true);
+        do {
+            $this->continue();
+        } while(microtime(true) - $start > ($msec / 1000));
+    }
+
     public function isComplete() {
         return count($this->stack) == 0;
     }

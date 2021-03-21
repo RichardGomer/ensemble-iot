@@ -4,6 +4,7 @@ namespace Ensemble\Device\Socket;
 use Ensemble\MQTT\Client as MQTTClient;
 use Ensemble\Schedule as Schedule;
 use Ensemble\Async as Async;
+use Ensemble\Device as Device;
 
 /**
  * Socket that polls a context device for a schedule, and operates off of that
@@ -17,7 +18,7 @@ use Ensemble\Async as Async;
 class ScheduledSocket extends Socket {
 
     public $opoff_threshold = 5; // OPOFF threshold in watts
-    public $opoff_time = 180; // OPOFF threshold time in seconds
+    public $opoff_time = 300; // OPOFF threshold time in seconds
 
     public $sched_polltime = 60 * 15; // Poll for a schedule this often
 
@@ -28,11 +29,10 @@ class ScheduledSocket extends Socket {
      * Construct with the name of the context device and field name to poll
      * for the (JSON) schedule
      */
-    public function __construct($name, MQTTClient $client, $deviceName, $context_device, $context_field) {
-        parent::__construct($name, $client, $deviceName);
+    public function __construct($name, MQTTClient $client, Device\ContextPointer $ctxptr, $deviceName, $powerNum="") {
+        parent::__construct($name, $client, $deviceName, $powerNum);
 
-        $this->context_device = $context_device;
-        $this->context_field = $context_field;
+        $this->ctx = $ctxptr;
 
         $setFunc = function($device, $mode) {
             $mode = strtoupper($mode);
@@ -56,7 +56,7 @@ class ScheduledSocket extends Socket {
         };
 
         // Set up a schedule driver on this socket
-        $this->driver = new Schedule\Driver($this, $setFunc, $context_device, $context_field);
+        $this->driver = new Schedule\Driver($this, $setFunc, $ctxptr);
     }
 
     public function getDriver() {

@@ -73,28 +73,31 @@ abstract class SchedulerDevice extends Async\Device {
             $device->schedule = $sched;
 
             foreach($device->contexts as $ctx) {
-
                 $ctxdevice = $ctx['device'];
                 $ctxfield = $ctx['field'];
                 $mode = $ctx['mode'];
 
-                $cmd = \Ensemble\Command::create($device, $ctxdevice, 'updateContext');
-                $cmd->setArg('field', $ctxfield);
-
-                if($mode == self::MODE_JSON) {
-                    $cmd->setArg('time', time());
-                    $cmd->setArg('value', $device->schedule->toJSON());
-                }
-                else {
-                    $cmd->setArg('series', $device->schedule->toArray());
-                }
-
-                $device->getBroker()->send($cmd);
+                $this->pushToContexts($ctxdevice, $ctxfield, $mode, $sched);
             }
 
             // Wait until the next reschedule is due
             yield new Async\waitUntil($start + $device->reschedint);
         });
+    }
+
+    protected function pushToContexts($device, $field, $mode, Schedule $schedule) {
+        $cmd = \Ensemble\Command::create($this, $device, 'updateContext');
+        $cmd->setArg('field', $field);
+
+        if($mode == self::MODE_JSON) {
+            $cmd->setArg('time', time());
+            $cmd->setArg('value', $schedule->toJSON());
+        }
+        else {
+            $cmd->setArg('series', $schedule->toArray());
+        }
+
+        $this->getBroker()->send($cmd);
     }
 
 }

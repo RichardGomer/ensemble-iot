@@ -6,14 +6,14 @@
  */
 namespace Ensemble\Schedule;
 use Ensemble\Async as Async;
+use Ensemble\Device as Device;
 
 class Driver extends Async\Device {
-    public function __construct(\Ensemble\Module $target, $setFunc, $context_device, $context_field, $translator=false) {
+    public function __construct(\Ensemble\Module $target, $setFunc, Device\ContextPointer $ctxptr, $translator=false) {
         $this->target = $target;
         $this->setFunc = $setFunc;
 
-        $this->context_device = $context_device;
-        $this->context_field = $context_field;
+        $this->ctx = $ctxptr;
 
         $this->translator = $translator;
 
@@ -33,8 +33,8 @@ class Driver extends Async\Device {
 
             // First, fetch the schedule
             try {
-                $this->log("Trying to fetch schedule {$this->context_field} from {$this->context_device}");
-                $schedule = yield new Async\TimeoutController(new FetchRoutine($this, $this->context_device, $this->context_field), 60);
+                $this->log("Trying to fetch schedule {$this->ctx->toString()}");
+                $schedule = yield new Async\TimeoutController($this->ctx->getFetchRoutine($this), 60);
             } catch(\Exception $e) {
                 $this->log("Couldn't fetch schedule: ".$e->getMessage());
                 $schedule = false;
@@ -43,6 +43,8 @@ class Driver extends Async\Device {
             if(!$schedule) {
                 return;
             }
+
+            $schedule = Schedule::fromJSON($schedule);
 
             if(is_callable($this->translator)) {
                 $schedule = $schedule->translate($this->translator);
