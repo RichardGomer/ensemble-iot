@@ -51,7 +51,7 @@ class TimedSocket extends Socket  {
 
             $this->log("Timed socket last triggered: $t");
 
-            if((is_infinite($this->lastTrigger) && !$this->offOnly) || $dev->lastTrigger + $dev->runTime > time()) {
+            if((is_infinite($this->lastTrigger) && !$this->offOnly) || !is_infinite($this->lastTrigger) && $dev->lastTrigger + $dev->runTime > time()) {
                 $dev->on();
             } else {
                 $dev->off();
