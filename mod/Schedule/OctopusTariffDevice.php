@@ -15,6 +15,21 @@ class OctopusTariffDevice extends SchedulerDevice {
     }
 
     public function reschedule() {
-        return $this->client->getTariffSchedule();
+        $s = $this->client->getTariffSchedule();
+
+        if($this->callback !== false) {
+            echo "Tariff received, passing to callback\n";
+            ($this->callback)($s);
+        } else {
+            echo "Tariff received, no callback defined\n";
+        }
+
+        return $s;
+    }
+
+    private $callback = false;
+    // Set a callback to run when the tariff is retrieved
+    public function setCallback($cb) {
+        $this->callback = $cb;
     }
 }

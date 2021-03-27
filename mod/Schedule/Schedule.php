@@ -124,6 +124,25 @@ class Schedule {
     }
 
     /**
+     * A more usable form of periods, including end time
+     */
+    public function getAllPeriods() {
+        $periods = array();
+        $keys = array_keys($this->periods);
+        foreach($keys as $i=>$k) {
+            $p = $this->periods[$k];
+            $next = $i < count($keys) - 1 ? $this->periods[$keys[$i+1]] : false;
+            $periods[]  = array(
+                'status'=>$p['status'],
+                'start'=>$p['start'],
+                'end'=> $next === false ? false : $next['start']
+            );
+        }
+
+        return $periods;
+    }
+
+    /**
      * @mixed $t : The time to normalise as a UNIX timestamp (integer), DateTime
      * object or
      * Returns a UNIX timestamp
@@ -212,8 +231,9 @@ class Schedule {
      * The translator function takes a single argument, a status, and returns a status
      * for the new schedule
      */
-    public function translate($translator) {
-            $out = new Schedule();
+    public function translate($translator, Schedule $out=null) {
+            if(!$out instanceof Schedule)
+                $out = new Schedule();
 
             foreach($this->getPeriods() as $p) {
                 $out->setPoint($p['start'], $translator($p['status']));

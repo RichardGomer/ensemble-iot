@@ -16,7 +16,7 @@ class OctopusGasUsageDevice extends SchedulerDevice {
 
     public function reschedule() {
         $s = $this->client->getGasUsage();
-        var_dump($s);
+        //var_dump($s);
         return $s;
     }
 }

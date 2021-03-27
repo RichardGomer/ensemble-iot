@@ -43,10 +43,10 @@ $oct->setElecMeter($octo_elec_meter_mpan, $octo_elec_meter_serial);
 $oct->setGasMeter($octo_gas_meter_mprn, $octo_gas_meter_serial);
 $oct->setTariff($octo_prodcode, $octo_trfcode);
 
-$conf['devices'][] = new Schedule\OctopusTariffDevice('tariffscheduler', 'global.context', 'electariff', $oct);
-$conf['devices'][] = new Schedule\OctopusTariffDevice('tariffscheduler', 'global.schedules', 'electariff', $oct);
+$conf['devices'][] = $tariffdevice = new Schedule\OctopusTariffDevice('tariffscheduler', 'global.schedules', 'electariff', $oct);
 $conf['devices'][] = new Schedule\OctopusGasUsageDevice('gasusagescheduler', 'global.context', 'gasusage', $oct);
 $conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', 'global.context', 'elecusage', $oct);
+
 
 /**
  * The Shower Socket limits use of the power shower using a tasmota smart socket
@@ -75,15 +75,17 @@ $swrsocket->getStatus()->sub('SENSOR.ENERGY.POWER', function($key, $value) use (
     }
 });
 
+
 /**
  * Scheduling!
  */
 // Create a context device to broker schedules
 $conf['devices'][] = $sctx = new Device\ContextDevice('global.schedules');
 
+
 /**
-* Create some schedules
-*/
+ * Create some schedules
+ */
 
 // Daily offpeak
 $doffpeak = new Schedule\Schedule();
@@ -112,6 +114,7 @@ $bsched->setPoint('19:00:00', 'ON');
 $sd_opoff = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'offpeak_opoff', $bsched);
 $conf['devices'][] = $sd_opoff;
 
+
 /**
  * Smart lights
  */
@@ -130,6 +133,7 @@ $client = new MQTT\Client($mqtthost, 1883);
 $conf['devices'][] = $socket = new Light\RGBWCT("light1", $client, "light1", 'global.schedules', 'daylightschedule');
 $conf['devices'][] = $socket = new Light\RGBWCT("light2", $client, "light2", 'global.schedules', 'daylightschedule');
 $conf['devices'][] = $socket = new Light\RGBWCT("light3", $client, "light3", 'global.schedules', 'daylightschedule');
+
 
 /**
  * Attach sockets to schedules
@@ -247,3 +251,28 @@ $conf['devices'][] = $sd;
 
 $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-pump2", $client, new Device\ContextPointer('global.schedules', 'pump2'), "socket8");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pump2');
+
+
+
+/**
+ * Immersion
+ */
+$devices[] = $isched = new Schedule\QuickSchedulerDevice('immersionscheduler');
+$isched->setContext('immersionschedule', 'global.schedules');
+
+// Triggered by the tariff device
+$tariffdevice->setCallback(function($tariff) use ($isched) {
+
+    echo "Immersion scheduler received tariff\n";
+    $baseTariff = new Schedule\TariffSchedule($tariff);
+
+
+    // 3.5p/kwh ~= 3.03p/kwh / 90% efficiency
+    $immersion = $baseTariff->between('23:00', '06:00')->lessThan(3.5)->cheapest(120)->getOnSchedule();
+    echo $immersion->prettyPrint();
+    $isched->setSchedule($immersion);
+
+});
+
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("immersion", $client, new Device\ContextPointer('global.schedules', 'immersionschedule'), "immersion");
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-immersion');

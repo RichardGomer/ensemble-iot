@@ -11,7 +11,7 @@ namespace Ensemble\Schedule;
 class OnSchedule extends Schedule {
 
     public function __construct() {
-        parent::__construct('ON', 'OFF', 'OPOFF');
+        parent::__construct(array('ON', 'OFF', 'OPOFF'));
         $this->setPoint(0, 'OFF');
     }
 
@@ -33,7 +33,7 @@ class OnSchedule extends Schedule {
      * Set "ON" at $onTime and "OFF" before ontime and after offtime
      * offTime must be after ontime. Strings are normalised
      */
-    public static function between($onTime, $offTime) {
+    public static function onBetween($onTime, $offTime) {
         $s = new OnSchedule();
 
         if($this->normaliseTime($offTime) < $this->normaliseTime($onTime)) {
