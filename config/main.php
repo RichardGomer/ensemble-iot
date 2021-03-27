@@ -258,7 +258,7 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-pump2",
  * Immersion
  */
 $conf['devices'][] = $isched = new Schedule\QuickSchedulerDevice('immersionscheduler');
-$isched->setContext('immersionschedule', 'global.schedules');
+$isched->setContext( 'global.schedules', 'immersionschedule');
 
 // Triggered by the tariff device
 $tariffdevice->setCallback(function($tariff) use ($isched) {
@@ -266,8 +266,8 @@ $tariffdevice->setCallback(function($tariff) use ($isched) {
     echo "Immersion scheduler received tariff\n";
     $baseTariff = new Schedule\TariffSchedule($tariff);
 
-    // Don't reschedule after 10pm because we'll overwrite with TOMORROW night's schedule!
-    if(date('h') >= 22) {
+    // Don't reschedule after 11pm because we'll overwrite with TOMORROW night's schedule!
+    if(date('h') >= 23) {
         return;
     }
 

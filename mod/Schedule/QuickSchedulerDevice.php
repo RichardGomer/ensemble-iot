@@ -9,23 +9,31 @@ namespace Ensemble\Schedule;
 
 class QuickSchedulerDevice extends SchedulerDevice {
 
-        private $schedule = false;
+        public $schedule = false;
+        private $done = false;
 
         // This just waits for the schedule to be set using setSchedule()
         public function reschedule() {
             $device = $this;
-            return new Async\Lambda(function() use ($device) {
-                if($device->schedule instanceof Schedule) {
-                    $s = $device->schedule;
-                    $device->schedule = false;
-                    return $s;
-                }
+            return new \Ensemble\Async\Lambda(function() use ($device) {
+                while(true) {
+                    if($device->schedule instanceof Schedule) {
+                        $s = $device->schedule;
+                        $device->schedule = false;
+                        $device->done = true;
+                        return $s;
+                    }
 
-                yield;
+                    yield;
+                }
             });
         }
 
         public function setSchedule(Schedule $s) {
             $this->schedule = $s;
+        }
+
+        public function getPollInterval() {
+            return $this->done ? 120 : 15;
         }
 }

@@ -66,6 +66,10 @@ abstract class SchedulerDevice extends Async\Device {
 
             $sched = $device->reschedule();
 
+            if($sched instanceof Async\Routine) {
+                $sched = yield $sched;
+            }
+
             if(!$sched instanceof Schedule) {
                 throw new SchedulerDeviceException("Scheduler did not return a Schedule object");
             }
