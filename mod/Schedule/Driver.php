@@ -46,6 +46,8 @@ class Driver extends Async\Device {
 
             $schedule = Schedule::fromJSON($schedule);
 
+            $this->log("Received schedule\n".$schedule->prettyPrint());
+
             if(is_callable($this->translator)) {
                 $schedule = $schedule->translate($this->translator);
                 $this->log("Translated schedule for local driver\n".$schedule->prettyPrint());
