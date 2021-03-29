@@ -45,7 +45,7 @@ class DailyScheduler extends SchedulerDevice {
         $out = new Schedule();
 
         foreach($periods as $time) {
-            $midnight = strtotime(date('Y-m-d 00:00:00', $time));
+            $midnight = strtotime(date('Y-m-d 02:00:00', $time)) - 7200; // relative to 2am copes with daylight savings
             $timepastmidnight = $time - $midnight;
             $out->setPoint($timepastmidnight, $in->getAt($time));
         }

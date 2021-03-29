@@ -66,7 +66,11 @@ class PowerMeter extends \Ensemble\Device\SensorDevice {
         try {
             $this->socket->pollMQTT();
             $power = $this->socket->getStatus()->get($this->key);
-        } catch(\Exception $e) {
+        }
+        catch(\Ensemble\KeyValue\KeyNotSetException $e) { // This is a legit case for an offline device, so don't log it as an error
+            $power = 0;
+        }
+        catch(\Exception $e) {
             trigger_error($e->getMessage(), E_USER_NOTICE);
             $power = 0;
         }
