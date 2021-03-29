@@ -19,7 +19,7 @@ class OctopusTariffDevice extends SchedulerDevice {
 
         if($this->callback !== false) {
             echo "Tariff received, passing to callback\n";
-            ($this->callback)($s);
+            ($this->callback)(clone $s);
         } else {
             echo "Tariff received, no callback defined\n";
         }
