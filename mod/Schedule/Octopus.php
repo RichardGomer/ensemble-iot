@@ -58,10 +58,10 @@ class Octopus {
      * Get the Agile tariff data from Octopus as a Schedule object
      * The schedule will contain all available tariff data - usually 24 or 48 hours
      */
-    public function getTariffSchedule() {
+    public function getTariffSchedule($num=192) {
 
         $path = "/v1/products/{$this->productcode}/electricity-tariffs/$this->tariffcode/standard-unit-rates";
-        $res = $this->request($path, array('page_size'=>25000));
+        $res = $this->request($path, array('page_size'=>$num));
 
         $s = new Schedule();
 
