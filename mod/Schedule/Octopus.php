@@ -85,7 +85,7 @@ class Octopus {
     protected function getUsage($type, $mpn, $serial) {
         $utype = $type == 'gas' ? 'gas-meter-points' : 'electricity-meter-points';
         $path = "/v1/{$utype}/{$mpn}/meters/$serial/consumption/";
-        $res = $this->request($path, array('page_size'=>25000));
+        $res = $this->request($path, array('page_size'=>144));
 
         $s = new Schedule();
 
