@@ -59,16 +59,20 @@ class LoggingContextDevice extends ContextDevice {
 
                 $res = $s->execute();
 
+                echo "     Store $field = $value @ ".date('Y-m-d H:i:s', $time)."  ";
+
                 if(!$res) { // On failure, try reconnecting up to 3 times
                     if($tries > 3) {
                         $err = $s->errorInfo();
-                        echo "Persistent SQL error: [{$err[0]}]: {$err[2]}\n";
+                        echo "[FAIL]\nPersistent SQL error: [{$err[0]}]: {$err[2]}\n";
                         $done = true;
                     } else {
+                        echo "[FAIL]\n";
                         sleep(1);
                         $this->connect();
                     }
                 } else {
+                    echo "[ OK ]\n";
                     $done = true;
                 }
             } while(!$done);
