@@ -43,7 +43,7 @@ $oct->setElecMeter($octo_elec_meter_mpan, $octo_elec_meter_serial);
 $oct->setGasMeter($octo_gas_meter_mprn, $octo_gas_meter_serial);
 $oct->setTariff($octo_prodcode, $octo_trfcode);
 
-$conf['devices'][] = $tariffdevice = new Schedule\OctopusTariffDevice('tariffscheduler', 'global.schedules', 'electariff', $oct);
+$conf['devices'][] = $tariffdevice = new Schedule\OctopusTariffDevice('tariffscheduler', 'global.context', 'electariff', $oct);
 $conf['devices'][] = new Schedule\OctopusGasUsageDevice('gasusagescheduler', 'global.context', 'gasusage', $oct);
 $conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', 'global.context', 'elecusage', $oct);
 
