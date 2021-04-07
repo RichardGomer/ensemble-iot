@@ -33,7 +33,7 @@ class ContextDriver extends Async\Device {
             // First, fetch the schedule
             try {
                 $this->log("Trying to fetch context field {$this->ctx->toString()}");
-                $schedule = yield new Async\TimeoutController($thix->ctx->getFetchRoutine(), 10);
+                $schedule = yield new Async\TimeoutController($this->ctx->getFetchRoutine($this), 10);
             } catch(\Exception $e) {
                 $this->log("Couldn't fetch context field: ".$e->getMessage());
                 $schedule = false;
