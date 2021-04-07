@@ -51,11 +51,10 @@ class Thread
 	}
 
 	// Close the process
-	public function close()
+	public function close($sig=SIGTERM)
 	{
-		$r = proc_close( $this->process );
-		$this->process = false;
-		return $r;
+		proc_terminate($this->process, $sig);
+		//posix_kill($this->getPID(), $sig);
 	}
 
 	//Get the status of the current runing process
@@ -73,6 +72,11 @@ class Thread
 			$status['exitcode'] = $this->exitcode;
 
 		return $status;
+	}
+
+	function getPID() {
+		$status = $this->getStatus();
+		return $status['pid'];
 	}
 
 	function isRunning() {

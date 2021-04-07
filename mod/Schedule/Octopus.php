@@ -82,10 +82,10 @@ class Octopus {
     }
 
     // Get consumption data as a Schedule
-    protected function getUsage($type, $mpn, $serial) {
+    protected function getUsage($type, $mpn, $serial, $num=192) {
         $utype = $type == 'gas' ? 'gas-meter-points' : 'electricity-meter-points';
         $path = "/v1/{$utype}/{$mpn}/meters/$serial/consumption/";
-        $res = $this->request($path, array('page_size'=>144));
+        $res = $this->request($path, array('page_size'=>$num));
 
         $s = new Schedule();
 
