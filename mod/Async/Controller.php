@@ -43,8 +43,8 @@ class Controller {
 
         // If the top item isn't yet a generator, then it needs to be executed to produce one
         if($top instanceof Routine) {
+            $this->debug("Top is a ROUTINE, executing");
             $newtop = $top->execute();
-
             $this->debug("ASYNC: ".$this->dbgid($top)." became ".$this->dbgid($newtop));
             $this->genprov[$this->dbgid($newtop)] = $this->dbgid($top);
             $top = $newtop;
@@ -58,6 +58,7 @@ class Controller {
                 $rtn = $top;
             }
         } elseif($top instanceof \Generator) { // Otherwise we call the current top of the stack, passing the last return value if there is one
+            $this->debug("Top is a GENERATOR, send last return value: ", $this->return);
             $rtn = $top->send($this->return);
             $this->return = null;
         }
@@ -95,11 +96,24 @@ class Controller {
                 $this->debug("New routine was returned, add to stack");
                 $this->continue();
             } else { // Otherwise, return the value to the new top of the stack and run that
-                $this->debug("Value was returned, pass to parent routine");
+                $this->debug("Value was returned, store pass to parent routine: ", $rtn);
                 $this->return = $rtn;
                 $this->continue();
             }
         }
+    }
+
+    /**
+     * Continue for a period of time, specified in milliseconds
+     * Operations will be executed until the time limit is exceeded.
+     * Note that operations will not be interrupted, so the provided time limit
+     * is only a lower bound on the execution time
+     */
+    public function continueFor($msec) {
+        $start = microtime(true);
+        do {
+            $this->continue();
+        } while(microtime(true) - $start > ($msec / 1000));
     }
 
     public function isComplete() {
@@ -117,11 +131,20 @@ class Controller {
     /**
      * Debugging stuff
      */
-    protected function debug($msg) {
+    protected function debug($msg, $val=293823) {
         if(!$this->debug)
             return;
 
-        echo "ASYNC: $msg\n       ".$this->dbgid($this).":\n";
+        if($val !== 293823) {
+            ob_start();
+            var_dump($val);
+            $valstr = "[ ".trim(ob_get_contents())." ]";
+            ob_end_clean();
+        } else {
+            $valstr = "";
+        }
+
+        echo "ASYNC: $msg $valstr\n       ".$this->dbgid($this).":\n";
 
         foreach(array_reverse($this->stack, true) as $i=>$r) {
             echo "       [".str_pad($i, 2, " ", STR_PAD_LEFT)."]  ".$this->dbgid($r)."\n";

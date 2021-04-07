@@ -80,6 +80,9 @@ class NettaHeater extends IRDevice {
                 // 1: Get the schedule from the configured context device
                 try {
                     $this->lastTemp = yield $heater->refreshState();
+                    if(is_object($this->lastTemp)) {
+                        throw new Exception("Received an object instead of an integer!");
+                    }
                     $this->log("Obtained heater state from context, ".$this->lastTemp);
                 } catch(\Exception $e) {
                     $this->log("Couldn't fetch state: ".$e->getMessage());

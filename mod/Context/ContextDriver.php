@@ -9,12 +9,11 @@ use Ensemble\Async as Async;
 use Ensemble\Device\FetchContextRoutine as FetchRoutine;
 
 class ContextDriver extends Async\Device {
-    public function __construct(\Ensemble\Module $target, $setFunc, $context_device, $context_field) {
+    public function __construct(\Ensemble\Module $target, $setFunc, ContextPointer $ctxptr) {
         $this->target = $target;
         $this->setFunc = $setFunc;
 
-        $this->context_device = $context_device;
-        $this->context_field = $context_field;
+        $this->ctx = $ctxptr;
 
         $this->name = $this->target->getDeviceName().'-context_driver-'.random_int(100000,999999);
     }
@@ -33,8 +32,8 @@ class ContextDriver extends Async\Device {
 
             // First, fetch the schedule
             try {
-                $this->log("Trying to fetch context field {$this->context_field} from {$this->context_device}");
-                $schedule = yield new Async\TimeoutController(new FetchRoutine($this, $this->context_device, $this->context_field), 10);
+                $this->log("Trying to fetch context field {$this->ctx->toString()}");
+                $schedule = yield new Async\TimeoutController($thix->ctx->getFetchRoutine(), 10);
             } catch(\Exception $e) {
                 $this->log("Couldn't fetch context field: ".$e->getMessage());
                 $schedule = false;

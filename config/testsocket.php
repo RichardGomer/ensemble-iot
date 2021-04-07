@@ -11,7 +11,7 @@ error_reporting(E_ALL);
 
 
 // Create a context device to broker schedules
-$conf['devices'][] = $ctx = new Device\ContextDevice('global.schedules');
+$conf['devices'][] = $ctx = new Device\ContextDevice('test.schedules');
 
 /**
 * Create some schedules
@@ -19,18 +19,18 @@ $conf['devices'][] = $ctx = new Device\ContextDevice('global.schedules');
 
 // Daily offpeak
 $doffpeak = new Schedule\Schedule();
-$doffpeak->setPoint('00:00:00', 'OFF');
-$doffpeak->setPoint('07:00:00', 'ON');
-$doffpeak->setPoint('16:00:00', 'OFF');
-$doffpeak->setPoint('19:00:00', 'ON');
-$doffpeak->setPoint('22:00:00', 'OFF');
-$sd_doffpeak = new Schedule\DailyScheduler('daytime.scheduler', 'global.schedules', 'daytimeoffpeak', $doffpeak);
+$doffpeak->setPoint(0, 'OFF');
+$doffpeak->setPoint(time() + 5, 'ON');
+$doffpeak->setPoint(time() + 30, 'OFF');
+$doffpeak->setPoint(time() + 50, 'ON');
+$doffpeak->setPoint(time() + 60, 'OFF');
+$sd_doffpeak = new Schedule\DailyScheduler('test.scheduler', 'test.schedules', 'testschedule', $doffpeak);
 $conf['devices'][] = $sd_doffpeak;
 
 
 $client = new MQTTClient('10.0.0.8', 1883);
 
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-vent-office", $client, "socket5", 'global.schedules', 'daytimeoffpeak');
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("testsocket", $client, new Device\ContextPointer('test.schedules', 'testschedule'), "immersion");
 
 
 class SocketTestDevice extends Device\BasicDevice {

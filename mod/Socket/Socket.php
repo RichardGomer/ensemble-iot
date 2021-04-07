@@ -19,19 +19,21 @@ class Socket extends \Ensemble\Device\MQTTDevice {
 
     private $t_interval = 5; // Telemetry interval
 
-    public function __construct($name, MQTTClient $client, $deviceName) {
+    public function __construct($name, MQTTClient $client, $deviceName, $powerNum="") {
 
         parent::__construct($name, $client, $deviceName);
+
+        $this->powerNum = $powerNum; // Multi-channel controllers have e.g. POWER1, POWER2 ...
 
         $this->setTeleInterval(5);
     }
 
     public function on() {
-        $this->send($this->topic_command.'POWER', 'ON');
+        $this->send($this->topic_command.'POWER'.$this->powerNum, 'ON');
     }
 
     public function off() {
-        $this->send($this->topic_command.'POWER', 'OFF');
+        $this->send($this->topic_command.'POWER'.$this->powerNum, 'OFF');
     }
 
     /**
@@ -64,7 +66,11 @@ class PowerMeter extends \Ensemble\Device\SensorDevice {
         try {
             $this->socket->pollMQTT();
             $power = $this->socket->getStatus()->get($this->key);
-        } catch(\Exception $e) {
+        }
+        catch(\Ensemble\KeyValue\KeyNotSetException $e) { // This is a legit case for an offline device, so don't log it as an error
+            $power = 0;
+        }
+        catch(\Exception $e) {
             trigger_error($e->getMessage(), E_USER_NOTICE);
             $power = 0;
         }
