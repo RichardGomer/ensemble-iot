@@ -51,8 +51,8 @@ $conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($s
 /**
  * Irrigation
  */
-$pump = new SoftStart(Pin::BCM(21, Pin::OUT), 100); # full pwoer pumping, using soft starter
-$pumplow = new SoftStart(Pin::BCM(21, Pin::OUT), 60); # low power pumping mode
+$pump = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 100); # full pwoer pumping, using soft starter
+$pumplow = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 40); # low power pumping mode
 $flow = new Ir\FlowMeter(26);
 $dosepump = new Relay(Pin::BCM(6, Pin::OUT));
 
@@ -69,9 +69,9 @@ $ic->addChannel(2, new Relay(Pin::BCM(18, Pin::OUT)), $pump);
 $ic->addChannel(3, new Relay(Pin::BCM(27, Pin::OUT)), $pump);
 $ic->addChannel(4, new Relay(Pin::BCM(22, Pin::OUT)), $pump);
 
-$ic->addChannel('h1', new Relay(Pin::BCM(12, Pin::OUT)), $pumplow);
+$ic->addChannel('h1', new Relay(Pin::BCM(13, Pin::OUT)), $pumplow);
 $ic->addChannel('h2', new Relay(Pin::BCM(5, Pin::OUT)), $pumplow);
-$ic->addChannel('h3', new Relay(Pin::BCM(13, Pin::OUT)), $pumplow);
+$ic->addChannel('h3', new Relay(Pin::BCM(12, Pin::OUT)), $pumplow);
 
 $conf['devices'][] = $ic;
 $conf['devices'][] = $ps;

@@ -136,18 +136,28 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
      */
     protected function checkEndPump(IrrigationCmd $cmd) {
 
+        echo "Get ml ... ";
         $flow = $this->flow->measure();
         $target = $cmd->getMl();
+        echo " $flow \n";
 
         $channel = $cmd->getChannel();
         $this->logContext($channel, $flow);
 
-	if(time() - $this->startTime > 15 * 60) {
-	    // Maximum pumping time of 15 mins exceeded
-	}
-	elseif($flow < $target) {
+        $ptime = time() - $this->startTime;
+
+        echo "Pumping in progress. {$flow} of {$target} ml in {$ptime}s on channel $channel\n";
+
+	    if($ptime > 15 * 60) {
+    	    // Maximum pumping time of 15 mins exceeded
+            echo "Maximum pump time exceeded\n";
+    	}
+    	elseif($flow < $target) {
+            echo "Target not reached, continue\n";
             return false;
         }
+
+        echo "Target met. Stopping\n";
 
         $valve = $this->channels[$channel]['valve'];
         $pump = $this->channels[$channel]['pump'];

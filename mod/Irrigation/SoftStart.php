@@ -1,6 +1,6 @@
 <?php
 
-namespace Ensemble\Irrigation;
+namespace Ensemble\Device\Irrigation;
 
 use Ensemble\GPIO as GPIO;
 use Ensemble\System as System;
@@ -16,6 +16,7 @@ class SoftStart extends GPIO\Relay {
         $this->intensity = $intensity;
     }
 
+    private $running = false;
     public function on() {
         if($this->running)
             return;
@@ -24,7 +25,7 @@ class SoftStart extends GPIO\Relay {
         usleep(100000);
 
         $script = dirname(__FILE__).'/softstart/softstart.py';
-        $this->thread = new System\Thread("python3", array($script, $this->pin->getPhys(), $this->intensity));
+        $this->thread = new System\Thread("python3 $script {$this->pin->getPhys()} {$this->intensity}");
     }
 
     public function off() {
