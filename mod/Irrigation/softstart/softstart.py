@@ -1,19 +1,19 @@
 
-import import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
 import math
+import sys
 
-GPIO.setmode(GPIO.BOARD)
-
-GPIO.setup(pin, GPIO.OUT)
-pwm = GPIO.PWM(pin, 250) # second number is pwm Hz
-
-if(argv.len < 3):
+if(len(sys.argv) < 3):
     print("USAGE: python3 softstart.py physpin intensity%");
     sys.exit(1); # Exit with general error code
 
-pin = argv[1]
-intensity = argv[2]
+pin = int(sys.argv[1])
+intensity = int(sys.argv[2])
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(pin, GPIO.OUT)
+pwm = GPIO.PWM(pin, 250) # second number is pwm Hz
 
 print("Soft start/stop on physical pin " + str(pin) + " at " + str(intensity) + "%")
 
@@ -29,7 +29,7 @@ try:
     print(str(dc) + "%  ", end="\r")
 
   while True:
-      sleep(1);
+      time.sleep(1);
 
 except KeyboardInterrupt:
   print("Interrupt received")
@@ -39,5 +39,6 @@ for dc in range(intensity, 0, -2):
   time.sleep(0.05 / math.ceil((dc+1)/3));
   print(str(dc) + "%  ", end="\r")
 
+print("Done")
 pwm.stop()                         # stop PWM
 GPIO.cleanup()                     # resets GPIO ports used back to input mode

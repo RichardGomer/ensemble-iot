@@ -42,6 +42,8 @@ class Thread
 
 		$descriptor = array ( 0 => array ( "pipe", "r" ), 1 => array ( "pipe", "w" ), 2 => array ( "pipe", "w" ) );
 
+        echo "EXEC ".$command.$astr."\n";
+
 		// Open the resource to execute $command
 		$this->process = proc_open( $command.$astr, $descriptor, $this->pipes );
 

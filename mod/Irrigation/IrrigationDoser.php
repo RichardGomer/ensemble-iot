@@ -48,7 +48,7 @@ class IrrigationDoser extends \Ensemble\Device\BasicDevice {
     private $queue = array();
     private $startflow = 0;
     private $lastflow = 0;
-    private $mlperl = 0;
+    private $mlperlitre = 0;
     private $dosed = 0;
     protected function action_setdose(\Ensemble\Command $cmd, $broker) {
 
