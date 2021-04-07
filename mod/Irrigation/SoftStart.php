@@ -32,7 +32,7 @@ class SoftStart extends GPIO\Relay {
         if(!$this->running)
             return;
 
-        $this->thread->close();
+        $this->thread->close(2); // Signal 2 = SIGINT, should trigger a KeyboardInterrupt in the python process
 
         $this->running = false;
     }
