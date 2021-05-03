@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Represent a schedule
- * A schedule is a series of contiguous time periods with associated statuses
- */
+* Represent a schedule
+* A schedule is a series of contiguous time periods with associated statuses
+*/
 namespace Ensemble\Schedule;
 
 class Schedule {
 
     /**
-     * @mixed $statuses; If provided, $statuses must be an array containing the
-     * allowed statuses for the schedule; for instance, "ON", "OFF"
-     */
+    * @mixed $statuses; If provided, $statuses must be an array containing the
+    * allowed statuses for the schedule; for instance, "ON", "OFF"
+    */
     public function __construct($statuses = false) {
         $this->periods = array();
         $this->statuses = $statuses;
@@ -41,8 +41,8 @@ class Schedule {
     }
 
     /**
-     * This array is compatible with contextDevice series updates
-     */
+    * This array is compatible with contextDevice series updates
+    */
     public function toArray() {
         $out = [];
         foreach($this->getPeriods() as $p) {
@@ -61,8 +61,8 @@ class Schedule {
     }
 
     /**
-     * Set the status for a period of time
-     */
+    * Set the status for a period of time
+    */
     public function setPeriod($t_from, $t_to, $status, $tidy=true) {
 
         $t_from = $this->normaliseTime($t_from);
@@ -84,12 +84,12 @@ class Schedule {
         $this->setPoint($t_to, $return);
 
         if($tidy)
-            $this->tidy();
+        $this->tidy();
     }
 
     /**
-     * Set status from time $t, until the next time that's set, or indefinitely
-     */
+    * Set status from time $t, until the next time that's set, or indefinitely
+    */
     public function setPoint($t, $status) {
         $this->checkStatus($status);
         $tn = $this->normaliseTime($t);
@@ -101,8 +101,8 @@ class Schedule {
     }
 
     /**
-     * Remove redundant points
-     */
+    * Remove redundant points
+    */
     protected function tidy() {
         $last = false;
         foreach($this->periods as $i=>$p) {
@@ -117,15 +117,15 @@ class Schedule {
     }
 
     /**
-     * Get all defined periods, in order
-     */
+    * Get all defined periods, in order
+    */
     protected function &getPeriods() {
         return $this->periods;
     }
 
     /**
-     * A more usable form of periods, including end time
-     */
+    * A more usable form of periods, including end time
+    */
     public function getAllPeriods() {
         $periods = array();
         $keys = array_keys($this->periods);
@@ -143,17 +143,17 @@ class Schedule {
     }
 
     /**
-     * @mixed $t : The time to normalise as a UNIX timestamp (integer), DateTime
-     * object or
-     * Returns a UNIX timestamp
-     */
+    * @mixed $t : The time to normalise as a UNIX timestamp (integer), DateTime
+    * object or
+    * Returns a UNIX timestamp
+    */
     protected function normaliseTime($t) {
 
         if(is_int($t))
-            return $t;
+        return $t;
 
         if(is_numeric($t))
-            return (int) $t;
+        return (int) $t;
 
         return strtotime($t);
     }
@@ -173,8 +173,8 @@ class Schedule {
     }
 
     /**
-     * Get status at the given time
-     */
+    * Get status at the given time
+    */
     public function getAt($time) {
         $t = $this->normaliseTime($time);
 
@@ -214,8 +214,8 @@ class Schedule {
     }
 
     /**
-     * Get change points - times where the status of the schedule changes
-     */
+    * Get change points - times where the status of the schedule changes
+    */
     public function getChangePoints() {
         $times = array();
         foreach($this->periods as $s) {
@@ -227,20 +227,97 @@ class Schedule {
     }
 
     /**
-     * Use the supplied translation function to create a new schedule from this one
-     * The translator function takes a single argument, a status, and returns a status
-     * for the new schedule
-     */
-    public function translate($translator, Schedule $out=null) {
-            if(!$out instanceof Schedule)
-                $out = new Schedule();
+    * Get a new instance of whatever class this object is
+    */
+    protected function factory() {
+        $c = get_class($this);
+        return new $c();
+    }
 
-            foreach($this->getPeriods() as $p) {
-                $out->setPoint($p['start'], $translator($p['status']));
+    /**
+    * Extract a period between the start and end times
+    * Start is assumed to be today; end can be today or tomorrow
+    * Times must be in format hh:mm
+    */
+    public function between($start, $end) {
+        $tp = '/[0-9]{2}:[0-9]{2}/';
+        if(!preg_match($tp, $start) || !preg_match($tp, $end)) {
+            throw new \Exception("Times passed to TariffSchedule::between() must be in format hh:mm");
+        }
+
+        $tstart = strtotime($start);
+        $tend = strtotime($end);
+
+        if($tend <= $tstart) {
+            $tend = strtotime("tomorrow {$end}");
+        }
+
+        echo date("Y-m-d H:i:s", $tstart)." - ".date('Y-m-d H:i:s', $tend)."\n";
+
+        $out = $this->factory();
+
+        $out->setPoint($tstart, $this->getAt($tstart));
+
+        foreach($this->getChangePoints() as $cp) {
+            if($cp > $tstart && $cp < $tend) {
+                $out->setPoint($cp, $this->getAt($cp));
+            }
+        }
+
+        $out->setPoint($tend, $this->getAt($tend));
+
+        return $out;
+    }
+
+
+    /**
+    * Use the supplied translation function to create a new schedule from this one
+    * The translator function takes a single argument, a status, and returns a status
+    * for the new schedule
+    */
+    public function translate($translator, Schedule $out=null) {
+        if(!$out instanceof Schedule)
+        $out = new Schedule();
+
+        foreach($this->getPeriods() as $p) {
+            $out->setPoint($p['start'], $translator($p['status']));
+        }
+
+        return $out;
+    }
+
+
+    /**
+    * Reduce the given schedules using the provided translation function
+    * Like translate(), but all the schedules are combined into one, and
+    * the translation function receives the value of all schedules at each
+    * change point. A change point is any point at which one or more schedules
+    * change state.
+    */
+    public static function reduce($schedules, $f, Schedule $out=null) {
+        $out = $out == null ? $this->factory() : $out;
+
+        $changepoints = [];
+        foreach($schedules as $s) {
+            $changepoints = array_merge($s->getChangePoints());
+        }
+
+        sort($changepoints);
+        $changepoints = array_unique($changepoints);
+
+        foreach($changepoints as $time) {
+
+            $statuses = [];
+            foreach($schedules as $s) {
+                $statuses[] = $s->getAt($time);
             }
 
-            return $out;
+            $out->setPoint($time, $translator($statuses));
+        }
+
+        return $out;
     }
+
 }
 
 class ScheduleException extends \Exception {}

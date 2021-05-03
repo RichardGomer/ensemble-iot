@@ -9,9 +9,16 @@
             "email": "richard@richardgomer.co.uk"
         }
     ],
+    "repositories": [
+      {
+          "type": "vcs",
+          "url": "https://github.com/gregseth/suncalc-php"
+      }
+    ],
     "require": {
         "guzzlehttp/guzzle": "^6.5",
-        "vanilla/garden-cli": "^2.2"
+        "vanilla/garden-cli": "^2.2",
+        "auroras-live/suncalc-php": "dev-master"
     },
     "autoload": {
         "psr-4": {

@@ -17,9 +17,11 @@ $oct->setTariff($octo_prodcode, $octo_trfcode);
 //$conf['devices'][] = $ctx = new Device\LoggingContextDevice('store.context', "mysql:host=$dbhost;dbname=$dbname;charset=utf8", $dbuser, $dbpass);
 $conf['devices'][] = $ctx = new Device\ContextDevice('store.context');
 
+
 // Create the tariff scheduler
 $conf['devices'][] = new Schedule\OctopusTariffDevice('tariffscheduler', 'store.context', 'electariff', $oct);
 
+/*
 // Create the usage schedulers
 $conf['devices'][] = new Schedule\OctopusGasUsageDevice('gasusagescheduler', 'store.context', 'gasusage', $oct);
 $conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', 'store.context', 'elecusage', $oct);
@@ -36,7 +38,7 @@ class ForecastTestDevice extends Async\Device {
         return new Async\Lambda(function() use ($device) {
 
             //var_dump($device->client->getGasUsage());
-            var_dump($device->client->getElecUsage());
+            //var_dump($device->client->getTariffSchedule());
             yield;
 
         });
@@ -44,3 +46,4 @@ class ForecastTestDevice extends Async\Device {
 }
 
 $conf['devices'][] = new ForecastTestDevice($oct);
+*/

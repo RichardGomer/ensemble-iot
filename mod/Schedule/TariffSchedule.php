@@ -25,47 +25,9 @@ class TariffSchedule extends Schedule {
         }
     }
 
-    private function newTS() {
-        $c = __CLASS__;
-        return new $c();
-    }
-
-    // Extract a period between the start and end times
-    // Start is assumed to be today; end can be today or tomorrow
-    // Times must be in format hh:mm
-    public function between($start, $end) {
-        $tp = '/[0-9]{2}:[0-9]{2}/';
-        if(!preg_match($tp, $start) || !preg_match($tp, $end)) {
-            throw new \Exception("Times passed to TariffSchedule::between() must be in format hh:mm");
-        }
-
-        $tstart = strtotime($start);
-        $tend = strtotime($end);
-
-        if($tend <= $tstart) {
-            $tend = strtotime("tomorrow {$end}");
-        }
-
-        echo date("Y-m-d H:i:s", $tstart)." - ".date('Y-m-d H:i:s', $tend)."\n";
-
-        $out = $this->newTS();
-
-        $out->setPoint($tstart, $this->getAt($tstart));
-
-        foreach($this->getChangePoints() as $cp) {
-            if($cp > $tstart && $cp < $tend) {
-                $out->setPoint($cp, $this->getAt($cp));
-            }
-        }
-
-        $out->setPoint($tend, $this->getAt($tend));
-
-        return $out;
-    }
-
     // Get periods where the price is less or equal to than $max
     public function lessThan($max) {
-        $out = $this->newTS();
+        $out = $this->factory();
         return $this->translate(function($value) use ($max) {
             return $value > $max ? false : $value;
         }, $out);
@@ -76,7 +38,7 @@ class TariffSchedule extends Schedule {
         $values = array_values(array_unique($this->toArray()));
         sort($values);
 
-        $out = $this->newTS();
+        $out = $this->factory();
 
         $totalmins = 0;
         foreach($values as $v) { // Iterate through values, cheapest first
