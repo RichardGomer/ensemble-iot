@@ -14,9 +14,9 @@ class ScheduledBlind extends \Ensemble\Device\MQTTDevice {
         parent::__construct($name, $client, $deviceName);
 
         $last = null;
-        $this->driver = new \Ensemble\Schedule\Driver($this, function($device, $ext) use ($last) {
+        $this->driver = new \Ensemble\Schedule\Driver($this, function($device, $ext) use (&$last) {
             $ext = round($ext, 0);
-            if($ext == $last) // Only send values when they change
+            if($ext === $last) // Only send values when they change
                 return;
             $last = $ext;
             $device->send($this->topic_command.'TuyaSend2', "2,$ext"); // DpID 2 sets position; TuyaSend2 sends an int to the DpID
