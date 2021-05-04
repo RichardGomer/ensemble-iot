@@ -293,6 +293,9 @@ $bsched->setPoint('12:00:00', 'auto'); // Afternoons, use the auto-closer based 
 $bsched->setPoint('21:30:00', '100'); // Close at night
 
 $sd = new Schedule\DailyScheduler('officeblind.scheduler', 'global.schedules', 'officeblindschedule', $bsched);
+$sd->vPos = 120;
+$sd->distance = 80;
+$sd->horizon = 5/180 * M_PI; // set horizon to 5 degrees altitude
 $conf['devices'][] = $sd;
 
 $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind1", $client, "blind1", new Device\ContextPointer('global.schedules', 'officeblindschedule'));

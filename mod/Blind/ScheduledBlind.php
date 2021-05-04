@@ -49,6 +49,10 @@ class ScheduledBlind extends \Ensemble\Device\MQTTDevice {
     // Direction the window faces degrees from north
     public $bearing = 240;
 
+    // Altitude of the horizon in degrees; e.g. where hills occlude the sun before
+    // the theoretical horizon
+    public $horizon = 0;
+
     // Vertical position of the window, and vertical distance of viewer from TOP of window
     public $winHeight = 100;
     public $vPos = 80;
@@ -100,6 +104,11 @@ class ScheduledBlind extends \Ensemble\Device\MQTTDevice {
         // If the sun is at an azimuth outside the range that shines through the window, the blind position is at minimum shade
         if($azOutRange) {
             //echo "Azimuth outside range\n";
+            return $this->extMin;
+        }
+
+        // If the sun is below the Horizon, set the blind to minimum shade
+        if($sunAltitude < $this->horizon) {
             return $this->extMin;
         }
 
