@@ -15,7 +15,12 @@ class ScheduledBlind extends \Ensemble\Device\MQTTDevice {
 
         $last = null;
         $this->driver = new \Ensemble\Schedule\Driver($this, function($device, $ext) use (&$last) {
-            $ext = round($ext, 0);
+
+            if($ext == 'auto') {
+                $ext = $this->getAutoSetting();
+            }
+
+            $ext = round($ext / 2, 0) * 2; // Round to nearest 2
             if($ext === $last) // Only send values when they change
                 return;
             $last = $ext;
