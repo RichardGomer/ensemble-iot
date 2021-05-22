@@ -310,4 +310,5 @@ $bsched->setPoint('08:30:00', '0');
 $bsched->setPoint('22:00:00', '100');
 
 $sd = new Schedule\DailyScheduler('bedroomblind.scheduler', 'global.schedules', 'bedroomblindschedule', $bsched);
+$conf['devices'][] = $sd;
 $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind2", $client, "blind2", new Device\ContextPointer('global.schedules', 'bedroomblindschedule'));
