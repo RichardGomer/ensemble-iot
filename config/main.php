@@ -267,14 +267,17 @@ $tariffdevice->setCallback(function($tariff) use ($isched) {
     $baseTariff = new Schedule\TariffSchedule($tariff);
 
     // Don't reschedule after 11pm because we'll overwrite with TOMORROW night's schedule!
-    if(date('H') > 23 || date('H') <= 6) {
-        $isched->log("Rescheduling won't occur between 2300 and 0600");
+    if(date('H') >= 23 || date('H') < 8) {
+        $isched->log("Rescheduling won't occur between 2300 and 0800");
         return;
     }
 
 
     // 3.5p/kwh ~= 3.03p/kwh / 90% efficiency
-    $immersion = $baseTariff->between('23:00', '06:00')->lessThan(3.5)->cheapest(120)->getOnSchedule();
+    //$immersion = $baseTariff->between('23:00', '06:00')->lessThan(3.5)->cheapest(120)->getOnSchedule();
+    $immersion1 = $baseTariff->between('23:00', '08:00')->cheapest(180)->getOnSchedule();
+    $immersion2 = $baseTariff->between('19:00', '21:00')->cheapest(30)->getOnSchedule();
+    $immersion = $immersion1->or($immersion2);
     $isched->log("Generated immersion schedule\n".$immersion->prettyPrint());
     $isched->setSchedule($immersion);
 
