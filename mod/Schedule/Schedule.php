@@ -312,7 +312,7 @@ class Schedule {
                 $statuses[] = $s->getAt($time);
             }
 
-            $out->setPoint($time, $translator($statuses));
+            $out->setPoint($time, $f($statuses));
         }
 
         return $out;
