@@ -295,7 +295,7 @@ class Schedule {
     * change state.
     */
     public static function reduce($schedules, $f, Schedule $out=null) {
-        $out = $out == null ? $this->factory() : $out;
+        $out = $out == null ? $schedules[0]->factory() : $out;
 
         $changepoints = [];
         foreach($schedules as $s) {
