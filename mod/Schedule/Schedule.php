@@ -238,8 +238,9 @@ class Schedule {
     * Extract a period between the start and end times
     * Start is assumed to be today; end can be today or tomorrow
     * Times must be in format hh:mm
+    * $then is the value that the end point should be set to, defaults false
     */
-    public function between($start, $end) {
+    public function between($start, $end, $then=false) {
         $tp = '/[0-9]{2}:[0-9]{2}/';
         if(!preg_match($tp, $start) || !preg_match($tp, $end)) {
             throw new \Exception("Times passed to TariffSchedule::between() must be in format hh:mm");
@@ -264,7 +265,7 @@ class Schedule {
             }
         }
 
-        $out->setPoint($tend, $this->getAt($tend));
+        $out->setPoint($tend, $then);
 
         return $out;
     }
@@ -299,7 +300,7 @@ class Schedule {
 
         $changepoints = [];
         foreach($schedules as $s) {
-            $changepoints = array_merge($s->getChangePoints());
+            $changepoints = array_merge($s->getChangePoints(), $changepoints);
         }
 
         sort($changepoints);
@@ -312,7 +313,11 @@ class Schedule {
                 $statuses[] = $s->getAt($time);
             }
 
-            $out->setPoint($time, $f($statuses));
+            $v = $f($statuses);
+            //$tstr = date('[Y-m-d H:i:s]', $time);
+            //echo "Reduce @ $tstr [".implode(",", $statuses)."] to ".$v."\n";
+
+            $out->setPoint($time, $v);
         }
 
         return $out;

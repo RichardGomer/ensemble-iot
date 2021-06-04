@@ -40,11 +40,13 @@ class TariffSchedule extends Schedule {
 
         $out = $this->factory();
 
+        if($mins == 0) {
+            return $out;
+        }
+
         $totalmins = 0;
         foreach($values as $v) { // Iterate through values, cheapest first
             foreach($this->getAllPeriods() as $p) {
-                if($totalmins >= $mins) return $out;
-
                 if($p['status'] === false) {
                     continue; // Skip excluded periods
                 }
@@ -53,6 +55,7 @@ class TariffSchedule extends Schedule {
                     $out->setPeriod($p['start'], $p['end'], $p['status']);
                     $totalmins += ($p['end'] - $p['start']) / 60;
                     //echo "setPeriod {$p['start']} - {$p['end']} = {$p['status']} => $totalmins minutes\n";
+                    if($totalmins >= $mins) return $out;
                 }
             }
         }
