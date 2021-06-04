@@ -82,7 +82,7 @@ foreach($conf['devices'] as $d) {
 
     $dn = $d->getDeviceName();
 
-    if($args['rundevices'] !== false && !in_array($dn, $args['rundevices'])) {
+    if(is_array($args['rundevices']) && count($args['rundevices']) > 0 && !in_array($dn, $args['rundevices'])) {
         echo "Skip device ".$dn;
         continue;
     }
