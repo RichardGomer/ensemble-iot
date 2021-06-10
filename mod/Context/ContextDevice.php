@@ -10,7 +10,7 @@ namespace Ensemble\Device;
 
 class ContextDevice extends BasicDevice {
 
-    protected $valuetimelimit = 3600 * 2; // Values older than this may be discarded
+    protected $valuetimelimit = 3600 * 2; // Sets the default expiry time for values
 
     private $data = array();
 
@@ -56,6 +56,13 @@ class ContextDevice extends BasicDevice {
 
         $all = $this->data[$field];
 
+        // Remove expired values
+        foreach($all as $k=>$v) {
+            if($v['expires'] <= time()) {
+                unset($all[$k]);
+            }
+        }
+
         // Remove values older than $time
         if($time !== false) {
             foreach($all as $k=>$v) {
@@ -65,6 +72,20 @@ class ContextDevice extends BasicDevice {
             }
         }
 
+        // Filter by priority, so that only entries with the greatest priority
+        // are returned (lower numbers = higher priority)
+        $minp = INF;
+        foreach($all as $k=>$v) {
+            $minp = min($minp, $v['priority']);
+        }
+
+        foreach($all as $k=>$v) {
+            if($v['priority'] > $minp) {
+                unset($all[$k]);
+            }
+        }
+
+        // Now sort by time and return the requested number of results
         usort($all, function($a, $b) {
             return $a['time'] - $b['time'];
         });
@@ -87,13 +108,16 @@ class ContextDevice extends BasicDevice {
 
         $series = $cmd->getArgOrValue('series', false);
 
+        $priority = $cmd->getArgOrValue('priority', 100); // Get a priority for the value; default to 100
+        $expires = $cmd->getArgOrValue('expires', false); // Expiry time of the value
+
         if(!$series) { // Not a series, set a single value
             $args = $cmd->getArgs(array('time', 'value', 'field'));
-            $this->update($args['field'], $args['value'], $args['time'], $cmd->getSource());
+            $this->update($args['field'], $args['value'], $priority, $args['time'], $cmd->getSource(), $expires);
         } else {
             $args = $cmd->getArgs(array('field', 'series'));
             foreach($series as $time=>$value) {
-                $this->update($args['field'], $value, $time, $cmd->getSource());
+                $this->update($args['field'], $value, $priority, $time, $cmd->getSource(), $expires);
             }
         }
 
@@ -104,9 +128,17 @@ class ContextDevice extends BasicDevice {
         }
     }
 
-    public function update($field, $value, $time=false, $source='') {
+    public function update($field, $value, $priority, $time=false, $source='', $expires=false) {
         if($time === false) {
             $time = time();
+        }
+
+        if($expires === false) {
+            $expires = time() + $this->valuetimelimit;
+        }
+
+        if($expires < time()) {
+            return;
         }
 
         if(!array_key_exists($field, $this->data)) {
@@ -117,7 +149,7 @@ class ContextDevice extends BasicDevice {
 
         // Clean up expired values and values for the same timestamp
         foreach($data as $i=>$record) {
-            if(($record['time'] < time() - $this->valuetimelimit) || $record['time'] == $time) {
+            if(($record['expires'] <= time()) || ($record['time'] == $time && $record['priority'] == $priority)) {
                 unset($data[$i]);
             }
         }
@@ -125,9 +157,13 @@ class ContextDevice extends BasicDevice {
         // Add the new record
         $data[] = array(
             'time'=>$time,
+            'expires'=>$expires,
             'source'=>$source,
-            'value'=>$value
+            'value'=>$value,
+            'priority'=>$priority
         );
+
+        //var_dump($data);
 
     }
 
