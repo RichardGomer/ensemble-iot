@@ -274,16 +274,16 @@ $tariffdevice->setCallback(function($tariff) use ($isched) {
 
 
     // 3.5p/kwh ~= 3.03p/kwh / 90% efficiency
-    //$immersion = $baseTariff->between('23:00', '06:00')->lessThan(3.5)->cheapest(120)->getOnSchedule();
-    $immersion1_t = $baseTariff->between('23:00', '08:00')->cheapest(180);
-    $immersion1 = $immersion1_t->getOnSchedule();
+    $immersion = $baseTariff->between('23:00', '06:00')->lessThan(3.5)->cheapest(120)->getOnSchedule();
+    //$immersion1_t = $baseTariff->between('23:00', '08:00')->cheapest(180);
+    //$immersion1 = $immersion1_t->getOnSchedule();
     //$isched->log("Night period\n".$immersion1_t->prettyPrint()."\n".$immersion1->prettyPrint());
 
-    $immersion2_t = $baseTariff->between('19:00', '22:00')->cheapest(30);
-    $immersion2 = $immersion2_t->getOnSchedule();
+    //$immersion2_t = $baseTariff->between('19:00', '22:00')->cheapest(30);
+    //$immersion2 = $immersion2_t->getOnSchedule();
     //$isched->log("Evening period\n".$immersion2_t->prettyPrint()."\n".$immersion2->prettyPrint());
 
-    $immersion = $immersion1->or($immersion2);
+    //$immersion = $immersion1->or($immersion2);
     $isched->log("Generated immersion schedule\n".$immersion->prettyPrint());
     $isched->setSchedule($immersion);
 });
