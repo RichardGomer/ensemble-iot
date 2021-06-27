@@ -16,20 +16,6 @@ class OnSchedule extends Schedule {
     }
 
     /**
-     * Some static factory methods for deriving on schedules from tariff schedules
-     *
-     */
-    public static function lessThan(Schedule $s, $value) {
-        return $s->translate(function($t) use ($value) {
-            if($t < $value) {
-                return 'ON';
-            } else {
-                return 'OFF';
-            }
-        });
-    }
-
-    /**
      * Set "ON" at $onTime and "OFF" before ontime and after offtime
      * offTime must be after ontime. Strings are normalised
      */
@@ -43,37 +29,6 @@ class OnSchedule extends Schedule {
         $s->setPeriod($onTime, $offTime, 'ON');
 
         return $s;
-    }
-
-    /**
-     * Reduce the given schedules using the provided translation function
-     * Like translate(), but all the schedules are combined into one, and
-     * the translation function receives the value of all schedules at each
-     * change point. A change point is any point at which one or more schedules
-     * change state.
-     */
-    public static function reduce($schedules, $f) {
-        $out = new OnSchedule();
-
-        $changepoints = [];
-        foreach($schedules as $s) {
-            $changepoints = array_merge($s->getChangePoints());
-        }
-
-        sort($changepoints);
-        $changepoints = array_unique($changepoints);
-
-        foreach($changepoints as $time) {
-
-            $statuses = [];
-            foreach($schedules as $s) {
-                $statuses[] = $s->getAt($time);
-            }
-
-            $out->setPoint($time, $translator($statuses));
-        }
-
-        return $out;
     }
 
     /**

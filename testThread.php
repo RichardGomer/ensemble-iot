@@ -2,9 +2,18 @@
 
 require 'vendor/autoload.php';
 
-$t = new Ensemble\System\Thread("/home/pi/ensemble-iot/mod/Irrigation/YFS201/yfs201flow 26");
+$t = new Ensemble\System\Thread("python3 -u ".dirname(__FILE__)."/testsig.py");
 
-while(true) {
-    sleep(3);
+echo "Begin";
+
+for($i = 0; $i < 3; $i++) {
+    sleep(1);
     var_dump($t->read());
+}
+
+$t->close(2); // 2 = SIGINT
+
+while($t->isRunning()) {
+    echo "Waiting...";
+    usleep(250000);
 }

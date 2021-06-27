@@ -79,7 +79,15 @@ $broker->addDevice($remote); // Add the remote delivery device
 
 // Register defined devices
 foreach($conf['devices'] as $d) {
-    echo "Added device ".$d->getDeviceName()."\n";
+
+    $dn = $d->getDeviceName();
+
+    if(is_array($args['rundevices']) && count($args['rundevices']) > 0 && !in_array($dn, $args['rundevices'])) {
+        echo "Skip device ".$dn;
+        continue;
+    }
+
+    echo "Added device $dn\n";
     $broker->addDevice($d);
 }
 

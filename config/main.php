@@ -92,7 +92,7 @@ $doffpeak = new Schedule\Schedule();
 $doffpeak->setPoint('00:00:00', 'OFF');
 $doffpeak->setPoint('07:00:00', 'ON');
 $doffpeak->setPoint('16:00:00', 'OFF');
-$doffpeak->setPoint('19:00:00', 'ON');
+$doffpeak->setPoint('19:30:00', 'ON');
 $doffpeak->setPoint('22:00:00', 'OFF');
 $sd_doffpeak = new Schedule\DailyScheduler('daytime.scheduler', 'global.schedules', 'daytimeoffpeak', $doffpeak);
 $conf['devices'][] = $sd_doffpeak;
@@ -101,16 +101,16 @@ $conf['devices'][] = $sd_doffpeak;
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', 'ON');
 $bsched->setPoint('16:00:00', 'OFF');
-$bsched->setPoint('19:00:00', 'ON');
+$bsched->setPoint('19:30:00', 'ON');
 $sd_offpeak = new Schedule\DailyScheduler('offpeak.scheduler', 'global.schedules', 'offpeak', $bsched);
 $conf['devices'][] = $sd_offpeak;
 
 // offpeak oppoff
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', 'ON');
-$bsched->setPoint('14:00:00', 'OPOFF');
+$bsched->setPoint('13:30:00', 'OPOFF');
 $bsched->setPoint('16:00:00', 'OFF');
-$bsched->setPoint('19:00:00', 'ON');
+$bsched->setPoint('19:30:00', 'ON');
 $sd_opoff = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'global.schedules', 'offpeak_opoff', $bsched);
 $conf['devices'][] = $sd_opoff;
 
@@ -122,7 +122,7 @@ $lsched = new Schedule\Schedule();
 $lsched->setPoint('00:00:00', 'auto 30%');
 $lsched->setPoint('05:00:00', 'auto 30%');
 $lsched->setPoint('06:00:00', 'auto 100%');
-$lsched->setPoint('22:00:00', 'auto 100%');
+$lsched->setPoint('21:30:00', 'auto 100%');
 $lsched->setPoint('23:00:00', 'auto 30%');
 
 $sd_lights = new Schedule\DailyScheduler('light.scheduler', 'global.schedules', 'daylightschedule', $lsched);
@@ -267,18 +267,56 @@ $tariffdevice->setCallback(function($tariff) use ($isched) {
     $baseTariff = new Schedule\TariffSchedule($tariff);
 
     // Don't reschedule after 11pm because we'll overwrite with TOMORROW night's schedule!
-    if(date('H') > 23 || date('H') <= 6) {
-        $isched->log("Rescheduling won't occur between 2300 and 0600");
+    if(date('H') >= 23 || date('H') < 8) {
+        $isched->log("Rescheduling won't occur between 2300 and 0800");
         return;
     }
 
 
     // 3.5p/kwh ~= 3.03p/kwh / 90% efficiency
     $immersion = $baseTariff->between('23:00', '06:00')->lessThan(3.5)->cheapest(120)->getOnSchedule();
+    //$immersion1_t = $baseTariff->between('23:00', '08:00')->cheapest(180);
+    //$immersion1 = $immersion1_t->getOnSchedule();
+    //$isched->log("Night period\n".$immersion1_t->prettyPrint()."\n".$immersion1->prettyPrint());
+
+    //$immersion2_t = $baseTariff->between('19:00', '22:00')->cheapest(30);
+    //$immersion2 = $immersion2_t->getOnSchedule();
+    //$isched->log("Evening period\n".$immersion2_t->prettyPrint()."\n".$immersion2->prettyPrint());
+
+    //$immersion = $immersion1->or($immersion2);
     $isched->log("Generated immersion schedule\n".$immersion->prettyPrint());
     $isched->setSchedule($immersion);
-
 });
 
 $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("immersion", $client, new Device\ContextPointer('global.schedules', 'immersionschedule'), "immersion");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-immersion');
+
+/**
+ * Office blind
+ */
+$bsched = new Schedule\Schedule();
+$bsched->setPoint('00:00:00', '100');
+$bsched->setPoint('08:45:00', '0'); // Reopen in the morning
+$bsched->setPoint('12:00:00', 'auto'); // Afternoons, use the auto-closer based on sun
+$bsched->setPoint('21:30:00', '100'); // Close at night
+
+$sd = new Schedule\DailyScheduler('officeblind.scheduler', 'global.schedules', 'officeblindschedule', $bsched);
+$sd->vPos = 120;
+$sd->distance = 80;
+$sd->horizon = 5/180 * M_PI; // set horizon to 5 degrees altitude
+$conf['devices'][] = $sd;
+
+$conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind1", $client, "blind1", new Device\ContextPointer('global.schedules', 'officeblindschedule'));
+
+
+/**
+ * Bedroom blind
+ */
+$bsched = new Schedule\Schedule();
+$bsched->setPoint('00:00:00', '100');
+$bsched->setPoint('08:30:00', '0');
+$bsched->setPoint('22:00:00', '100');
+
+$sd = new Schedule\DailyScheduler('bedroomblind.scheduler', 'global.schedules', 'bedroomblindschedule', $bsched);
+$conf['devices'][] = $sd;
+$conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind2", $client, "blind2", new Device\ContextPointer('global.schedules', 'bedroomblindschedule'));
