@@ -45,7 +45,8 @@ class Thread
         echo "EXEC ".$command.$astr."\n";
 
 		// Open the resource to execute $command
-		$this->process = proc_open( $command.$astr, $descriptor, $this->pipes );
+		// exec replaces the spawned shell, rather than starting a sub-process; makes close() work as expected!
+		$this->process = proc_open( "exec ".$command.$astr, $descriptor, $this->pipes );
 
 		// Set STDOUT and STDERR to non-blocking
 		stream_set_blocking( $this->pipes[1], 0 );
@@ -56,7 +57,7 @@ class Thread
 	public function close($sig=SIGTERM)
 	{
 		proc_terminate($this->process, $sig);
-		//posix_kill($this->getPID(), $sig);
+		//posix_kill($pid = $this->getPID(), $sig);
 	}
 
 	//Get the status of the current runing process

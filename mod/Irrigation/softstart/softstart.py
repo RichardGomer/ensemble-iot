@@ -3,10 +3,19 @@ import RPi.GPIO as GPIO
 import time
 import math
 import sys
+import signal
 
 if(len(sys.argv) < 3):
     print("USAGE: python3 softstart.py physpin intensity%");
     sys.exit(1); # Exit with general error code
+
+quit = False;
+def signal_handler(sig, frame):
+    global quit
+    print('Received SIGINT')
+    quit = True;
+
+signal.signal(signal.SIGINT, signal_handler)
 
 pin = int(sys.argv[1])
 intensity = int(sys.argv[2])
@@ -28,7 +37,7 @@ try:
     time.sleep(0.1 / math.ceil((dc+1)/3));
     print(str(dc) + "%  ", end="\r")
 
-  while True:
+  while True and not quit:
       time.sleep(1);
 
 except KeyboardInterrupt:

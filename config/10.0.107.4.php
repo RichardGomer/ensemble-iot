@@ -34,7 +34,7 @@ $s->addDestination("greenhouse.context", "greenhouse-moisture");
  * Heating
  */
 $client = new MQTT\Client('10.0.0.8', 1883);
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenhouse", $client, "socket9", 'global.schedules', 'offpeak');
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenhouse", $client, new Device\ContextPointer('global.schedules', 'offpeak'), "socket9");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('greenhouse.context', 'power-greenhouse');
 $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable the heater until the driver can take over
 
@@ -45,7 +45,7 @@ $conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($s
     } elseif ($value < 4.8) { // If it's too cool, allow the heater to come on (based on schedule)
         $socket->getDriver()->clearOverride(365*24*3600+100);
     }
-}, "greenhouse.context", "greenhouse-temp");
+}, new Device\ContextPointer("greenhouse.context", "greenhouse-temp"));
 
 
 /**
