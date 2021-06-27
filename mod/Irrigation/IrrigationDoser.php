@@ -59,7 +59,7 @@ class IrrigationDoser extends \Ensemble\Device\BasicDevice {
         $this->lastflow = 0;
         $this->dosed = 0;
 
-        echo "Dose set to {$this->mlperlitre}ml/l\n";
+        $this->log("Dose set to {$this->mlperlitre}ml/l");
     }
 
     protected function action_prime(\Ensemble\Command $cmd, $broker) {
@@ -82,7 +82,17 @@ class IrrigationDoser extends \Ensemble\Device\BasicDevice {
 
     public function poll(\Ensemble\CommandBroker $b) {
 
-        $totalFlow = $this->flow->getFlow() - $this->startflow; // Get flow volume since the dose was set
+        // Get flow volume
+        $newflow = this->flow->getFlow();
+
+        // If flow has been reset, reset our total, too
+        if($totalFlow < $this->lastflow) {
+            $this->startflow = 0;
+            $this->dosed = 0;
+        }
+
+        // Calculate total flow since last reset
+        $totalFlow = $newflow - $this->startflow;
 
         // Don't dose if the flow has stopped!
         if($totalFlow == $this->lastflow) {
@@ -98,7 +108,7 @@ class IrrigationDoser extends \Ensemble\Device\BasicDevice {
             return;
         }
 
-        echo "Flow is $totalFlow, dose required is {$reqdDose}ml, dose +{$nextDose}ml now\n";
+        $this->log("New flow is $newflow, total is $totalFlow, dose required is {$reqdDose}ml, dose +{$nextDose}ml now");
 
         $this->dosed += $nextDose; // Update total dose
         $this->logContext($this->dosed); // and log it

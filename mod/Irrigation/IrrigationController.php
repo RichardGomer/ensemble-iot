@@ -63,7 +63,7 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
             $this->beginPump($this->currentCmd);
         } catch (\Exception $e) {
             $this->currentCmd = false;
-            echo "Can't pump: ".$e->getMessage()."\n";
+            $this->log("Can't pump: ".$e->getMessage());
         }
     }
 
@@ -110,7 +110,7 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
 
         $this->startTime = time();
 
-        echo "Begin pumping on channel $channel\n";
+        $this->log("Begin pumping on channel $channel");
         $this->logContext($channel, 0);
 
         // Open the valve
@@ -125,6 +125,7 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         $min = 6;
         if(($flow = $this->flow->measure()) < $min) {
             $pump->off();
+            usleep(200000);
             $valve->off();
             $this->logContext($channel, $flow);
             throw new LowFlowException("Detected less than {$min}ml flow in 3 seconds on channel '$channel' - aborted");
@@ -136,45 +137,41 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
      */
     protected function checkEndPump(IrrigationCmd $cmd) {
 
-        echo "Get ml ... ";
         $flow = $this->flow->measure();
         $target = $cmd->getMl();
-        echo " $flow \n";
 
         $channel = $cmd->getChannel();
         $this->logContext($channel, $flow);
 
         $ptime = time() - $this->startTime;
 
-        echo "Pumping in progress. {$flow} of {$target} ml in {$ptime}s on channel $channel\n";
+        $this->log("Pumping in progress. {$flow} of {$target} ml in {$ptime}s on channel $channel");
 
-	    if($ptime > 15 * 60) {
-    	    // Maximum pumping time of 15 mins exceeded
-            echo "Maximum pump time exceeded\n";
+	    if($ptime > 10 * 60) {
+    	    // Maximum pumping time of 10 mins exceeded
+            $this->log("Maximum pump time exceeded");
     	}
     	elseif($flow < $target) {
-            echo "Target not reached, continue\n";
+            $this->log("Target not reached, continue");
             return false;
         }
 
-        echo "Target met. Stopping\n";
+        $this->log("Target met. Stopping");
 
         $valve = $this->channels[$channel]['valve'];
         $pump = $this->channels[$channel]['pump'];
 
         $pump->off();
-        usleep(500000); //0.5sec pause
+        usleep(200000);
         $valve->off();
 
         $cmd->setFlow($flow);
         $cmd->setTime(time() - $this->startTime);
 
-        usleep(700000);
         $this->logContext($channel, 0);
 
         return true;
     }
-
 }
 
 
