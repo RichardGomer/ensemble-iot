@@ -59,7 +59,7 @@ class FlowMeter
     // Get flow since last reset
     public function getFlow() {
         $flow = $this->read();
-        //echo "Flow is {$flow}ml\n";
+        echo "Flow is {$flow}ml\n";
         return $this->totalFlow;
     }
 

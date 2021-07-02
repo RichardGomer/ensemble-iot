@@ -86,20 +86,15 @@ class IrrigationDoser extends \Ensemble\Device\BasicDevice {
         $newflow = this->flow->getFlow();
 
         // If flow has been reset, reset our total, too
-        if($totalFlow < $this->lastflow) {
+        if($newflow < $this->lastflow) {
             $this->startflow = 0;
             $this->dosed = 0;
         }
 
+        $this->lastflow = $newflow; // So we can check flow is still going
+
         // Calculate total flow since last reset
         $totalFlow = $newflow - $this->startflow;
-
-        // Don't dose if the flow has stopped!
-        if($totalFlow == $this->lastflow) {
-            return;
-        }
-
-        $this->lastflow = $totalFlow; // So we can check flow is still going
 
         $reqdDose = $this->mlperlitre * ($totalFlow / 1000); // Calculate the required dose for the flow volume, in ml
         $nextDose = min(10, $reqdDose - $this->dosed); // Never dose more than 10ml at a time, to avoid blocking the thread too long
