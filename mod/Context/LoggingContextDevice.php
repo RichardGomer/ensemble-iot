@@ -33,8 +33,8 @@ class LoggingContextDevice extends ContextDevice {
     /**
      * Update a field
      */
-    public function update($field, $value, $time=false, $source='', $store=true) {
-        parent::update($field, $value, $time, $source);
+    public function update($field, $value, $priority, $time=false, $source='', $store=true) {
+        parent::update($field, $value, $priority, $time, $source);
 
         if($value === "" || $value===false)
             return; // Don't save blank values!
