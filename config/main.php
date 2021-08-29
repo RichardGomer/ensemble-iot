@@ -63,18 +63,9 @@ $conf['devices'][] = $extractor = new Device\Socket\TimedSocket("loftextractor",
 $swrsocket->getStatus()->sub('SENSOR.ENERGY.POWER', array($extractor, 'trigger')); // Trigger the extractor when the socket current draw changes
 
 // Wall extractor similar, but comes on AFTER the shower is turned off
-$conf['devices'][] = $extractor = new Device\Socket\TimedSocket("wallextractor", $client, "bathroom", "4"); // POWER3 on 'bathroom' MQTT device
+$conf['devices'][] = $extractor = new Device\Socket\TimedSocket("wallextractor", $client, "bathroom", "4"); // POWER4 on 'bathroom' MQTT device
 $swrsocket->getStatus()->sub('SENSOR.ENERGY.POWER', array($extractor, 'trigger')); // Trigger the extractor when the socket current draw changes
 $extractor->setOffOnly();
-
-// Turn the light on when the shower is switched on
-$brlight = new Device\Socket\Socket("bathroomlight", $client, "bathroom", "1");
-$swrsocket->getStatus()->sub('SENSOR.ENERGY.POWER', function($key, $value) use ($brlight) {
-    if($value > 1) {
-        $brlight->on();
-    }
-});
-
 
 /**
  * Scheduling!
@@ -98,11 +89,11 @@ $sd_doffpeak = new Schedule\DailyScheduler('daytime.scheduler', 'global.schedule
 $conf['devices'][] = $sd_doffpeak;
 
 // offpeak
-$bsched = new Schedule\Schedule();
-$bsched->setPoint('00:00:00', 'ON');
-$bsched->setPoint('16:00:00', 'OFF');
-$bsched->setPoint('19:30:00', 'ON');
-$sd_offpeak = new Schedule\DailyScheduler('offpeak.scheduler', 'global.schedules', 'offpeak', $bsched);
+$offpeak = new Schedule\Schedule();
+$offpeak->setPoint('00:00:00', 'ON');
+$offpeak->setPoint('16:00:00', 'OFF');
+$offpeak->setPoint('19:30:00', 'ON');
+$sd_offpeak = new Schedule\DailyScheduler('offpeak.scheduler', 'global.schedules', 'offpeak', $offpeak);
 $conf['devices'][] = $sd_offpeak;
 
 // offpeak oppoff
@@ -168,8 +159,25 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-network", $clien
 $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $client, "socket7");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-tv');
 
-// Pond pump
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dryer", $client, new Device\ContextPointer('global.schedules', 'offpeak'), "socket11");
+/**
+ * Pond pump
+ */
+$pondsched = new Schedule\Schedule();
+$pondsched->setPoint(0, 'ON');
+$pondsched->setPeriod('16:00', '19:00', 'OFF');
+
+// Overnight, 15mins on per hour
+$pondsched->setPeriod('23:15', '24:00', 'OFF');
+for($h = 0; $h <= 8; $h++) {
+    $h1 = $h+1;
+    $pondsched->setPeriod("$h:00", "$h:15", "ON");
+    $pondsched->setPeriod("$h:15", "{$h1}:00", "OFF");
+}
+
+$sd_pond = new Schedule\DailyScheduler('pond.scheduler', 'global.schedules', 'pondpump', $pondsched);
+$conf['devices'][] = $sd_pond;
+
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-pondpump", $client, new Device\ContextPointer('global.schedules', 'pondpump'), "socket11");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pond');
 
 
@@ -275,6 +283,8 @@ $tariffdevice->setCallback(function($tariff) use ($isched) {
 
     // 3.5p/kwh ~= 3.03p/kwh / 90% efficiency
     $immersion = $baseTariff->between('23:00', '06:00')->lessThan(3.5)->cheapest(120)->getOnSchedule();
+
+    // For immersion as primary hot water source, use the below
     //$immersion1_t = $baseTariff->between('23:00', '08:00')->cheapest(180);
     //$immersion1 = $immersion1_t->getOnSchedule();
     //$isched->log("Night period\n".$immersion1_t->prettyPrint()."\n".$immersion1->prettyPrint());
@@ -303,7 +313,7 @@ $bsched->setPoint('21:30:00', '100'); // Close at night
 $sd = new Schedule\DailyScheduler('officeblind.scheduler', 'global.schedules', 'officeblindschedule', $bsched);
 $sd->vPos = 120;
 $sd->distance = 80;
-$sd->horizon = 5/180 * M_PI; // set horizon to 5 degrees altitude
+$sd->horizon = 10/180 * M_PI;
 $conf['devices'][] = $sd;
 
 $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind1", $client, "blind1", new Device\ContextPointer('global.schedules', 'officeblindschedule'));
@@ -314,7 +324,7 @@ $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind1", $client
  */
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', '100');
-$bsched->setPoint('08:30:00', '0');
+$bsched->setPoint('08:10:00', '0');
 $bsched->setPoint('22:00:00', '100');
 
 $sd = new Schedule\DailyScheduler('bedroomblind.scheduler', 'global.schedules', 'bedroomblindschedule', $bsched);
