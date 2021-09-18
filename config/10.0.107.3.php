@@ -19,14 +19,15 @@ $context->addSuperContext('global.context'); // Pass all measurements up to glob
 
 $hole_depth = 65; // Depth of hole (from sensor) in cm
 $pump_on = 30; // Pump comes on when this level is reached (in cm)
-$pump_on_interval = 3600;
-$pump_off = 3; // And goes off when this level is reached (in cm)
+$pump_on_interval = 1800;
+$pump_off = 10; // And goes off when this level is reached (in cm)
 $pump_force = 40; // Pump always operates when level goes above this
 
 $width = 36;
 $length = 56;
 
-$depth = new Device\Sump\DepthSensor("sump.depth", 31, 33, $hole_depth);
+$dist = new Device\Sump\TFLuna("sump.distance", "/dev/ttyS0");
+$depth = new Device\Sump\DepthSensor("sump.depth", $dist, $hole_depth);
 $depth->addDestination(_NAME.'.context', 'sumpdepth'); // Push depth measurements to context
 $conf['devices'][] = $depth;
 
