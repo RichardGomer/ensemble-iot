@@ -55,7 +55,6 @@ class JsonStore extends JsonReader
 
        // Create a lock file so we can recreate the actual file without destroying locks etc.
        $this->datalockfn = $this->datafn.'.lock';
-
        $this->datalockfh = fopen($this->datalockfn, 'w+');
        @chmod($this->datalockfn, 0777); // So web server can edit!
 
@@ -73,7 +72,14 @@ class JsonStore extends JsonReader
        if($this->locked > 1) // Needn't lock again
             return;
 
-       flock($this->datalockfh, LOCK_EX);
+       $start = microtime(true);
+       do {
+           $locked = flock($this->datalockfh, LOCK_EX | LOCK_NB);
+           if(microtime(true) - $start > 5) { // Obtain a lock within 5 seconds
+               $this->locked--;
+               throw new LockException("Couldn't obtain lock on {$this->datalockfn}");
+           }
+       } while(!$locked);
    }
 
    public function getData()
@@ -120,3 +126,5 @@ class JsonStore extends JsonReader
        $this->release();
    }
 }
+
+class LockException extends \Exception {}

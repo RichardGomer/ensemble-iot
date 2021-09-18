@@ -42,15 +42,35 @@ class Client {
 
 class MQTTSubscription {
     public function __construct($host, $port, $topic) {
+
+        $this->host = $host;
+        $this->port = $port;
+        $this->topic = $topic;
+
+        $this->start();
+    }
+
+    protected function start() {
+        usleep(500000);
         $this->thread = new Thread("stdbuf -i0 -o0 -e0 mosquitto_sub", array(
-                    'h' => $host,
-                    'p' => $port,
-                    'F' => '%j',
-                    't' => $topic
-                ));
+            'h' => $this->host,
+            'p' => $this->port,
+            'F' => '%j',
+            't' => $this->topic
+        ));
     }
 
     public function getMessages() {
+        if(!$this->thread->isRunning()) {
+            $c = $this->thread->getExitCode();
+            echo "MQTT thread for '{$this->topic}'@{$this->host}:{$this->port} has stopped with code $c.\nSTDERR:\n";
+            echo "   ".implode("\n   ", $this->thread->error());
+            echo "\nSTDOUT:\n";
+            $this->thread->read();
+            echo "   ".implode("\n   ", $this->thread->getBuffer());
+            $this->start();
+        }
+
         $lines = $this->thread->read();
 
         $messages = array();

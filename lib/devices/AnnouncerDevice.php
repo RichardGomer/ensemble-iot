@@ -37,6 +37,10 @@ class AnnouncerDevice implements \Ensemble\Module {
         return "_Announcer";
     }
 
+    public function getChildDevices() {
+        return false;
+    }
+
     public function getPollInterval() {
         return $this->pollInterval;
     }

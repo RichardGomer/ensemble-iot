@@ -42,15 +42,19 @@ class JsonQueue implements Queue {
      * Return the next post-threshold command in the queue and remove it
      */
     public function shift() {
+        $this->json->lock();
         $q = $this->getQueue();
 
         foreach($q as $i=>$c) {
             if($c['threshold'] <= time()) {
                 array_splice($q, $i, 1);
                 $this->json->queue = $q;
+                $this->json->release();
                 return Command::fromJSON($c['cmd']);
             }
         }
+
+        $this->json->release();
     }
 
     /**
@@ -83,6 +87,13 @@ class JsonQueue implements Queue {
      */
     public function count() {
         return count($this->peekAll());
+    }
+
+    /**
+     * Count ALL commands (ergardless of threshold) in the queue
+     */
+    public function countAll() {
+        return count($this->getQueue());
     }
 
     /**

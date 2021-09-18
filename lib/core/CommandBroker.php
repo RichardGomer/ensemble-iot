@@ -11,6 +11,26 @@ class CommandBroker {
 
     public function addDevice(Module $device) {
         $this->devices[] = $device;
+
+        // Add any child devices
+        $cds = $device->getChildDevices();
+        if(is_array($cds)) {
+            foreach($cds as $cd) {
+                if($cd instanceof Module) {
+                    echo "Add child device ".$cd->getDeviceName()."\n";
+                    $this->addDevice($cd);
+                }
+            }
+        }
+    }
+
+    public function removeDevice(Module $device) {
+        foreach($this->devices as $k=>$d) {
+            if($d === $device) {
+                unset($this->devices[$k]); // Remove the device from the list
+                unset($this->polls[$device->getName()]); // Remove scheduled polls
+            }
+        }
     }
 
     public function setInputQueue(Queue $queue) {
@@ -39,10 +59,10 @@ class CommandBroker {
         }
 
         if($local && !$this->disabledirectlocal) {
-            echo "TX ".$command." [QUEUE LOCAL]\n";
+            echo date('[Y-m-d H:i:s] ')."TX ".$command." [QUEUE LOCAL]\n";
             $this->input->push($command);
         } else {
-            echo "TX ".$command." [QUEUE REMOTE]\n";
+            echo date('[Y-m-d H:i:s] ')."TX ".$command." [QUEUE REMOTE]\n";
             $this->remote->push($command);
         }
     }
@@ -57,26 +77,26 @@ class CommandBroker {
 
             // Don't execute the command if it has expired
             if($command->isExpired()) {
-                echo "RX ".$command." [EXPIRED]\n";
+                echo date('[Y-m-d H:i:s] ')."RX ".$command." [EXPIRED]\n";
                 throw new ExpiredException("Command expired before action");
             }
 
             $device = $this->getTargetDevice($command);
 
             if($device->isBusy()) {
-                echo "RX ".$command." [QUEUE LOCAL, DEVICE BUSY]\n";
+                echo date('[Y-m-d H:i:s] ')."RX ".$command." [QUEUE LOCAL, DEVICE BUSY]\n";
                 throw new DeviceBusyException("Device is busy");
             }
 
-            echo "RX ".$command." [EXECUTE]\n";
+            echo date('[Y-m-d H:i:s] ')."RX ".$command." [EXECUTE]\n";
             $device->action($command, $this);
         } catch(DeviceBusyException $e) { // If the device is busy, return the command to the queue with a threshold
-            $this->input->push($command, time() + 10);
+            $this->input->push($command, time() + 60);
         } catch(DeviceNotFoundException $e) {
             $this->remote->push($command); // Route commands for unknown devices via the remote queue
         } catch(\Exception $e) {
             $t = get_class($e);
-            echo "Exception during execution: [{$t}] {$e->getMessage()}\n";
+            echo date('[Y-m-d H:i:s] ')."Exception during execution: [{$t}] {$e->getMessage()}\n";
             $this->send($command->reply($e)); // If there's an exception, reply with it
         }
 
@@ -111,10 +131,10 @@ class CommandBroker {
 
     protected function poll($name) {
         try {
-            echo "POLL $name\n";
+            echo date('[Y-m-d H:i:s] ')."POLL $name\n";
             $this->getDevice($name)->poll($this);
         } catch(\Exception $e) {
-            echo "Exception during device poll:\n  ".$e->getMessage()."\n";
+            echo date('[Y-m-d H:i:s] ')."Exception during device poll:\n  ".get_class($e)." ".$e->getMessage()."\n";
         }
     }
 
@@ -129,14 +149,18 @@ class CommandBroker {
      */
     public function run() {
 
+        $this->addDevice(new StatusReportDevice($this->input));
+
         // Set up initial poll times for each module
         // Poll times are staggered to try and avoid lumpy performance
         $polls = array();
-        foreach($this->devices as $n=>$d) {
+        $n = 0;
+        foreach($this->devices as $k=>$d) {
             $name = $d->getDeviceName();
             $ptime = $d->getPollInterval();
             if($ptime > 0) {
-                $polls[$name] = $n * 3 + time(); // Stagger offset + time now
+                $polls[$name] = $n * 1 + time(); // Stagger offset + time now
+                $n++;
                 // We don't use the poll interval to begin with, because all devices get polled at startup
             }
         }
@@ -161,9 +185,19 @@ class CommandBroker {
                 usleep(100000);
                 continue;
             }
-
-            $next = $this->input->shift();
-            $this->handle($next);
+            else {
+                /**
+                 * We don't want to block forever consuming commands, because some devices won't actually
+                 * consume them until the next poll; but we do want to make decent headway each time. This loop
+                 * will consume up to 100 commands, before checking whether polling is due
+                 */
+                $n = 0;
+                do {
+                    $next = $this->input->shift();
+                    $this->handle($next);
+                    $n++;
+                } while(!$this->input->isEmpty() && $n < 100);
+            }
         }
     }
 
@@ -172,3 +206,22 @@ class CommandBroker {
 class DeviceNotFoundException extends \Exception {}
 class DeviceBusyException extends \Exception {}
 class ExpiredException extends \Exception {}
+
+class StatusReportDevice extends Device\BasicDevice {
+    public function __construct(JsonQueue $inq) {
+        $this->name = "_QSTATUS";
+        $this->in = $inq;
+    }
+
+    public function poll(\Ensemble\CommandBroker $b) {
+        echo date('[Y-m-d H:i:s] ')."QUEUE STATUS: {$this->in->count()} due of {$this->in->countAll()} queued commands\n";
+    }
+
+    public function announce() {
+        return false;
+    }
+
+    public function getPollInterval() {
+        return 120;
+    }
+}

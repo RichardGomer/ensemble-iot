@@ -39,4 +39,9 @@ interface Module {
      * Trigger routine actions
      */
     public function poll(CommandBroker $broker);
+
+    /**
+     * Some devices need to register child devices; they can do so by returining them here
+     */
+    public function getChildDevices();
 }

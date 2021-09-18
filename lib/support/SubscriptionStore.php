@@ -2,6 +2,9 @@
 
 namespace Ensemble\KeyValue;
 
+/**
+ * A key-value store that can trigger callbacks when updated.
+ */
 class SubscriptionStore {
 
     public function __set($key, $value) {
@@ -12,6 +15,9 @@ class SubscriptionStore {
         return $this->get($key);
     }
 
+    /**
+     * Set a value and trigger subscribed callbacks
+     */
     private $data = array();
     public function set($key, $value) {
         $key = strtoupper($key);
@@ -25,6 +31,10 @@ class SubscriptionStore {
         }
     }
 
+    /**
+     * Get the value of a key
+     * @throws KeyNotSetException
+     */
     public function get($key) {
         $key = strtoupper($key);
         if(!array_key_exists($key, $this->data)) {
@@ -34,10 +44,16 @@ class SubscriptionStore {
         return $this->data[$key];
     }
 
+    /**
+     * Get all defined keys/values
+     */
     public function getAll() {
         return $this->data;
     }
 
+    /**
+     * Subscribe a callback to a key
+     */
     private $subs = array();
     public function sub($key, $cb) {
         $key = strtoupper($key);
@@ -47,7 +63,10 @@ class SubscriptionStore {
         $this->subs[$key][] = $cb;
     }
 
-    // Set keys from an array. Multi-dimensional data is flattened via keys like parent.child.subchild
+    /**
+     * Set keys from an array. Multi-dimensional data is flattened via keys like
+     * parent.child.subchild
+     */
     public function setArray($array, $path = array()) {
 
         foreach($array as $k=>$v) {

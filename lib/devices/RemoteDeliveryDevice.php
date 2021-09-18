@@ -32,6 +32,10 @@ class RemoteDeliveryDevice implements \Ensemble\Module {
         return "_RemoteDelivery";
     }
 
+    public function getChildDevices() {
+        return false;
+    }
+
     public function announce() {
         return false;
     }

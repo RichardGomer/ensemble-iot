@@ -15,11 +15,14 @@ $cli->description("Send a command to an ensemble-iot device")
 ->opt('devicemap:m', 'The path to a device map file to lookup endpoint URLs based on device name', false)
 ->opt('device:d', 'The target device name', true, 'string')
 ->opt('action:a', 'The action to run', true, 'string')
+->opt('expires:X', 'An expiry time (in seconds) for the command (defaults to 15 mins)', false, 
+'integer')
 ->opt('args:x', 'Arguments for the command in the format key=value', false, 'string[]');
 $args = $cli->parse($argv);
 
 $ep = $args->getOpt('endpoint', false);
 $dm = $args->getOpt('devicemap', false);
+$exp = $args->getOpt('exp', 15 * 60);
 
 if($ep === false && $dm === false) {
     echo "You must specify either an endpoint to use for delivery, or a devicemap file\n";
@@ -66,6 +69,7 @@ class DummySource implements Module {
     public function isBusy() { return false; }
     public function getPollInterval() { return 0; }
     public function poll(CommandBroker $broker) { }
+    public function getChildDevices(){ return false; }
 }
 
 $pas = '';
@@ -78,7 +82,7 @@ echo "ARGS: \n$pas\n";
 echo "TARGET: $devicename via $endpoint\n";
 
 $command = Command::create(new DummySource(), $devicename, $action, $pargs);
-$command->setExpires(time() + 120); // Expire in two minutes
+$command->setExpires(time() + $exp); 
 
 $client = Remote\ClientFactory::factory($endpoint);
 

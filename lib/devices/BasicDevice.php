@@ -7,6 +7,8 @@ namespace Ensemble\Device;
 
 abstract class BasicDevice implements \Ensemble\Module {
 
+    use DeviceLogging;
+
     protected $name = false;
 
     public function announce() {
@@ -27,6 +29,10 @@ abstract class BasicDevice implements \Ensemble\Module {
         }
 
         return $this->name;
+    }
+
+    public function getChildDevices() {
+        return false;
     }
 
     /**
@@ -77,23 +83,5 @@ abstract class BasicDevice implements \Ensemble\Module {
             call_user_func($this->replies[$follows]['handler'], $c, $b);
             unset($this->replies[$follows]);
         }
-    }
-
-    /**
-     * Allow a logging device to be set, and used for logging
-     */
-    private $logger = false;
-    public function setLogDevice($name) {
-        $this->logger = $name;
-    }
-
-    public function log($message,  \Ensemble\CommandBroker $via) {
-        echo '['.$this->getDeviceName().'] LOG: '.$message."\n";
-
-        if(!$this->logger)
-            return;
-
-        $c = \Ensemble\Command::create($this, $this->logger, 'log', array('message'=>$message));
-        $via->send($c);
     }
 }

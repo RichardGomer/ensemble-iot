@@ -28,7 +28,7 @@ class FlowMeter
     protected function read() {
         $lines = $this->proc->read();
 
-        var_dump($lines);
+        //var_dump($lines);
 
         foreach($lines as $line) {
             if(preg_match('/([0-9]+):([0-9]+)/', $line, $parts)) {

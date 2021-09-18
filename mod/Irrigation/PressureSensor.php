@@ -21,7 +21,7 @@ class PressureSensor extends \Ensemble\Device\SensorDevice
         $cmd = "python3 -u $ps";
         $this->proc = new \Ensemble\System\Thread($cmd);
         $this->pump = $pump;
-	$this->name = $name;
+	    $this->name = $name;
     }
 
     public function getPollInterval() {
@@ -37,7 +37,7 @@ class PressureSensor extends \Ensemble\Device\SensorDevice
 
         foreach($lines as $line) {
             if(preg_match('/:: ([0-9]+)/', $line, $parts)) {
-                var_dump($line, $parts);
+                //var_dump($line, $parts);
                 $last = $parts[1];
             }
         }

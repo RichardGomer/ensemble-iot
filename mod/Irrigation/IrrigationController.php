@@ -9,8 +9,7 @@ use Ensemble\GPIO\Relay;
  */
 class IrrigationController extends \Ensemble\Device\BasicDevice {
 
-    public function __construct($name, Relay $pump, FlowMeter $flow) {
-        $this->pump = $pump;
+    public function __construct($name, FlowMeter $flow) {
         $this->flow = $flow;
         $this->name = $name;
 
@@ -20,8 +19,8 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
     /**
      * Add a named channel for pumping
      */
-    public function addChannel($name, Relay $valve) {
-        $this->channels[$name] = $valve;
+    public function addChannel($name, Relay $valve, Relay $pump) {
+        $this->channels[$name] = array('valve'=>$valve, 'pump'=>$pump);
     }
 
     /**
@@ -64,7 +63,7 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
             $this->beginPump($this->currentCmd);
         } catch (\Exception $e) {
             $this->currentCmd = false;
-            echo "Can't pump: ".$e->getMessage()."\n";
+            $this->log("Can't pump: ".$e->getMessage());
         }
     }
 
@@ -105,12 +104,13 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
             throw new BadChannelException("Channel '$channel' does not exist");
         }
 
-        $valve = $this->channels[$channel];
+        $valve = $this->channels[$channel]['valve'];
+        $pump = $this->channels[$channel]['pump'];
         $this->flow->reset(); // Reset the flow meter
 
         $this->startTime = time();
 
-        echo "Begin pumping on channel $channel\n";
+        $this->log("Begin pumping on channel $channel");
         $this->logContext($channel, 0);
 
         // Open the valve
@@ -118,13 +118,14 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         usleep(100000); // Wait for valve to open and let power supply settle down
 
         // Start the pump
-        $this->pump->on();
+        $pump->on();
         sleep(3); // 3 seconds should be enough for something to happen!
 
         // Check that there's flow, otherwise abort
         $min = 6;
         if(($flow = $this->flow->measure()) < $min) {
-            $this->pump->off();
+            $pump->off();
+            usleep(200000);
             $valve->off();
             $this->logContext($channel, $flow);
             throw new LowFlowException("Detected less than {$min}ml flow in 3 seconds on channel '$channel' - aborted");
@@ -142,28 +143,35 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         $channel = $cmd->getChannel();
         $this->logContext($channel, $flow);
 
-	if(time() - $this->startTime > 15 * 60) {
-	    // Maximum pumping time of 15 mins exceeded
-	}
-	elseif($flow < $target) {
+        $ptime = time() - $this->startTime;
+
+        $this->log("Pumping in progress. {$flow} of {$target} ml in {$ptime}s on channel $channel");
+
+	    if($ptime > 10 * 60) {
+    	    // Maximum pumping time of 10 mins exceeded
+            $this->log("Maximum pump time exceeded");
+    	}
+    	elseif($flow < $target) {
+            $this->log("Target not reached, continue");
             return false;
         }
 
-        $this->pump->off();
-        usleep(100000); //100msec pause
+        $this->log("Target met. Stopping");
 
-        $valve = $this->channels[$channel];
+        $valve = $this->channels[$channel]['valve'];
+        $pump = $this->channels[$channel]['pump'];
+
+        $pump->off();
+        usleep(200000);
         $valve->off();
 
         $cmd->setFlow($flow);
         $cmd->setTime(time() - $this->startTime);
 
-        usleep(9000000);
         $this->logContext($channel, 0);
 
         return true;
     }
-
 }
 
 
