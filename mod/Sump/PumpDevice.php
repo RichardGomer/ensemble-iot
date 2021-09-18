@@ -12,6 +12,7 @@ class PumpDevice extends \Ensemble\Device\BasicDevice {
         $this->name = $name;
         $this->pump = $pump;
         $this->depth = $depth;
+        $this->requestMin = false;
 
         $this->registerAction('pump', $this, 'a_pump');
     }

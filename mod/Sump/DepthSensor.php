@@ -13,7 +13,7 @@ namespace Ensemble\Device\Sump;
  */
 class DepthSensor extends \Ensemble\Device\SensorDevice
 {
-    public function __construct($name, DepthSensor $sensor, $maxDepth)
+    public function __construct($name, DistanceSensor $sensor, $maxDepth)
     {
         $this->name = $name;
         $this->sensor = $sensor;
@@ -28,7 +28,7 @@ class DepthSensor extends \Ensemble\Device\SensorDevice
             return false;
         }
 
-        $res = array('time'=>time(), 'value'=> $this->maxDepth - $d);
+        $res = array('time'=>time(), 'value'=> $this->maxDepth - $d['value']);
 
         if($send) {
             $this->pushToDestinations($res);

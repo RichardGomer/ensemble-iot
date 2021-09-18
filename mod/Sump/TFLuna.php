@@ -17,7 +17,7 @@ class TFLuna extends DistanceSensor {
   {
       $dev = $this->device;
       $bin = __DIR__.'/TFLuna/distance.py';
-      $cmd = "python3 $bin $dev 5";
+      $cmd = "python3 $bin $dev 100";
       $proc = new \Ensemble\System\Thread($cmd);
       $proc->waitForExit();
       $lines = $proc->read();

@@ -7,11 +7,11 @@ On mine:
 	pin 4, green, gnd
 """
 
-import serial,time
+import sys,serial,time
 import numpy as np
 
 if(len(sys.argv) < 3):
-        print "USAGE: python3 distance.py device n-measurements"
+        print("USAGE: python3 distance.py device n-measurements")
         quit()
 
 DEV = sys.argv[1]
@@ -27,7 +27,6 @@ def tfluna_read():
         else:
             bytes_serial = ser.read(9) # read 9 bytes
             ser.reset_input_buffer() # reset buffer
-            print(type(bytes_serial))
 
             if bytes_serial[0] == 0x59 and bytes_serial[1] == 0x59: # check first two bytes
                 distance = bytes_serial[2] + bytes_serial[3]*256 # distance in next two bytes
@@ -41,8 +40,8 @@ def tfluna_read():
 if ser.isOpen() == False:
     ser.open()
 
-while True:
-	distance,strength,temperature = tfluna_read()
+for i in range(NUM):
+    distance,strength,temperature = tfluna_read()
     if(distance == False):
         print('Failed')
     else:
