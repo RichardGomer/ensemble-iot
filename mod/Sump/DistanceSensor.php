@@ -1,6 +1,6 @@
 <?php
 
-
+namespace Ensemble\Device\Sump;
 
 abstract class DistanceSensor extends \Ensemble\Device\SensorDevice
 {
