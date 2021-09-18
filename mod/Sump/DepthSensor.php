@@ -6,8 +6,6 @@
 
 namespace Ensemble\Device\Sump;
 
-include 'DistanceSensor.php';
-
 /**
  * Measure depth using something like an HC-SR04 sensor
  * triggerPhys / echoPhys are the physical pin numbers of the trigger and echo pins
