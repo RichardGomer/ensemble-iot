@@ -44,7 +44,7 @@ $oct->setGasMeter($octo_gas_meter_mprn, $octo_gas_meter_serial);
 $oct->setTariff($octo_prodcode, $octo_trfcode);
 
 // Agile: $conf['devices'][] = $tariffdevice = new Schedule\OctopusTariffDevice('tariffscheduler', 'global.context', 'electariff', $oct);
-$conf['devices'][] = $tariffdevice = new Schedule\OctopusGoTariffDevice('tariffscheduler', 'global.context', 'electariff', $oct); // Go
+$conf['devices'][] = $tariffdevice = new Schedule\OctopusGoTariffDevice('tariffscheduler', 'global.context', 'electariff'); // Go
 $conf['devices'][] = new Schedule\OctopusGasUsageDevice('gasusagescheduler', 'global.context', 'gasusage', $oct);
 $conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', 'global.context', 'elecusage', $oct);
 
