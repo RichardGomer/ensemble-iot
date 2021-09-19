@@ -248,12 +248,14 @@ $sw_toilet->getStatus()->sub('STATE.POWER', function($key, $value) use ($sw_toil
  * Additional Pump
  */
 $bsched = new Schedule\Schedule();
-$bsched->setPoint('04:00:00', 'ON');
-$bsched->setPoint('04:01:30', 'OFF');
+$bsched->setPoint('08:00:00', 'ON');
+$bsched->setPoint('08:02:00', 'OFF');
 $bsched->setPoint('12:00:00', 'ON');
-$bsched->setPoint('12:01:30', 'OFF');
+$bsched->setPoint('12:02:00', 'OFF');
+$bsched->setPoint('16:00:00', 'ON');
+$bsched->setPoint('16:02:00', 'OFF');
 $bsched->setPoint('20:00:00', 'ON');
-$bsched->setPoint('20:01:30', 'OFF');
+$bsched->setPoint('20:02:00', 'OFF');
 $sd = new Schedule\DailyScheduler('pump2.scheduler', 'global.schedules', 'pump2', $bsched);
 $conf['devices'][] = $sd;
 
