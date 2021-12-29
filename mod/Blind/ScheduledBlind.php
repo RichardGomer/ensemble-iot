@@ -18,6 +18,8 @@ class ScheduledBlind extends \Ensemble\Device\MQTTDevice {
 
             if($ext == 'auto') {
                 $ext = $this->getAutoSetting();
+            } elseif($ext == 'dusk') {
+                $ext = $this->getDuskSetting();
             }
 
             $ext = round($ext / 2, 0) * 2; // Round to nearest 2
@@ -107,9 +109,9 @@ class ScheduledBlind extends \Ensemble\Device\MQTTDevice {
             return $this->extMin;
         }
 
-        // If the sun is below the Horizon, set the blind to minimum shade
+        // If the sun is below the Horizon, set the blind to max
         if($sunAltitude < $this->horizon) {
-            return $this->extMin;
+            return $this->extMax;
         }
 
         // Scale blind shade based on altitude
@@ -120,5 +122,23 @@ class ScheduledBlind extends \Ensemble\Device\MQTTDevice {
 
         return $ext;
     }
+
+    /**
+     * dusk mode closes the blind at dusk
+     */
+     public function getDuskSetting($timestamp=false) {
+         if($timestamp === false) {
+             $timestamp = time();
+         }
+
+         $sunset = date_sunset($timestamp, SUNFUNCS_RET_TIMESTAMP, $this->lat, $this->lng, 96);
+         echo "Sunset is at $sunset\n";
+
+         if($timestamp < $sunset) {
+             return $this->extMin;
+         } else {
+             return $this->extMax;
+         }
+     }
 
 }
