@@ -14,6 +14,8 @@ use Ensemble\Async as Async;
  */
 class TimedSocket extends Socket  {
 
+    $confirmTime =
+
     /**
      * runTime = time to run, in seconds, after the last trigger
      */
@@ -22,6 +24,7 @@ class TimedSocket extends Socket  {
 
         $this->runTime = $runTime;
         $this->lastTrigger = 0;
+        $this->firstTrigger = 0;
     }
 
     // Set this socket to only run when the controller switches OFF
@@ -31,15 +34,28 @@ class TimedSocket extends Socket  {
     }
 
     public function trigger($field, $watts) {
-        if($watts < 1 && is_infinite($this->lastTrigger)) { // Set trigger time when power is turned off
-            $this->log("Power turned OFF ({$watts}W)");
-            $this->lastTrigger = time();
-        } elseif ($watts < 1) { // Power already off; do nothing
-            $this->log("Power is still OFF ({$watts}W)");
+
+        if($watts < 1) { // First handle cases where power is off
+            if(is_infinite($this->lastTrigger)) { // Set trigger time when power is turned off
+                $this->log("Power turned OFF ({$watts}W)");
+                $this->lastTrigger = time();
+                $this->firstTrigger = 0;
+            } else { // Power already off; do nothing
+                $this->log("Power is still OFF ({$watts}W)");
+            }
         }
-        else { // Otherwise power is on, run indefinitely
-            $this->log("Power is ON ({$watts}W)");
-            $this->lastTrigger = INF;
+        else { // Power is ON
+            if ($this->firstTrigger == 0) { // Power just came on
+                $this->log("Power turned ON ({$watts}W)");
+                $this->firstTrigger = time();
+            } else { // Otherwise power is on, run
+                if($this->firstTrigger > time() - 20) { // Don't trigger for 20 seconds, avoids false triggers
+                    $this->log("Power has been on less than 20s, waiting to confirm");
+                } else {
+                    $this->log("Power is ON ({$watts}W)");
+                    $this->lastTrigger = 0;
+                }
+            }
         }
     }
 
@@ -51,7 +67,10 @@ class TimedSocket extends Socket  {
 
             $this->log("Timed socket last triggered: $t");
 
-            if((is_infinite($this->lastTrigger) && !$this->offOnly) || !is_infinite($this->lastTrigger) && $dev->lastTrigger + $dev->runTime > time()) {
+            if((
+                 is_infinite($this->lastTrigger) && !$this->offOnly) ||
+                !is_infinite($this->lastTrigger) && $dev->lastTrigger + $dev->runTime > time()
+            ) {
                 $dev->on();
             } else {
                 $dev->off();
