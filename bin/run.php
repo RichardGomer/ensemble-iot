@@ -171,4 +171,4 @@ if(!isAssoc($conf)) { // Start multiple threads using the configurations
 } else { // Start a single broker thread
     echo "There are no threads defined. Will use a single broker.\n";
     startBroker($conf);
-}
+} 
