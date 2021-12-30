@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The Socket Module is for interfacing with Tasmota smart sockets using MQTT.
+ * The MQTTDevice Module is for interfacing with Tasmota smart sockets using MQTT.
  * Tasmota can be used on hardware like Sonoff and Tuya WiFi switches.
  *
  * State and telemetry data are stored in a SubscriptionStore so changes can be

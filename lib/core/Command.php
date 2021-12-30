@@ -24,6 +24,14 @@ class Command {
         return $cmd;
     }
 
+    // Create a command without a source
+    public static function createOrphan($target, $action, $args) {
+        $cmd = new Command("", $target, $action);
+        $cmd->setArgs($args);
+        $cmd->id = "_orphan_".uniqid("", true);
+        return $cmd;
+    }
+
     // Copy this command and set a new target
     public function copyTo($target) {
         $cmd = clone $this;

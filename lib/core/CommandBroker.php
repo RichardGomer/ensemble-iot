@@ -131,7 +131,10 @@ class CommandBroker {
 
     protected function poll($name) {
         try {
-            echo date('[Y-m-d H:i:s] ')."POLL $name\n";
+            if(substr($name, 0, 1) !== '_') { // Poll special devices quietly!
+                echo date('[Y-m-d H:i:s] ')."POLL $name\n";
+            }
+            
             $this->getDevice($name)->poll($this);
         } catch(\Exception $e) {
             echo date('[Y-m-d H:i:s] ')."Exception during device poll:\n  ".get_class($e)." ".$e->getMessage()."\n";

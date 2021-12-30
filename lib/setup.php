@@ -21,8 +21,7 @@ if(php_sapi_name() === 'cli') {
     ->opt('local-ep:l', 'Specify the URL of our local endpoint, disables auto-guessing', false)
     ->opt('default-ep:d', 'Specify the URL of the default remote endpoint', false)
     ->opt('disable-direct-local', 'Disable direct local delivery, ie force all messages via endpoint (mostly for testing)', false, 'boolean')
-    ->opt('config:c', 'The name of the config file (in ./config/) to use, excluding .php suffix; disables IP-based auto-loading', false)
-    ->opt('rundevices:r', 'Names of devices to run (defaults to all defined devices; specify multiple times for multiple devices)', false, 'string[]');
+    ->opt('config:c', 'The name of the config file (in ./config/) to use, excluding .php suffix; disables IP-based auto-loading', false);
     $args = $cli->parse($argv);
 } else {
     $args = array(
@@ -30,7 +29,6 @@ if(php_sapi_name() === 'cli') {
         'default-ep' => false,
         'disable-direct-local' => false,
         'config' => false,
-        'rundevices' => false
     );
 }
 

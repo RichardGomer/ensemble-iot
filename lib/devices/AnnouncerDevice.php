@@ -2,7 +2,6 @@
 
 /**
  * This device announces local devices to remote endpoints on a regular basis
- * Typically this would be the
  */
 
 namespace Ensemble\Device;
@@ -54,6 +53,14 @@ class AnnouncerDevice implements \Ensemble\Module {
         if($this->map instanceof \Ensemble\Remote\DeviceMap) {
             $remotes = array_unique(array_merge($this->map->getEndpoints(), $remotes));
         }
+
+        /**
+         * Threading adds some complexities into announcements.
+         * We should:
+         * 1) Pick only one of our own EPs to announce to each remote; so that e.g. threads use json, others use HTTP
+         * 2) Not announce json to remote EPs, which can only use HTTP
+         * What are the rules? Only announce "compatible" endpoints?
+         */
 
         foreach($remotes as $r) {
             try {

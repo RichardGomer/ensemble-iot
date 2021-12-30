@@ -20,7 +20,7 @@ $conf['devices'][] = new Device\LoggerDevice('global.log', new Log\TextLog(_VAR.
  * global.context is intended as the master context device
  */
 if(!file_exists(__DIR__.'/dbcreds.php')) {
-        echo "Set \$dbhost, \$dbname, \$dbuser and \$dbpass in config/dbcreds.php\n";
+        echo "Create and populate config/dbcreds.php\n";
         exit;
 }
 

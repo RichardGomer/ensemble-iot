@@ -36,7 +36,7 @@ abstract class Device implements \Ensemble\Module {
     }
 
     public function getPollInterval() {
-        return 5;
+        return 0.1; // We can request frequent polling because the broker prioritises incoming commands over polling anyway
     }
 
     /**

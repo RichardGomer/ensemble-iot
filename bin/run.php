@@ -6,8 +6,6 @@ ini_set('memory_limit', '256M');
 
 require dirname(__DIR__).'/lib/setup.php';
 
-$broker = $conf['broker'] = new CommandBroker(); // Expose the broker during config
-
 // Load device config, if any, based on IP address
 $configured = false;
 if(!$args['config']) {
@@ -39,7 +37,8 @@ if(!$args['config']) {
 }
 
 /**
- * TODO: Allow multiple brokers to be started; each in a thread.
+ * Allow multiple brokers to be started; each in a thread.
+ *
  * If $conf[] is just an integer-indexed array, then treat each key as a
  * separate config array. For each one:
  * Set a config number; spawn a new thread; have the child thread kick off the
@@ -47,35 +46,49 @@ if(!$args['config']) {
  * The main thread will just wait until the others are done.
  * Each thread will have its own remote delivery device etc.
  *
- * Options: have threads share the incoming queue but only pick up their own
- * commands? Or use the main thread to split them up somehow? JSONQueue would
- * need to be device-aware to do filtering; otherwise peek/shift don't make sense
- * COULD: Use the main thread as a router; and have the child threads do all routing
+ * We use the main thread as a router; and have the child threads do all routing
  * through it (i.e they have only a default endpoint, receive no announcements).
- * But take their announcements into our own device map (that would happen automatically
- * anyway; as they announce to us) and do routing via a new kind of endpoint - shmop?, jsonqueue?
+ * We can route to them because we receive their announcements.
+ *
+ * Remote devices CANNOT route to threads; so at the moment the main thread needs
+ * to be a default route in order for commands to reach subthreads from outside.
+ * TODO: Fix that ^^ - make HTTP endpoint aware of subthreads?
  *
  * Check: Each thread will do its own announcements, but to a single HTTP
  * endpoint. So check that that works (and that they don't e.g. overwrite
  * one anothers announcements)
- *
- *
  */
+
+// Record runtime status information
+$status = new Storage\JsonStore('devicestatus');
+$status->proc = getmypid();
+$status->started = time();
+$status->ips = $ips = System\IP::getIPs();
+
 
 /**
- * Start a single broker using the defined config in $conf
+ * Start a single broker using a configuration array, $conf
+ *
+ *
  */
 function startBroker($conf) {
-  // Record runtime status information
-  $status = new Storage\JsonStore('devicestatus');
-  $status->proc = getmypid();
-  $status->started = time();
-  $status->ips = $ips = System\IP::getIPs();
 
+  /**
+   * For the main thread, these are "real"; for subthreads they need to be
+   * configured as JsonQueue instances:
+   *     inputQueue: Should be a single queue for each thread
+   *     remoteQueue: Should be the main thread's input queue
+   */
   $inputQueue = $conf['queue_in'];
   $remoteQueue = $conf['queue_remote'];
+
+  /**
+   * For the main thread, this is a real devicemap; for subthreads it will be
+   * blank so that all commands go via the default endpoint (main thread)
+   */
   $deviceMap = $conf['device_map'];
 
+  $broker = new CommandBroker();
 
   $broker->setRemoteQueue($remoteQueue);
   $broker->setInputQueue($inputQueue);
@@ -107,14 +120,7 @@ function startBroker($conf) {
 
   // Register defined devices
   foreach($conf['devices'] as $d) {
-
       $dn = $d->getDeviceName();
-
-      if(is_array($args['rundevices']) && count($args['rundevices']) > 0 && !in_array($dn, $args['rundevices'])) {
-          echo "Skip device ".$dn;
-          continue;
-      }
-
       echo "Added device $dn\n";
       $broker->addDevice($d);
   }
@@ -122,4 +128,47 @@ function startBroker($conf) {
   $broker->run();
 }
 
-startBroker($conf);
+function isAssoc(array $arr)
+{
+    if (array() === $arr) return false;
+    return array_keys($arr) !== range(0, count($arr) - 1);
+}
+
+if(!isAssoc($conf)) { // Start multiple threads using the configurations
+
+    echo "There are multiple threads defined. Will use child brokers.\n";
+
+    $masterConfig = $conf[0];
+
+    foreach($conf as $num => $subconf) {
+
+        if($num == 0) { // Skip config 0, we'll run it in the master thread
+            continue;
+        }
+
+        $cpid = \pcntl_fork(); // Fork
+        $subthread = $cpid == 0; //... and determine if we're the child thread
+        if($subthread) { // If so, start the thread
+            // Tidy up the config; e.g. wire up the input/output queues
+            echo "Start thread $num...\n";
+            $c = &$conf[$num];
+            $c['default_endpoint'] = "json:".($oq = "q_in.json"); // Commands all go via main thread
+            $c['endpoint_url'] = "json:".($iq = "q_thread{$num}.json"); // Our endpoint is a JSON queue
+            $c['queue_in'] = new JsonQueue($iq); // Create our input queue
+            $c['queue_remote'] = new JsonQueue($oq); // Connect the remote queue
+            $c['disable-direct-local'] = false;
+            $c['device_map'] = new Remote\DeviceMap(new Storage\JsonStore("device_map_t{$num}.json"));
+
+            startBroker($conf[$num]);
+            echo "Thread $num has ended\n";
+            exit;
+        }
+    }
+
+    echo "Start master thread\n";
+    startBroker($masterConfig);
+
+} else { // Start a single broker thread
+    echo "There are no threads defined. Will use a single broker.\n";
+    startBroker($conf);
+}
