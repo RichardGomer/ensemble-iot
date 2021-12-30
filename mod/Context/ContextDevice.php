@@ -167,4 +167,36 @@ class ContextDevice extends BasicDevice {
 
     }
 
+    public function action_clearPriority(\Ensemble\Command $cmd, \Ensemble\CommandBroker $b) {
+        $minp = $cmd->getArgOrValue('priority', 100);
+        $field = $cmd->getArg('field');
+
+        $this->clearPriority($field, $minp);
+
+        // Copy the update to supercontexts
+        foreach($this->supers as $s) {
+            $scmd = $cmd->copyTo($s);
+            $b->send($scmd);
+        }
+    }
+
+    /**
+     * Clear out values for the named field with a priority strictly less (i.e. higher) than $minPriority
+     * Use to, for example, remove overrides that have been set manually
+     */
+    public function clearPriority($field, $minPriority=100) {
+        if(!array_key_exists($field, $this->data)) {
+            throw new \Exception("Field '$field' is not set so cannot be priority-cleared");
+        }
+
+        $data = &$this->data[$field];
+
+        // Clean up expired values and values for the same timestamp
+        foreach($data as $i=>$record) {
+            if(($record['priority'] <= $minPriority)) {
+                unset($data[$i]);
+            }
+        }
+    }
+
 }
