@@ -9,7 +9,7 @@ class Sensor extends \Ensemble\Device\SensorDevice {
      */
     public static function enable($gpio) {
         $gpio = (int) $gpio;
-        exec("dtoverlay w1-gpio gpiopin=$gpio pullup=0");
+        exec("sudo dtoverlay w1-gpio gpiopin=$gpio pullup=0");
     }
 
     public function getPollInterval() {
@@ -35,7 +35,7 @@ class Sensor extends \Ensemble\Device\SensorDevice {
             throw new SensorNotFoundException("Field {$this->field} not found on sensor {$this->id}");
         }
 
-        $reading = file_get_contents($path);
+        $reading = file_get_contents($fpath);
 
         return array('time'=>time(), 'reading'=>$reading);
     }
@@ -50,9 +50,7 @@ class TemperatureSensor extends Sensor {
     public function measure() {
         $raw = parent::measure();
 
-        foreach($raw as $k=>$v) {
-            $raw[$k] = $v / 1000;
-        }
+        $raw['reading'] = $raw['reading'] / 1000;
 
         return $raw;
     }
