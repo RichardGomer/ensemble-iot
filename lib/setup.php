@@ -39,12 +39,21 @@ if($args['disable-direct-local']) {
 }
 
 function getIPs() {
-    $ips = System\IP::getIPs();
-    if(count($ips) < 1) {
-            echo "Can't detect local IP addresses\n";
-            exit;
-    }
-    return $ips;
+    echo "Get local IP addresses ";
+    $tries = 0;
+    do {
+        $ips = System\IP::getIPs();
+        if(count($ips) < 1) {
+            echo ".";
+            sleep(5);
+        } else {
+            return $ips;
+        }
+        $tries++;
+    } while($tries < 10);
+
+    echo " FAILED\n";
+    exit;
 }
 
 if(!$args['local-ep']) {
