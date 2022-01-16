@@ -84,4 +84,8 @@ class MQTTSubscription {
 
         return $messages;
     }
+
+    public function close() {
+        $this->thread->close();
+    }
 }

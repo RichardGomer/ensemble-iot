@@ -29,8 +29,9 @@ $conf['devices'][] = $sd_doffpeak;
 
 
 $client = new MQTTClient('10.0.0.8', 1883);
+$conf['devices'][] = $bridge = new MQTT\Bridge("mqttbridge", new MQTT\Client('10.0.0.8', '1883'));
 
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("testsocket", $client, new Device\ContextPointer('test.schedules', 'testschedule'), "immersion");
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("testsocket", $bridge, new Device\ContextPointer('test.schedules', 'testschedule'), "immersion");
 
 
 class SocketTestDevice extends Device\BasicDevice {

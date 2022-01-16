@@ -47,6 +47,7 @@ function getIPs() {
             echo ".";
             sleep(5);
         } else {
+            echo " OK\n";
             return $ips;
         }
         $tries++;

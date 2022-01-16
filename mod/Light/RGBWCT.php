@@ -5,9 +5,9 @@
  */
 
 namespace Ensemble\Device\Light;
-use Ensemble\MQTT\Client as MQTTClient;
-use Ensemble\Async as Async;
-use Ensemble\Schedule as Schedule;
+use Ensemble\MQTT;
+use Ensemble\Async;
+use Ensemble\Schedule;
 
 /**
  * Controls an RGBWCT Tasmota device using a schedule. Schedule must be stored
@@ -16,15 +16,15 @@ use Ensemble\Schedule as Schedule;
  *
  * Check the docs below for information about the schedule
  */
-class RGBWCT extends \Ensemble\Device\MQTTDevice {
+class RGBWCT extends MQTT\Tasmota {
 
     private $t_interval = 5; // Telemetry interval
     private $sched_polltime = 120; // Poll for schedule every two minutes
     protected $schedule = false;
 
-    public function __construct($name, MQTTClient $client, $deviceName, $context_device, $context_field) {
+    public function __construct($name, MQTT\Bridge $bridge, $deviceName, $context_device, $context_field) {
 
-        parent::__construct($name, $client, $deviceName);
+        parent::__construct($name, $bridge, $deviceName);
 
         $this->setTeleInterval(30);
 

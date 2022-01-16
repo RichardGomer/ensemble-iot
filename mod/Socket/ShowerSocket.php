@@ -1,7 +1,7 @@
 <?php
 
 namespace Ensemble\Device\Socket;
-use Ensemble\MQTT\Client as MQTTClient;
+use Ensemble\MQTT as MQTT;
 use Ensemble\Async as Async;
 
 /**
@@ -11,7 +11,7 @@ class ShowerSocket extends Socket  {
 
     private $threshold = 5; // Threshold power in watts
 
-    public function __construct($name, MQTTClient $client, $deviceName) {
+    public function __construct($name, MQTT\Bridge $client, $deviceName) {
         parent::__construct($name, $client, $deviceName);
         $this->on();
     }

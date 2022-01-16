@@ -1,8 +1,8 @@
 <?php
 
 namespace Ensemble\Device\Socket;
-use Ensemble\MQTT\Client as MQTTClient;
-use Ensemble\Async as Async;
+use Ensemble\MQTT;
+use Ensemble\Async;
 
 /**
  * Timed sockets run for a period of time after being triggered by another
@@ -19,8 +19,8 @@ class TimedSocket extends Socket  {
     /**
      * runTime = time to run, in seconds, after the last trigger
      */
-    public function __construct($name, MQTTClient $client, $deviceName, $powerNum="", $runTime=900) {
-        parent::__construct($name, $client, $deviceName, $powerNum);
+    public function __construct($name, MQTT\Bridge $bridge, $deviceName, $powerNum="", $runTime=900) {
+        parent::__construct($name, $bridge, $deviceName, $powerNum);
 
         $this->runTime = $runTime;
         $this->lastTrigger = 0;
@@ -86,4 +86,3 @@ class TimedSocket extends Socket  {
         });
     }
 }
- 

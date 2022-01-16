@@ -1,7 +1,7 @@
 <?php
 
 namespace Ensemble\Device\Socket;
-use Ensemble\MQTT\Client as MQTTClient;
+use Ensemble\MQTT as MQTT;
 use Ensemble\Schedule as Schedule;
 use Ensemble\Async as Async;
 use Ensemble\Device as Device;
@@ -29,8 +29,8 @@ class ScheduledSocket extends Socket {
      * Construct with the name of the context device and field name to poll
      * for the (JSON) schedule
      */
-    public function __construct($name, MQTTClient $client, Device\ContextPointer $ctxptr, $deviceName, $powerNum="") {
-        parent::__construct($name, $client, $deviceName, $powerNum);
+    public function __construct($name, MQTT\Bridge $bridge, Device\ContextPointer $ctxptr, $deviceName, $powerNum="") {
+        parent::__construct($name, $bridge, $deviceName, $powerNum);
 
         $this->ctx = $ctxptr;
 
