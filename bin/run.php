@@ -53,10 +53,6 @@ if(!$args['config']) {
  * Remote devices CANNOT route to threads; so at the moment the main thread needs
  * to be a default route in order for commands to reach subthreads from outside.
  * TODO: Fix that ^^ - make HTTP endpoint aware of subthreads?
- *
- * Check: Each thread will do its own announcements, but to a single HTTP
- * endpoint. So check that that works (and that they don't e.g. overwrite
- * one anothers announcements)
  */
 
 // Record runtime status information
@@ -171,4 +167,4 @@ if(!isAssoc($conf)) { // Start multiple threads using the configurations
 } else { // Start a single broker thread
     echo "There are no threads defined. Will use a single broker.\n";
     startBroker($conf);
-} 
+}

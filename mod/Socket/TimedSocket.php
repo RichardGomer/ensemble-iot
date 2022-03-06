@@ -14,8 +14,6 @@ use Ensemble\Async;
  */
 class TimedSocket extends Socket  {
 
-    $confirmTime =
-
     /**
      * runTime = time to run, in seconds, after the last trigger
      */

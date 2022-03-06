@@ -29,11 +29,13 @@ class Socket extends MQTT\Tasmota {
     }
 
     public function on() {
-        $this->send($this->topic_command.'POWER'.$this->powerNum, 'ON');
+        if(!$this->isOn())
+            $this->send($this->topic_command.'POWER'.$this->powerNum, 'ON');
     }
 
     public function off() {
-        $this->send($this->topic_command.'POWER'.$this->powerNum, 'OFF');
+        if($this->isOn())
+            $this->send($this->topic_command.'POWER'.$this->powerNum, 'OFF');
     }
 
     /**

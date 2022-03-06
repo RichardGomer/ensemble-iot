@@ -51,8 +51,8 @@ class MQTTSubscription {
     }
 
     protected function start() {
-        usleep(500000);
-        $this->thread = new Thread("stdbuf -i0 -o0 -e0 mosquitto_sub", array(
+        usleep(5000);
+        $this->thread = new Thread("stdbuf -i0 -o0 -e0 mosquitto_sub -R ", array(
             'h' => $this->host,
             'p' => $this->port,
             'F' => '%j',

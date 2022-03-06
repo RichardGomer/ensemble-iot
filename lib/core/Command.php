@@ -35,6 +35,7 @@ class Command {
     // Copy this command and set a new target
     public function copyTo($target) {
         $cmd = clone $this;
+        $cmd->setArg('_lastTarget', $cmd->getTarget()); // Store the previous target
         $cmd->target = $target;
         return $cmd;
     }

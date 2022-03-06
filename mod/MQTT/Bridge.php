@@ -30,7 +30,7 @@ class Bridge extends BasicDevice {
     }
 
     public function getPollInterval() {
-        return 0.1;
+        return 0.01;
     }
 
     private $subs = array();
@@ -42,6 +42,7 @@ class Bridge extends BasicDevice {
 
             $messages = $client->getMessages();
             foreach($messages as $m) {
+                echo "MQTT: {$m['topic']} {$m['message']}\n";
                 $cmd = $trans->convert($this, $m['topic'], $m['message']);
                 $broker->send($cmd);
             }
@@ -57,7 +58,7 @@ class Bridge extends BasicDevice {
     }
 
     /**
-     *
+     * Create a basic subscription - shorthand for creating a BasicTranslator and subscribing it
      */
     public function subscribeBasic($topic, $destination, $commandName, $payloadField="mqtt_payload") {
         $this->subscribe($topic, new BasicTranslator($destination, $commandName, $payloadField));

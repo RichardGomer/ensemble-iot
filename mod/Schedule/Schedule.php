@@ -195,13 +195,16 @@ class Schedule {
         return $last['status'];
     }
 
-    public function getNow() {
-        return $this->getAt(time());
+    /**
+     * Get status now, optionally offset by a given number of seconds
+     */
+    public function getNow($offset = 0) {
+        return $this->getAt(time() + $offset);
     }
 
     // Return the current period in the format array($lastChangeTime => $currentStatus, $nextChangeTime => $nextStatus)
-    public function getCurrentPeriod() {
-        $now = time();
+    public function getCurrentPeriod($offset=0) {
+        $now = time() + $offset;
         foreach($this->getChangePoints() as $time) {
             if($time > $now) {
                 if($lastTime == false) {

@@ -5,12 +5,12 @@
  */
 
 namespace Ensemble\Device\Blind;
-use Ensemble\MQTT\Client as MQTTClient;
-use Ensemble\Async as Async;
+use Ensemble\MQTT;
+use Ensemble\Async;
 
-class ScheduledBlind extends \Ensemble\Device\MQTTDevice {
+class ScheduledBlind extends MQTT\Tasmota {
 
-    public function __construct($name, MQTTClient $client, $deviceName, \Ensemble\Device\ContextPointer $schedule) {
+    public function __construct($name, MQTT\Bridge $client, $deviceName, \Ensemble\Device\ContextPointer $schedule) {
         parent::__construct($name, $client, $deviceName);
 
         $last = null;
@@ -20,6 +20,8 @@ class ScheduledBlind extends \Ensemble\Device\MQTTDevice {
                 $ext = $this->getAutoSetting();
             } elseif($ext == 'dusk') {
                 $ext = $this->getDuskSetting();
+            } elseif($ext == 'dawn') {
+                $ext = $this->getDawnSetting();
             }
 
             $ext = round($ext / 2, 0) * 2; // Round to nearest 2
@@ -140,5 +142,23 @@ class ScheduledBlind extends \Ensemble\Device\MQTTDevice {
              return $this->extMax;
          }
      }
+
+     /**
+      * dawn mode opens the blind at dawn
+      */
+      public function getDawnSetting($timestamp=false) {
+          if($timestamp === false) {
+              $timestamp = time();
+          }
+
+          $sunrise = date_sunrise($timestamp, SUNFUNCS_RET_TIMESTAMP, $this->lat, $this->lng, 89);
+          echo "Sunrise is at $sunrise\n";
+
+          if($timestamp < $sunrise) {
+              return $this->extMax;
+          } else {
+              return $this->extMin;
+          }
+      }
 
 }
