@@ -26,16 +26,28 @@ class Socket extends MQTT\Tasmota {
         $this->powerNum = $powerNum; // Multi-channel controllers have e.g. POWER1, POWER2 ...
 
         $this->setTeleInterval(5);
+
+        // Set up a subscription to sync internal power state with that received from the device
+        $dev = $this;
+        $this->status->sub("STATE>POWER{$powerNum}", function($k, $v) use ($dev) {
+            $dev->on = $v == 'ON';
+        });
     }
 
+    private $on = null; // avoid sending unnecessary state changes
+
     public function on() {
-        if(!$this->isOn())
+        if($this->on !== true)
             $this->send($this->topic_command.'POWER'.$this->powerNum, 'ON');
+
+        $this->on = true;
     }
 
     public function off() {
-        if($this->isOn())
+        if($this->on !== false)
             $this->send($this->topic_command.'POWER'.$this->powerNum, 'OFF');
+
+        $this->on = false;
     }
 
     /**

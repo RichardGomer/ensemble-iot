@@ -25,7 +25,7 @@ abstract class Tasmota extends Async\Device {
 
     private $t_interval = 15; // Telemetry interval
 
-    protected $topic, $topic_command, $mqtt;
+    protected $topic, $topic_command, $mqtt, $status;
 
     const MQTT_COMMAND = 'do_rcv_mqtt';
 
