@@ -25,7 +25,7 @@ class SoftStart extends GPIO\Relay {
         usleep(100000);
 
         $script = dirname(__FILE__).'/softstart/softstart.py';
-        $this->thread = new System\Thread("python3 $script {$this->pin->getPhys()} {$this->intensity}");
+        $this->thread = new System\Thread("python3 $script {$this->pins[0]->getPhys()} {$this->intensity}");
     }
 
     public function off() {

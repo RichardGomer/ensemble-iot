@@ -83,7 +83,7 @@ class IrrigationDoser extends \Ensemble\Device\BasicDevice {
     public function poll(\Ensemble\CommandBroker $b) {
 
         // Get flow volume
-        $newflow = this->flow->getFlow();
+        $newflow = $this->flow->getFlow();
 
         // If flow has been reset, reset our total, too
         if($newflow < $this->lastflow) {

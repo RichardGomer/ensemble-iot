@@ -16,6 +16,9 @@ $ctx = new Device\ContextDevice("greenhouse.context");
 $ctx->addSuperContext("global.context");
 $conf['devices'][] = $ctx;
 
+// A local schedule context too
+$conf['devices'][] = $sctx = new Device\ContextDevice('greenhouse.schedules');
+
 /**
  * Bluetooth data logger
  */
@@ -49,10 +52,27 @@ $conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($s
 
 
 /**
+ * Greenhouse Growlight
+ */
+// Use a custom schedule, 0600-1600 = 10hours of light per day
+$bsched = new Schedule\Schedule();
+$bsched->setPoint('00:00:00', 'OFF');
+$bsched->setPoint('06:00:00', 'ON');
+$bsched->setPoint('16:00:00', 'OFF');
+$sd_growlight = new Schedule\DailyScheduler('growlight1.scheduler', 'greenhouse.schedules', 'growlight', $bsched);
+$conf['devices'][] = $sd_growlight;
+
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-growlight1", $client, new Device\ContextPointer('greenhouse.schedules', 'growlight'), "socket12");
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('greenhouse.context', 'power-growlight');
+
+
+/**
  * Irrigation
  */
 $pump = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 100); # full pwoer pumping, using soft starter
-$pumplow = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 40); # low power pumping mode
+$pumpmed = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 70); # low power pumping mode
+$pumplow = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 85); # v. low power pumping mode
+
 $flow = new Ir\FlowMeter(26);
 $dosepump = new Relay(Pin::BCM(6, Pin::OUT));
 
@@ -69,9 +89,15 @@ $ic->addChannel(2, new Relay(Pin::BCM(18, Pin::OUT)), $pump);
 $ic->addChannel(3, new Relay(Pin::BCM(27, Pin::OUT)), $pump);
 $ic->addChannel(4, new Relay(Pin::BCM(22, Pin::OUT)), $pump);
 
-$ic->addChannel('h1', new Relay(Pin::BCM(13, Pin::OUT)), $pumplow);
-$ic->addChannel('h2', new Relay(Pin::BCM(5, Pin::OUT)), $pumplow);
-$ic->addChannel('h3', new Relay(Pin::BCM(12, Pin::OUT)), $pumplow);
+$ic->addChannel('h', new Relay(array($h1 = Pin::BCM(13, Pin::OUT), $h2 = Pin::BCM(5, Pin::OUT), $h3 = Pin::BCM(12, Pin::OUT))), $pumpmed);
+$ic->addChannel('h1', new Relay($h1), $pumplow);
+$ic->addChannel('h2', new Relay($h2), $pumplow);
+$ic->addChannel('h3', new Relay($h3), $pumplow);
+
+
+
+//$ic->addChannel('h2', new Relay(Pin::BCM(5, Pin::OUT)), $pumplow);
+//$ic->addChannel('h3', new Relay(Pin::BCM(12, Pin::OUT)), $pumplow);
 
 $conf['devices'][] = $ic;
 $conf['devices'][] = $ps;

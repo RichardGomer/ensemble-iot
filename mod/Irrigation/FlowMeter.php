@@ -28,7 +28,7 @@ class FlowMeter
     protected function read() {
         $lines = $this->proc->read();
 
-        //var_dump($lines);
+        var_dump($lines);
 
         foreach($lines as $line) {
             if(preg_match('/([0-9]+):([0-9]+)/', $line, $parts)) {
@@ -48,10 +48,11 @@ class FlowMeter
      * flow rate.
      */
     protected function calculateFlow($revs, $time) {
-        return $revs * 2.25; // On the YFS-201, each pulse is 2.25ml +-10%
+        return $revs * 5; // On the YFS-201, each pulse is 2.25ml +-10%; on the new sensor it seems to be about 5ml
     }
 
     public function reset() {
+	echo "Flow meter reset\n";
         $this->proc->read(); // Discard any waiting output from the background monitor
         $this->totalFlow = 0;
     }

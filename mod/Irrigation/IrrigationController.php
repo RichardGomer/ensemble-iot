@@ -115,20 +115,20 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
 
         // Open the valve
         $valve->on();
-        usleep(100000); // Wait for valve to open and let power supply settle down
+        usleep(200000); // Wait for valve to open and let power supply settle down
 
         // Start the pump
         $pump->on();
-        sleep(3); // 3 seconds should be enough for something to happen!
+        sleep(3); // should be enough for something to happen!
 
         // Check that there's flow, otherwise abort
         $min = 6;
         if(($flow = $this->flow->measure()) < $min) {
             $pump->off();
-            usleep(200000);
+            usleep(500000);
             $valve->off();
             $this->logContext($channel, $flow);
-            throw new LowFlowException("Detected less than {$min}ml flow in 3 seconds on channel '$channel' - aborted");
+            throw new LowFlowException("Detected flow {$flow}ml is less than {$min}ml flow on channel '$channel' - aborted");
         }
     }
 
@@ -162,7 +162,7 @@ class IrrigationController extends \Ensemble\Device\BasicDevice {
         $pump = $this->channels[$channel]['pump'];
 
         $pump->off();
-        usleep(200000);
+        usleep(1500000); // 1.5sec - time for softstop
         $valve->off();
 
         $cmd->setFlow($flow);
