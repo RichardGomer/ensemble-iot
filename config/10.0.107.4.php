@@ -9,7 +9,8 @@ use \Ensemble\Device\Irrigation as Ir;
 use \Ensemble\GPIO\Pin;
 use \Ensemble\GPIO\Relay;
 
-require __DIR__.'/home.php';
+date_default_timezone_set('Europe/London');
+$conf['default_endpoint'] = 'http://10.0.0.8:3107/ensemble-iot/1.0/';
 
 // We use a local context to reduce network dependency
 $ctx = new Device\ContextDevice("greenhouse.context");
@@ -33,8 +34,8 @@ $s->addDestination("greenhouse.context", "greenhouse-moisture");
 /**
  * Heating
  */
-$bridge = new MQTT\Bridge(new MQTT\Client('10.0.0.8', 1883););
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenhouse", $bridge, new Device\ContextPointer('global.schedules', 'offpeak'), "socket9");
+$bridge = new MQTT\Bridge('_greenhouse.mqttbridge', new MQTT\Client('10.0.0.8', 1883));
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenhouse", $bridge, new Device\ContextPointer('energy.schedules', 'offpeak'), "socket9");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('greenhouse.context', 'power-greenhouse');
 $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable the heater until the driver can take over
 
