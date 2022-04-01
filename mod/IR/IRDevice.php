@@ -2,11 +2,11 @@
 
 namespace Ensemble\Device\IR;
 
-abstract class IRDevice extends \Ensemble\Device\MQTTDevice {
+abstract class IRDevice extends \Ensemble\MQTT\Tasmota {
 
-    public function __construct($name, \Ensemble\MQTT\Client $client, $deviceName) {
+    public function __construct($name, \Ensemble\MQTT\Bridge $bridge, $deviceName) {
 
-        parent::__construct($name, $client, $deviceName);
+        parent::__construct($name, $bridge, $deviceName);
     }
 
     // Send an IR command. $ircmd should be a tasmota IR command string  like:

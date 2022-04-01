@@ -12,28 +12,42 @@
  */
 
 namespace Ensemble\Device\Socket;
-use Ensemble\MQTT\Client as MQTTClient;
-use Ensemble\Async as Async;
+use Ensemble\MQTT;
+use Ensemble\Async;
 
-class Socket extends \Ensemble\Device\MQTTDevice {
+class Socket extends MQTT\Tasmota {
 
     private $t_interval = 5; // Telemetry interval
 
-    public function __construct($name, MQTTClient $client, $deviceName, $powerNum="") {
+    public function __construct($name, MQTT\Bridge $bridge, $deviceName, $powerNum="") {
 
-        parent::__construct($name, $client, $deviceName);
+        parent::__construct($name, $bridge, $deviceName);
 
         $this->powerNum = $powerNum; // Multi-channel controllers have e.g. POWER1, POWER2 ...
 
         $this->setTeleInterval(5);
+
+        // Set up a subscription to sync internal power state with that received from the device
+        $dev = $this;
+        $this->status->sub("STATE>POWER{$powerNum}", function($k, $v) use ($dev) {
+            $dev->on = $v == 'ON';
+        });
     }
 
+    private $on = null; // avoid sending unnecessary state changes
+
     public function on() {
-        $this->send($this->topic_command.'POWER'.$this->powerNum, 'ON');
+        if($this->on !== true)
+            $this->send($this->topic_command.'POWER'.$this->powerNum, 'ON');
+
+        $this->on = true;
     }
 
     public function off() {
-        $this->send($this->topic_command.'POWER'.$this->powerNum, 'OFF');
+        if($this->on !== false)
+            $this->send($this->topic_command.'POWER'.$this->powerNum, 'OFF');
+
+        $this->on = false;
     }
 
     /**
@@ -64,7 +78,6 @@ class PowerMeter extends \Ensemble\Device\SensorDevice {
 
     public function measure() {
         try {
-            $this->socket->pollMQTT();
             $power = $this->socket->getStatus()->get($this->key);
         }
         catch(\Ensemble\KeyValue\KeyNotSetException $e) { // This is a legit case for an offline device, so don't log it as an error

@@ -9,11 +9,11 @@ use Ensemble\Async as Async;
 
 class NettaHeater extends IRDevice {
 
-    public function __construct($name, \Ensemble\MQTT\Client $client, $deviceName, $context_device, $context_field) {
+    public function __construct($name, \Ensemble\MQTT\Bridge $bridge, $deviceName, $context_device, $context_field) {
         $this->context_field = $context_field;
         $this->context_device = $context_device;
 
-        parent::__construct($name, $client, $deviceName);
+        parent::__construct($name, $bridge, $deviceName);
     }
 
     const CMD_UP = '{"Protocol":"SYMPHONY","Bits":12,"Data":"0xD84","DataLSB":"0xB021","Repeat":0}';

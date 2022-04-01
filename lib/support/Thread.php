@@ -95,7 +95,7 @@ class Thread
 	function waitForExit()
 	{
 	        do {
-	                usleep(100000);
+	                usleep(1000);
 	                $s = $this->getStatus();
 	        } while($s !== false && $s['running'] == true);
 	}

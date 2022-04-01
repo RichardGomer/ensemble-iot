@@ -33,8 +33,8 @@ class LoggingContextDevice extends ContextDevice {
     /**
      * Update a field
      */
-    public function update($field, $value, $time=false, $source='', $store=true) {
-        parent::update($field, $value, $time, $source);
+    public function update($field, $value, $priority, $time=false, $source='', $expires, $store=true) {
+        parent::update($field, $value, $priority, $time, $source, $expires);
 
         if($value === "" || $value===false)
             return; // Don't save blank values!
@@ -116,7 +116,7 @@ class LoggingContextDevice extends ContextDevice {
         while(($row = $st->fetch()) !== false) {
             $n++;
             //echo "$n / $tot   SET {$row['field']} = {$row['value']}\n";
-            $this->update($row['field'], $row['value'], $row['time'], $row['source'], false);
+            $this->update($row['field'], $row['value'], 100, $row['time'], $row['source'], false, false);
         }
 
     }

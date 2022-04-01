@@ -36,7 +36,7 @@ abstract class Device implements \Ensemble\Module {
     }
 
     public function getPollInterval() {
-        return 5;
+        return 0.1; // We can request frequent polling because the broker prioritises incoming commands over polling anyway
     }
 
     /**
@@ -125,15 +125,20 @@ abstract class Device implements \Ensemble\Module {
  * The received action is returned.
  */
 class WaitForCommand implements Routine {
-    public function __construct(Device $device, $actionType) {
+    public function __construct(Device $device, $actionTypes) {
         $this->device = $device;
-        $this->actionType = $actionType;
+
+        if(!is_array($actionTypes)) {
+            $actionTypes = array($actionTypes);
+        }
+
+        $this->actionTypes = $actionTypes;
     }
 
     public function execute(){
         while(true) {
             foreach($this->device->getCommands() as $c) {
-                if($c->getAction() == $this->actionType) {
+                if(in_array($c->getAction(), $this->actionTypes)) {
                     $this->device->removeCommand($c);
                     return $c;
                 }

@@ -11,7 +11,7 @@ namespace Ensemble\Device;
 class RemoteDeliveryDevice implements \Ensemble\Module {
 
     private $maxDelivery = 5; // Maximum number of messages to deliver in a single attempt
-    private $pollInterval = 5; // Request to be polled every this many seconds
+    private $pollInterval = 0.1; // Request to be polled every this many seconds; this can be very frequent 
     private $timeout = 5; // HTTP request timeout in seconds
     private $tries = 3; // Number of tries before backing off of an endpoint
     private $backoff = 60; // Number of seconds to back off of an endpoint on failure
@@ -94,6 +94,18 @@ class RemoteDeliveryDevice implements \Ensemble\Module {
 
 
     public function action(\Ensemble\Command $c, \Ensemble\CommandBroker $b) {
+        echo "RemoteDelivery Device received a command!\n";
+
+        // Device registrations can arrive as commands; we should handle them
+        if($c->getAction() == "registerDevices") {
+            $devices = $c->getArg('devices');
+            $ep = $c->getArg('endpoint');
+            foreach($devices as $d) {
+                echo "Register some devices at $ep\n";
+                $this->map->register($d, $ep);
+            }
+        }
+
         return false;
     }
 

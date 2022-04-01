@@ -131,7 +131,10 @@ class CommandBroker {
 
     protected function poll($name) {
         try {
-            echo date('[Y-m-d H:i:s] ')."POLL $name\n";
+            if(substr($name, 0, 1) !== '_') { // Poll special devices quietly!
+                echo date('[Y-m-d H:i:s] ')."POLL $name\n";
+            }
+
             $this->getDevice($name)->poll($this);
         } catch(\Exception $e) {
             echo date('[Y-m-d H:i:s] ')."Exception during device poll:\n  ".get_class($e)." ".$e->getMessage()."\n";
@@ -168,7 +171,7 @@ class CommandBroker {
         $lastpoll = 0;
         while(true) {
 
-            // Check poll timers every 1 second for polling due
+            // Check poll timers every 1 microsecond for polling due
             if(microtime(true) - $lastpoll >= 1) {
                 $now = microtime(true);
                 $lastpoll = $now;
@@ -182,7 +185,7 @@ class CommandBroker {
             }
 
             if($this->input->isEmpty()) {
-                usleep(100000);
+                usleep(1000);
                 continue;
             }
             else {
@@ -194,7 +197,8 @@ class CommandBroker {
                 $n = 0;
                 do {
                     $next = $this->input->shift();
-                    $this->handle($next);
+                    if($next !== null)
+                        $this->handle($next);
                     $n++;
                 } while(!$this->input->isEmpty() && $n < 100);
             }

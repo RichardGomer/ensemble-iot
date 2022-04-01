@@ -30,6 +30,17 @@ class ContextPointer {
         return new FetchRoutine($requester, $this->device, $this->field);
     }
 
+    /**
+     * Set the value of the field by sending a command to the context
+     */
+     public function setContextSeries($value, Device $requester) {
+         $cmd = \Ensemble\Command::create($requester, $this->contextdevice, 'updateContext');
+         $cmd->setArg('field', $this->field);
+         $cmd->setArg('series', $value);
+         $requester->getBroker()->send($cmd);
+     }
+     
+
     public function toString() {
         return "[{$this->device}/{$this->field}]";
     }
