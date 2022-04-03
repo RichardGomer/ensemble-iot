@@ -52,6 +52,7 @@ class LoggingContextDevice extends ContextDevice {
             $done = false;
             do {
                 $tries++;
+
                 $s->bindValue(':source', $source);
                 $s->bindValue(':field', $field);
                 $s->bindValue(':value', $value);
@@ -84,8 +85,8 @@ class LoggingContextDevice extends ContextDevice {
         $this->db = new \PDO($this->connstr, $this->dbuser, $this->dbpass);
 
         $st = array();
-        $st[] = $this->db->prepare("DELETE FROM context WHERE `source`=:source AND `field`=:field AND `time`=:time AND (ISNULL(:value) OR NOT ISNULL(:value))");
-        $st[] = $this->db->prepare("INSERT INTO context(`source`, `field`, `value`, `time`) VALUES (:source, :field, :value, :time)");
+        $st[] = $this->db->prepare("DELETE FROM context WHERE `source`=:source AND `field`=:field AND `time`=FROM_UNIXTIME(:time) AND (ISNULL(:value) OR NOT ISNULL(:value))");
+        $st[] = $this->db->prepare("INSERT INTO context(`source`, `field`, `value`, `time`) VALUES (:source, :field, :value, FROM_UNIXTIME(:time))");
 
         $this->statements = $st;
     }
@@ -100,7 +101,7 @@ class LoggingContextDevice extends ContextDevice {
     public function repopulate() {
         $limit = $this->valuetimelimit; // This is the configured expiry time for values
 
-        $st = $this->db->prepare("SELECT `field`,`value`,`time`,`source` FROM context WHERE `time`>=:time");
+        $st = $this->db->prepare("SELECT `field`,`value`,UNIX_TIMESTAMP(`time`) as `time`,`source` FROM context WHERE `time`>=FROM_UNIXTIME(:time)");
         $st->bindValue(':time', (int) time() - $limit);
         $res = $st->execute();
 
