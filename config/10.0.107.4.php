@@ -12,6 +12,7 @@ use \Ensemble\GPIO\Relay;
 date_default_timezone_set('Europe/London');
 $conf['default_endpoint'] = 'http://10.0.0.8:3107/ensemble-iot/1.0/';
 
+
 // We use a local context to reduce network dependency
 $ctx = new Device\ContextDevice("greenhouse.context");
 $ctx->addSuperContext("global.context");
@@ -37,7 +38,8 @@ $s->addDestination("greenhouse.context", "greenhouse-moisture");
 /**
  * Heating
  */
-$bridge = new MQTT\Bridge('_greenhouse.mqttbridge', new MQTT\Client('10.0.0.8', 1883));
+$conf['devices'][] = $bridge = new MQTT\Bridge('_greenhouse.mqttbridge', new MQTT\Client('10.0.0.8', 1883));
+
 $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenhouse", $bridge, new Device\ContextPointer('energy.schedules', 'offpeak'), "socket9");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('greenhouse.context', 'power-greenhouse');
 $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable the heater until the driver can take over
@@ -63,7 +65,7 @@ $bsched->setPoint('16:00:00', 'OFF');
 $sd_growlight = new Schedule\DailyScheduler('growlight1.scheduler', 'greenhouse.schedules', 'growlight', $bsched);
 $conf['devices'][] = $sd_growlight;
 
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-growlight1", $client, new Device\ContextPointer('greenhouse.schedules', 'growlight'), "socket12");
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-growlight1", $bridge, new Device\ContextPointer('greenhouse.schedules', 'growlight'), "socket12");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('greenhouse.context', 'power-growlight');
 
 
