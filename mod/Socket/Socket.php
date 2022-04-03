@@ -29,7 +29,7 @@ class Socket extends MQTT\Tasmota {
 
         // Set up a subscription to sync internal power state with that received from the device
         $dev = $this;
-        $this->status->sub("STATE>POWER{$powerNum}", function($k, $v) use ($dev) {
+        $this->status->sub("STATE.POWER{$powerNum}", function($k, $v) use ($dev) {
             $dev->on = $v == 'ON';
         });
     }

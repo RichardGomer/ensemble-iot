@@ -103,25 +103,12 @@ $extractor->setOffOnly();
  */
 $conf['devices'][] = new Device\Forecast\ForecastDevice('forecast', $datapoint_key, '353868', 'global.context', 'forecast-');
 
-/**
- * Greenhouse Growlight
- */
-// Use a custom schedule, 0600-1600 = 10hours of light per day
-$bsched = new Schedule\Schedule();
-$bsched->setPoint('00:00:00', 'OFF');
-$bsched->setPoint('06:00:00', 'ON');
-$bsched->setPoint('16:00:00', 'OFF');
-$sd_growlight = new Schedule\DailyScheduler('growlight.scheduler', 'global.schedules', 'growlight', $bsched);
-$conf['devices'][] = $sd_growlight;
-
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-growlight", $bridge, new Device\ContextPointer('global.schedules', 'growlight'), "socket10");
-($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-growlight');
-
 
 /**
  * Driveway Pump
  */
 $bsched = new Schedule\Schedule();
+$bsched->setPoint('00:00:00', 'OFF');
 $bsched->setPoint('08:00:00', 'ON');
 $bsched->setPoint('08:02:00', 'OFF');
 $bsched->setPoint('12:00:00', 'ON');
