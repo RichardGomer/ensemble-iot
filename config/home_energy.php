@@ -36,6 +36,14 @@ $conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', '
  */
 $conf['devices'][] = $sctx = new Device\ContextDevice('energy.schedules');
 
+// Daytime
+$daytime = new Schedule\Schedule();
+$daytime->setPoint('00:00:00', 'OFF');
+$daytime->setPoint('07:00:00', 'ON');
+$daytime->setPoint('22:00:00', 'OFF');
+$sd_daytime = new Schedule\DailyScheduler('daytime.scheduler', 'energy.schedules', 'daytime', $daytime);
+$conf['devices'][] = $sd_daytime;
+
 // Daily offpeak
 $doffpeak = new Schedule\Schedule();
 $doffpeak->setPoint('00:00:00', 'OFF');
@@ -43,7 +51,7 @@ $doffpeak->setPoint('07:00:00', 'ON');
 $doffpeak->setPoint('16:00:00', 'OFF');
 $doffpeak->setPoint('19:30:00', 'ON');
 $doffpeak->setPoint('22:00:00', 'OFF');
-$sd_doffpeak = new Schedule\DailyScheduler('daytime.scheduler', 'energy.schedules', 'daytimeoffpeak', $doffpeak);
+$sd_doffpeak = new Schedule\DailyScheduler('daytimeoffpeak.scheduler', 'energy.schedules', 'daytimeoffpeak', $doffpeak);
 $conf['devices'][] = $sd_doffpeak;
 
 // offpeak
@@ -76,13 +84,15 @@ $conf['devices'][] = $bridge = new MQTT\Bridge('_energy.mqttbridge', $client);
 
 
 // Office ventilator
-// Uses the daytime offpeak schedule, but translates to only be active May - September
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-vent-office", $bridge, new Device\ContextPointer('energy.schedules', 'daytimeoffpeak'), "socket5");
+// Uses the daytime offpeak schedule, but translates to only be active April - September
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-vent-office", $bridge, new Device\ContextPointer('energy.schedules', 'daytime'), "socket5");
 $socket->getDriver()->setTranslator(function($v) {
  $m = (int) date('m');
- return $m >= 5 && $m <= 9 ? $v : "OFF"; // Only run May to September
+ return $m >= 4 && $m <= 9 ? $v : "OFF"; // Only run April to September
 });
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-officevent');
+
+
 
 
 // Tumble dryer

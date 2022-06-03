@@ -109,14 +109,11 @@ $conf['devices'][] = new Device\Forecast\ForecastDevice('forecast', $datapoint_k
  */
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', 'OFF');
-$bsched->setPoint('08:00:00', 'ON');
-$bsched->setPoint('08:02:00', 'OFF');
-$bsched->setPoint('12:00:00', 'ON');
-$bsched->setPoint('12:02:00', 'OFF');
-$bsched->setPoint('16:00:00', 'ON');
-$bsched->setPoint('16:02:00', 'OFF');
-$bsched->setPoint('20:00:00', 'ON');
-$bsched->setPoint('20:02:00', 'OFF');
+for($h = 6; $h < 24; $h = $h+2) {
+    $H = sprintf("%2u", $h);
+    $bsched->setPoint("$H:00:00", 'ON');
+    $bsched->setPoint("$H:02:00", 'OFF');
+}
 $sd = new Schedule\DailyScheduler('pump2.scheduler', 'global.schedules', 'pump2', $bsched);
 $conf['devices'][] = $sd;
 
