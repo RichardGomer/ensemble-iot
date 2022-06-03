@@ -43,7 +43,7 @@ class RGBWCTDriver extends Schedule\Driver {
                 );
                 $light->setBrightness($bpc);
             } elseif($current['mode'] == 'ct') { // Manual colour temperature; scale temp and brightness
-                $light->setCT($this->getAutoCT());
+                $light->setCT($this->scale($current['ct'], $next['ct']));
                 $light->setBrightness($bpc);
             } elseif($current['mode'] == 'auto') { // Auto CT mode, only scale brightness
                 $light->setCT($this->getAutoCT());
