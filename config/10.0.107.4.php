@@ -34,6 +34,26 @@ $s->addDestination("greenhouse.context", "sense1-batt");
 $conf['devices'][] = $s = $miflora->getSensor("sense1_moisture", 'moisture');
 $s->addDestination("greenhouse.context", "greenhouse-moisture");
 
+$conf['devices'][] = $miflora = new Device\Miflora\MifloraDevice("sense2", "c4:7c:8d:6c:b2:c0");
+$conf['devices'][] = $s = $miflora->getSensor("sense2_temp", 'temperature');
+$s->addDestination("greenhouse.context", "coldframe-temp");
+$conf['devices'][] = $s = $miflora->getSensor("sense2_light", 'light');
+$s->addDestination("greenhouse.context", "coldframe-light");
+$conf['devices'][] = $s = $miflora->getSensor("sense2_batt", 'battery');
+$s->addDestination("greenhouse.context", "sense2-batt");
+$conf['devices'][] = $s = $miflora->getSensor("sense2_moisture", 'moisture');
+$s->addDestination("greenhouse.context", "coldframe-moisture");
+
+$conf['devices'][] = $miflora = new Device\Miflora\MifloraDevice("sense3", "c4:7c:8d:6d:f7:b2");
+$conf['devices'][] = $s = $miflora->getSensor("sense3_temp", 'temperature');
+$s->addDestination("greenhouse.context", "raisedbed-temp");
+$conf['devices'][] = $s = $miflora->getSensor("sense3_light", 'light');
+$s->addDestination("greenhouse.context", "raisedbed-light");
+$conf['devices'][] = $s = $miflora->getSensor("sense3_batt", 'battery');
+$s->addDestination("greenhouse.context", "sense3-batt");
+$conf['devices'][] = $s = $miflora->getSensor("sense3_moisture", 'moisture');
+$s->addDestination("greenhouse.context", "raisedbed-moisture");
+
 
 /**
  * Heating
