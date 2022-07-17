@@ -94,7 +94,7 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-growlig
  */
 $pump = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 100); # full pwoer pumping, using soft starter
 $pumpmed = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 70); # low power pumping mode
-$pumplow = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 85); # v. low power pumping mode
+$pumplow = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 40); # v. low power pumping mode
 
 $flow = new Ir\FlowMeter(26);
 $dosepump = new Relay(Pin::BCM(6, Pin::OUT));
