@@ -216,6 +216,17 @@ class Schedule {
         }
     }
 
+    public function getNextChangeTime() {
+        $now = time();
+        foreach($this->getChangePoints() as $time) {
+            if($time > $now) {
+                return $time;
+            }
+        }
+
+        return false;
+    }
+
     /**
     * Get change points - times where the status of the schedule changes
     */

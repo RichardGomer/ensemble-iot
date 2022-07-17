@@ -8,7 +8,7 @@ use Ensemble\Schedule as Schedule;
  *
  * Schedules are generated for 2 hours in advance
  */
-class RainbowScheduler extends Schedule\OnDemandSchedulerDevice {
+class RainbowScheduler extends Schedule\SchedulerDevice {
 
     public function __construct($name, $device, $field, $duration) {
         parent::__construct($name, $device, $field);
@@ -22,12 +22,12 @@ class RainbowScheduler extends Schedule\OnDemandSchedulerDevice {
         $start = $this->start;
 
         $colours = array(
-            '255,0,0 100%',
-            '255,255,0 100%',
-            '0,255,0 100%',
-            '0,255,255 100%',
-            '0,0,255 100%',
-            '255,0,255 100%'
+            '255,0,0 70%',
+            '255,255,0 70%',
+            '0,255,0 70%',
+            '0,255,255 70%',
+            '0,0,255 70%',
+            '255,0,255 70%'
         );
 
         $schedstart = floor(time() / $this->duration) * $this->duration;

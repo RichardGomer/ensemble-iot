@@ -25,7 +25,11 @@ class WLED extends BasicDevice implements RGBWCT {
      * Set the current scheme using a piece of settings json
      */
     public function setScheme($json) {
-        // TODO
+        if(is_string($json)) {
+            $json = json_decode($json);
+        }
+
+        $this->applyJSON($json);
     }
 
     private $on = false;

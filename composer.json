@@ -32,7 +32,8 @@
             "Ensemble\\Log\\": "lib/support",
             "Ensemble\\KeyValue\\": "lib/support",
             "Ensemble\\MQTT\\": "mod/MQTT",
-            "Ensemble\\Schedule\\": "mod/Schedule"
+            "Ensemble\\Schedule\\": "mod/Schedule",
+            "Ensemble\\Actions\\": "mod/Actions"
         }
     }
 }

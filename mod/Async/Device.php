@@ -150,6 +150,27 @@ class WaitForCommand implements Routine {
 }
 
 /**
+ * Wait for an action of ANY type to be received by the device
+ * The received action is returned.
+ */
+class WaitForAnyCommand implements Routine {
+    public function __construct(Device $device) {
+        $this->device = $device;
+    }
+
+    public function execute(){
+        while(true) {
+            foreach($this->device->getCommands() as $c) {
+                $this->device->removeCommand($c);
+                return $c;
+            }
+
+            yield;
+        }
+    }
+}
+
+/**
  * Waits for a reply or exception to be received in response to the given command
  * the command must already have been sent!
  */

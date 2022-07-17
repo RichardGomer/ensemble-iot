@@ -20,7 +20,7 @@ class Driver extends Async\Device {
         $this->target = $target;
         $this->setFunc = $setFunc;
 
-        $this->ctx = $ctxptr;
+        $this->schemes['___default'] = $ctxptr;
 
         $this->translator = $translator;
 
@@ -30,8 +30,55 @@ class Driver extends Async\Device {
         $this->override->setPoint(0, false);
     }
 
+    public $refreshTime = 240;
+    public function setRefreshTime($secs) {
+        $this->refreshTime = $secs;
+    }
+
+    /**
+     * Schemes are effectively named ContextPointers that the driver can switch between as sources for the
+     * schedule
+     */
+    private $scheme = '___default';
+    public function getScheme() {
+        return $this->scheme;
+    }
+
+    public function setScheme($scheme = false) {
+
+        if($scheme === false) {
+            $scheme = '___default';
+        }
+
+        if($scheme === $this->scheme) {
+            return; // No change, just return
+        }
+
+        if(!array_key_exists($scheme, $this->schemes)) {
+            throw new \Exception("Schedule Driver does not have scheme '$scheme'");
+        }
+
+        $this->log("Switch scheme to $scheme");
+
+        $this->scheme = $scheme;
+
+        $this->refresh = true; // Force the main routine to re-fetch the schedule
+        $this->continue(); // Immediately call the main routine
+    }
+
+    public function addScheme($name, Device\ContextPointer $schedulePtr) {
+        $this->schemes[$name] = $schedulePtr;
+    }
+
+    // Get the ContextPointer to the currently active scheme
+    protected function getPtr() {
+        return $this->schemes[$this->getScheme()];
+    }
+
+
+    private $interval = 10;
     public function getPollInterval() {
-        return 30;
+        return $this->interval;
     }
 
     public function setTranslator($f) {
@@ -43,14 +90,16 @@ class Driver extends Async\Device {
         $this->offset = $seconds;
     }
 
-    public $refreshTime = 600;
     public function getRoutine() {
         return new Async\Lambda(function(){
 
+            $this->interval = 5;
+            $this->refresh = false;
+
             // First, fetch the schedule
             try {
-                $this->log("Trying to fetch schedule {$this->ctx->toString()}");
-                $schedule = yield new Async\TimeoutController($this->ctx->getFetchRoutine($this), 60);
+                $this->log("Trying to fetch schedule {$this->getPtr()->toString()}");
+                $schedule = yield new Async\TimeoutController($this->getPtr()->getFetchRoutine($this), 60);
             } catch(\Exception $e) {
                 $this->log("Couldn't fetch schedule: ".$e->getMessage());
                 $schedule = false;
@@ -71,7 +120,7 @@ class Driver extends Async\Device {
 
             // Then use it to drive the device until it's time to refresh the schedule again
             $expire = time() + $this->refreshTime;
-            while(time() < $expire) {
+            while(time() < $expire && $this->refresh === false) {
 
                 $over = $this->override->getNow($this->offset);
                 if($over !== false) { // Apply the override, if set
@@ -90,6 +139,7 @@ class Driver extends Async\Device {
                 $currentStart = $keys[0];
                 $nextStart = $keys[1];
 
+                $this->interval = min(max(1, $schedule->getNextChangeTime() - time()), 15); // Interval is smart; it's the next change time (minimum 1 sec) or (at most) 15 seconds
 
                 // If necessary, yield anything that the set function needs to do asynchronously
                 $res = ($this->setFunc)($this->target, $current, $currentStart, $next, $nextStart);
@@ -100,6 +150,12 @@ class Driver extends Async\Device {
             }
         });
     }
+
+    /**
+     * A local "override" schedule is available that takes precedent over the remote schedule.
+     * The schedule itself is accessed using getOverride(); and the value is applied instead of the value
+     * from the remote schedule unless it is === false
+     */
 
     /**
      * Get the override schedule
