@@ -44,6 +44,14 @@ $daytime->setPoint('22:00:00', 'OFF');
 $sd_daytime = new Schedule\DailyScheduler('daytime.scheduler', 'energy.schedules', 'daytime', $daytime);
 $conf['devices'][] = $sd_daytime;
 
+// Short Daytime
+$shdaytime = new Schedule\Schedule();
+$shdaytime->setPoint('00:00:00', 'OFF');
+$shdaytime->setPoint('08:00:00', 'ON');
+$shdaytime->setPoint('20:00:00', 'OFF');
+$sd_shdaytime = new Schedule\DailyScheduler('shortdaytime.scheduler', 'energy.schedules', 'shortdaytime', $shdaytime);
+$conf['devices'][] = $sd_shdaytime;
+
 // Daily offpeak
 $doffpeak = new Schedule\Schedule();
 $doffpeak->setPoint('00:00:00', 'OFF');
@@ -120,6 +128,14 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $bridge, "s
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-tv');
 
 
+
+/**
+ * Toilet light on schedule
+ */
+$conf['devices'][] = $sw_toilet = new Device\Light\LightSwitch("switch-toilet", $bridge, "lightswitch2");
+$conf['devices'][] = $toiletswdriver = new Schedule\Driver($sw_toilet, function($sw, $status){ if($status == 'ON') { $sw->on(); } else { $sw->off(); } }, new Device\ContextPointer("energy.schedules", "shortdaytime"));
+
+
 /**
 * Toilet Heater
 */
@@ -147,8 +163,6 @@ $conf['devices'][]  = $ir1driver = new Schedule\Driver($ir1, function($device, $
 }, new Device\ContextPointer('energy.schedules', 'electric_heat'));
 
 // Link the light switch to turn the temperature up
-$conf['devices'][] = $sw_toilet = new Device\Light\LightSwitch("switch-toilet", $bridge, "lightswitch2");
-
 $sw_toilet->getStatus()->sub('STATE.POWER', function($key, $value) use ($sw_toilet, $ir1driver) {
  static $laststate = 'OFF';
 
