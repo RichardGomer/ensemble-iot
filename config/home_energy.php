@@ -133,7 +133,7 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $bridge, "s
  * Toilet light on schedule
  */
 $conf['devices'][] = $sw_toilet = new Device\Light\LightSwitch("switch-toilet", $bridge, "lightswitch2");
-$conf['devices'][] = $toiletswdriver = new Schedule\Driver($sw_toilet, function($sw, $status){ if($status == 'ON') { $sw->on(); } else { $sw->off(); } }, new Device\ContextPointer("energy.schedules", "shortdaytime"));
+$conf['devices'][] = $toiletswdriver = new Schedule\Driver($sw_toilet, function($sw, $status, $time){ if($status == 'ON') { $sw->on(); } elseif($status == 'OFF' && $time > time() - 15) { $sw->off(); } }, new Device\ContextPointer("energy.schedules", "shortdaytime"));
 
 
 /**
