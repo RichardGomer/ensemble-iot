@@ -14,7 +14,7 @@ require 'home_common.inc.php';
 /**
  * Solcast solar forecast
  */
-$solcast = new Device\EnergyPlan\SolcastDevice('solcast', $solcast_key, $solcast_site);
+$conf['devices'][] = $solcast = new Device\EnergyPlan\SolcastDevice('solcast', $solcast_key, $solcast_site);
 $solcast->setContext('global.context', 'solcast');
 
 /**
@@ -52,30 +52,20 @@ $shdaytime->setPoint('20:00:00', 'OFF');
 $sd_shdaytime = new Schedule\DailyScheduler('shortdaytime.scheduler', 'energy.schedules', 'shortdaytime', $shdaytime);
 $conf['devices'][] = $sd_shdaytime;
 
-// Daily offpeak
-$doffpeak = new Schedule\Schedule();
-$doffpeak->setPoint('00:00:00', 'OFF');
-$doffpeak->setPoint('07:00:00', 'ON');
-$doffpeak->setPoint('16:00:00', 'OFF');
-$doffpeak->setPoint('19:30:00', 'ON');
-$doffpeak->setPoint('22:00:00', 'OFF');
-$sd_doffpeak = new Schedule\DailyScheduler('daytimeoffpeak.scheduler', 'energy.schedules', 'daytimeoffpeak', $doffpeak);
-$conf['devices'][] = $sd_doffpeak;
-
 // offpeak
 $offpeak = new Schedule\Schedule();
-$offpeak->setPoint('00:00:00', 'ON');
-//$offpeak->setPoint('16:00:00', 'OFF');
-//$offpeak->setPoint('19:30:00', 'ON');
+$offpeak->setPoint('00:00:00', 'OFF');
+$offpeak->setPoint('00:30:00', 'ON');
+$offpeak->setPoint('04:30:00', 'OFF');
 $sd_offpeak = new Schedule\DailyScheduler('offpeak.scheduler', 'energy.schedules', 'offpeak', $offpeak);
 $conf['devices'][] = $sd_offpeak;
 
 // offpeak oppoff
 $bsched = new Schedule\Schedule();
-$bsched->setPoint('00:00:00', 'ON');
-//$bsched->setPoint('13:30:00', 'OPOFF');
-//$bsched->setPoint('16:00:00', 'OFF');
-//$bsched->setPoint('19:30:00', 'ON');
+$bsched->setPoint('00:00:00', 'OFF');
+$bsched->setPoint('00:30:00', 'ON');
+$bsched->setPoint('02:30:30', 'OPOFF');
+$bsched->setPoint('05:00:00', 'OFF');
 $sd_opoff = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'energy.schedules', 'offpeak_opoff', $bsched);
 $conf['devices'][] = $sd_opoff;
 
@@ -201,7 +191,6 @@ $tariffdevice->setCallback(function($tariff) use ($isched) {
         $isched->log("Rescheduling won't occur between 2300 and 0800");
         return;
     }
-
 
     // 3.5p/kwh ~= 3.03p/kwh / 90% efficiency
     $immersion = $baseTariff->between('23:00', '06:00')->lessThan(3.5)->cheapest(120)->getOnSchedule();
