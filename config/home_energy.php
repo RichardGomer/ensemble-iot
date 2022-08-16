@@ -130,7 +130,7 @@ $conf['devices'][] = $toiletswdriver = new Schedule\Driver($sw_toilet, function(
 * Toilet Heater
 */
 // Convert daily offpeak schedule to target temperatures
-$sched_heat = $doffpeak->translate(function($s){
+$sched_heat = $offpeak->translate(function($s){
     return $s == 'ON' ? '17' : '10';
 });
 $sd_heat = new Schedule\DailyScheduler('electric_heat.scheduler', 'energy.schedules', 'electric_heat', $sched_heat);
