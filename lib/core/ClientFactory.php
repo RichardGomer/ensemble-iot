@@ -95,7 +95,7 @@ class HttpClient implements RemoteClient {
     }
 
     protected function makeRequest($args) {
-        $res = $this->client->request('POST', $this->endpoint, array('query'=>$args));
+        $res = $this->client->request('POST', $this->endpoint, array('form_params'=>$args));
         if(($s = $res->getStatusCode()) != '200') {
             throw new RequestException("HTTP Request returned status $s");
         }
