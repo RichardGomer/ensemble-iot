@@ -30,6 +30,7 @@ $conf['devices'][] = $tariffdevice = new Schedule\OctopusGoTariffDevice('tariffs
 $conf['devices'][] = new Schedule\OctopusGasUsageDevice('gasusagescheduler', 'global.context', 'gasusage', $oct);
 $conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', 'global.context', 'elecusage', $oct);
 
+return;
 
 /**
  * Scheduling!
@@ -47,8 +48,8 @@ $conf['devices'][] = $sd_daytime;
 // Short Daytime
 $shdaytime = new Schedule\Schedule();
 $shdaytime->setPoint('00:00:00', 'OFF');
-$shdaytime->setPoint('08:00:00', 'ON');
-$shdaytime->setPoint('20:00:00', 'OFF');
+$shdaytime->setPoint('07:00:00', 'ON');
+$shdaytime->setPoint('17:00:00', 'OFF');
 $sd_shdaytime = new Schedule\DailyScheduler('shortdaytime.scheduler', 'energy.schedules', 'shortdaytime', $shdaytime);
 $conf['devices'][] = $sd_shdaytime;
 
@@ -212,3 +213,19 @@ $tariffdevice->setCallback(function($tariff) use ($isched) {
 
 $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("immersion", $bridge, new Device\ContextPointer('energy.schedules', 'immersionschedule'), "immersion");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-immersion');
+
+
+/**
+ * Pond pump
+ */
+$pondsched = new Schedule\Schedule();
+$pondsched->setPoint('00:00:00', 'OFF');
+
+for($i = 0; $i < 24; $i++) {
+    $pondsched->setPeriod(sprintf('%02d:00:00', $i), sprintf('%02d:15:00', $i), 'ON');
+}
+
+$sch_pondsched = $conf['devices'][] = new Schedule\DailyScheduler('pondpump.scheduler', 'energy.schedules', 'pondpump_schedule', $bsched);
+
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("pondpump", $bridge, new Device\ContextPointer('energy.schedules', 'pondpump_schedule'), "socket13");
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pondpump');
