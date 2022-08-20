@@ -81,7 +81,7 @@ class NettaHeater extends IRDevice {
                 try {
                     $this->lastTemp = yield $heater->refreshState();
                     if(is_object($this->lastTemp)) {
-                        throw new Exception("Received an object instead of an integer!");
+                        throw new \Exception("Received an object instead of an integer!");
                     }
                     $this->log("Obtained heater state from context, ".$this->lastTemp);
                 } catch(\Exception $e) {
