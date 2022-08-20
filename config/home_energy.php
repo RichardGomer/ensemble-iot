@@ -30,8 +30,6 @@ $conf['devices'][] = $tariffdevice = new Schedule\OctopusGoTariffDevice('tariffs
 $conf['devices'][] = new Schedule\OctopusGasUsageDevice('gasusagescheduler', 'global.context', 'gasusage', $oct);
 $conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', 'global.context', 'elecusage', $oct);
 
-return;
-
 /**
  * Scheduling!
  */
