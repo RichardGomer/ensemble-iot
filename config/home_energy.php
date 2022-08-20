@@ -223,7 +223,7 @@ for($i = 0; $i < 24; $i++) {
     $pondsched->setPeriod(sprintf('%02d:00:00', $i), sprintf('%02d:15:00', $i), 'ON');
 }
 
-$sch_pondsched = $conf['devices'][] = new Schedule\DailyScheduler('pondpump.scheduler', 'energy.schedules', 'pondpump_schedule', $sch_pondsched);
+$sch_pondsched = $conf['devices'][] = new Schedule\DailyScheduler('pondpump.scheduler', 'energy.schedules', 'pondpump_schedule', $pondsched);
 
 $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("pondpump", $bridge, new Device\ContextPointer('energy.schedules', 'pondpump_schedule'), "socket13");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pondpump');
