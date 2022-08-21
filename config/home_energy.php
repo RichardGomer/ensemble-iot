@@ -143,6 +143,7 @@ $ir1state = 'ir1-htr-temp-st';
 //    $ctx->update($ir1state, 17);
 //}
 
+/*
 // Configure the heater itself
 $conf['devices'][] = $ir1 = new Device\IR\NettaHeater("ir1-heater", $bridge, "ir1", 'global.context', $ir1state);
 
@@ -150,27 +151,7 @@ $conf['devices'][] = $ir1 = new Device\IR\NettaHeater("ir1-heater", $bridge, "ir
 $conf['devices'][]  = $ir1driver = new Schedule\Driver($ir1, function($device, $temp) {
  $device->setTemperature($temp);
 }, new Device\ContextPointer('energy.schedules', 'electric_heat'));
-
-// Link the light switch to turn the temperature up
-$sw_toilet->getStatus()->sub('STATE.POWER', function($key, $value) use ($sw_toilet, $ir1driver) {
- static $laststate = 'OFF';
-
- $sw_toilet->log("Status set to $value, previously $laststate");
-
- // Boost temperature when light switches ON (for three minutes)
- if($value == 'ON' && $laststate == 'OFF') {
-     $sw_toilet->log("Boosting heater");
-     $ir1driver->getOverride()->setPeriod(time(), time() + 240, 20);
- } elseif($value == 'OFF') {
-     // Clear the override
-     $ir1driver->getOverride()->setPeriod(0, time() + 3600, false);
- }
-
- $laststate = $value;
-
- $ir1driver->continue(); // Apply immediately
-});
-
+*/
 
 /**
  * Immersion
