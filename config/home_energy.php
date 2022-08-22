@@ -15,7 +15,7 @@ require 'home_common.inc.php';
  * Solcast solar forecast
  */
 $conf['devices'][] = $solcast = new Device\EnergyPlan\SolcastDevice('solcast', $solcast_key, $solcast_site);
-$solcast->setContext('global.context', 'solcast', ContextDevice::MODE_SERIES);
+$solcast->setContext('global.context', 'solcast', SchedulerDevice::MODE_SERIES);
 
 /**
  * Octopus Utility Data
