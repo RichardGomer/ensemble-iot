@@ -7,7 +7,7 @@
 
 namespace Ensemble;
 use Ensemble\Schedule;
-
+use Ensemble\Device\ContextDevice;
 
 require 'home_common.inc.php';
 
@@ -15,7 +15,7 @@ require 'home_common.inc.php';
  * Solcast solar forecast
  */
 $conf['devices'][] = $solcast = new Device\EnergyPlan\SolcastDevice('solcast', $solcast_key, $solcast_site);
-$solcast->setContext('global.context', 'solcast');
+$solcast->setContext('global.context', 'solcast', ContextDevice::MODE_SERIES);
 
 /**
  * Octopus Utility Data
