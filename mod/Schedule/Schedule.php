@@ -1,20 +1,40 @@
 <?php
 
 /**
-* Represent a schedule
-* A schedule is a series of contiguous time periods with associated statuses
-*/
+ * Represent a schedule
+ * A schedule is a series of contiguous time periods with associated statuses
+ */
 namespace Ensemble\Schedule;
 
 class Schedule {
 
     /**
-    * @mixed $statuses; If provided, $statuses must be an array containing the
-    * allowed statuses for the schedule; for instance, "ON", "OFF"
-    */
+     * @mixed $statuses; If provided, $statuses must be an array containing the
+     * allowed statuses for the schedule; for instance, "ON", "OFF"
+     */
     public function __construct($statuses = false) {
         $this->periods = array();
         $this->statuses = $statuses;
+        $this->setTimezone(date_default_timezone_get());
+    }
+
+    /**
+     * Set the schedule's timezone
+     * The timezone controls how strings are interpreted and how prettyPrint
+     * formats output
+     * Internally, all times are UTC
+     */
+    private $timezone = 'UTC';
+    public function setTimezone($tz) {
+        if(count($this->periods) > 0) {
+            throw new \Exception("Timezone cannot be changed on a populated schedule");
+        }
+        $this->tzo = false; // Clear timezone object cache
+        $this->timezone = $tz;
+    }
+
+    public function getTimezone() {
+        return $this->timezone;
     }
 
     public static function fromJSON($json) {
@@ -41,8 +61,8 @@ class Schedule {
     }
 
     /**
-    * This array is compatible with contextDevice series updates
-    */
+     * This array is compatible with contextDevice series updates
+     */
     public function toArray() {
         $out = [];
         foreach($this->getPeriods() as $p) {
@@ -52,17 +72,20 @@ class Schedule {
         return $out;
     }
 
-    public function prettyPrint() {
-        $out = '';
-        foreach($this->getChangePoints() as $t) {
-            $out .= "    ".date('[Y-m-d H:i:s]', $t)." ".$this->getAt($t)."\n";
+    public function prettyPrint($extended=false) {
+        $out = $extended ? "    [Schedule tz = {$this->timezone}]\n    [ts             dur          start                  ]\n" : "";
+        foreach($this->getAllPeriods() as $t) {
+            $time = new \DateTime("now", $this->getTZO());
+            $time->setTimestamp($t['start']); // There's no constructor for this!
+            $ext = $extended ? (sprintf("%010d   ", $t['start'])."  ".($t['end'] == false ? " ∞        " : sprintf("%- 10d", $t['end'] - $t['start'])))."   " : "";
+            $out .= "    [{$ext}".$time->format('Y-m-d H:i:s T')."] ".$t['status']."\n";
         }
         return $out;
     }
 
     /**
-    * Set the status for a period of time
-    */
+     * Set the status for a period of time
+     */
     public function setPeriod($t_from, $t_to, $status, $tidy=true) {
 
         $t_from = $this->normaliseTime($t_from);
@@ -88,8 +111,8 @@ class Schedule {
     }
 
     /**
-    * Set status from time $t, until the next time that's set, or indefinitely
-    */
+     * Set status from time $t, until the next time that's set, or indefinitely
+     */
     public function setPoint($t, $status) {
         $this->checkStatus($status);
         $tn = $this->normaliseTime($t);
@@ -101,8 +124,8 @@ class Schedule {
     }
 
     /**
-    * Remove redundant points
-    */
+     * Remove redundant points
+     */
     protected function tidy() {
         $last = false;
         foreach($this->periods as $i=>$p) {
@@ -117,15 +140,15 @@ class Schedule {
     }
 
     /**
-    * Get all defined periods, in order
-    */
+     * Get all defined periods, in order
+     */
     protected function &getPeriods() {
         return $this->periods;
     }
 
     /**
-    * A more usable form of periods, including end time
-    */
+     * A more usable form of periods, including end time
+     */
     public function getAllPeriods() {
         $periods = array();
         $keys = array_keys($this->periods);
@@ -143,10 +166,9 @@ class Schedule {
     }
 
     /**
-    * @mixed $t : The time to normalise as a UNIX timestamp (integer), DateTime
-    * object or
-    * Returns a UNIX timestamp
-    */
+     * @mixed $t : The time to normalise as a UNIX timestamp (integer) or ISO8601 string
+     * Returns a UNIX timestamp
+     */
     protected function normaliseTime($t) {
 
         if(is_int($t))
@@ -155,7 +177,16 @@ class Schedule {
         if(is_numeric($t))
         return (int) $t;
 
-        return strtotime($t);
+        $d = new \DateTime($t, $this->getTZO());
+        return $d->getTimestamp();
+    }
+
+    protected $tzo = false;
+    public function getTZO(){
+        if($this->tzo === false) {
+            $this->tzo = new \DateTimeZone($this->timezone);
+        }
+        return $this->tzo;
     }
 
     protected function checkStatus($s) {
@@ -173,8 +204,8 @@ class Schedule {
     }
 
     /**
-    * Get status at the given time
-    */
+     * Get status at the given time
+     */
     public function getAt($time) {
         $t = $this->normaliseTime($time);
 
@@ -228,8 +259,8 @@ class Schedule {
     }
 
     /**
-    * Get change points - times where the status of the schedule changes
-    */
+     * Get change points - times where the status of the schedule changes
+     */
     public function getChangePoints() {
         $times = array();
         foreach($this->periods as $s) {
@@ -241,19 +272,19 @@ class Schedule {
     }
 
     /**
-    * Get a new instance of whatever class this object is
-    */
+     * Get a new instance of whatever class this object is
+     */
     protected function factory() {
         $c = get_class($this);
         return new $c();
     }
 
     /**
-    * Extract a period between the start and end times
-    * Start is assumed to be today; end can be today or tomorrow
-    * Times must be in format hh:mm
-    * $then is the value that the end point should be set to, defaults false
-    */
+     * Extract a period between the start and end times
+     * Start is assumed to be today; end can be today or tomorrow
+     * Times must be in format hh:mm
+     * $then is the value that the end point should be set to, defaults false
+     */
     public function between($start, $end, $then=false) {
         $tp = '/[0-9]{2}:[0-9]{2}/';
         if(!preg_match($tp, $start) || !preg_match($tp, $end)) {
@@ -286,10 +317,10 @@ class Schedule {
 
 
     /**
-    * Use the supplied translation function to create a new schedule from this one
-    * The translator function takes a single argument, a status, and returns a status
-    * for the new schedule
-    */
+     * Use the supplied translation function to create a new schedule from this one
+     * The translator function takes a single argument, a status, and returns a status
+     * for the new schedule
+     */
     public function translate($translator, Schedule $out=null) {
         if(!$out instanceof Schedule)
         $out = new Schedule();
@@ -303,12 +334,12 @@ class Schedule {
 
 
     /**
-    * Reduce the given schedules using the provided translation function
-    * Like translate(), but all the schedules are combined into one, and
-    * the translation function receives the value of all schedules at each
-    * change point. A change point is any point at which one or more schedules
-    * change state.
-    */
+     * Reduce the given schedules using the provided translation function
+     * Like translate(), but all the schedules are combined into one, and
+     * the translation function receives the value of all schedules at each
+     * change point. A change point is any point at which one or more schedules
+     * change state.
+     */
     public static function reduce($schedules, $f, Schedule $out=null) {
         $out = $out == null ? $schedules[0]->factory() : $out;
 

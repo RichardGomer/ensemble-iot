@@ -5,61 +5,60 @@ namespace Ensemble\Schedule;
 class DailyScheduler extends SchedulerDevice {
 
     /**
-     * The base schedule sets the daily schedule
+     * The base schedule sets the daily schedule, as if it was a template
      *
-     * Times are made modulo 24 hours and then bumped
+     * This scheduler is timezone aware; it uses the timezone that's set on the
+     * base schedule for the generated schedules.
      *
+     * CLOCK TIME is maintained in the generated schedule, so events will happen
+     * at the same LOCAL time each day, even if the timezone changes due to
+     * daylight savings time.
+     *
+     * To avoid compensating for DST, pass in a base schedule that uses a
+     * non-geographic timezone; e.g. "UTC" instead of "Europe/London"
      */
     public function __construct($name, $device, $field, $baseschedule) {
         parent::__construct($name, $device, $field);
 
-        $this->basesched = $this->normaliseSchedule($baseschedule);
+        $this->base = $baseschedule;
     }
 
-    public function reschedule() {
+    /**
+     * $date is the date that we want to generate the schedule for, in ISO8601
+     */
+    public function reschedule($date=false) {
 
-        // Get the timestamp at the start of today
-        $todaystart = strtotime('today midnight');
-        $tomorrowstart = strtotime('tomorrow midnight');
+        $date = new \DateTime($date === false ? "now" : $date, $tz = new \DateTimeZone($this->base->getTimezone()));
 
         $ns = new Schedule();
+        $ns->setTimezone($this->base->getTimezone());
         $ns->setPoint(0, 'OFF');
 
-        // Copy each point of the base schedule into the new schedule
-        $this->copyIntoWithOffset($this->basesched, $ns, $todaystart);
-        $this->copyIntoWithOffset($this->basesched, $ns, $tomorrowstart);
+        for($i = 0; $i <= 1; $i++) {
+            foreach($this->base->getAllPeriods() as $p) {
+                // Get the clock time from the base schedule
+                $time = new \DateTime("now", $tz); $time->setTimestamp($p['start']); // There's no constructor for this!
+                $clocktime_h = $time->format('H');
+                $clocktime_m = $time->format('i');
+                $clocktime_s = $time->format('s');
 
-        $this->log("Generated Schedule:\n".$ns->prettyPrint());
+                // Set the clock time on the new schedule to the same
+                $date->setTime($clocktime_h, $clocktime_m, $clocktime_s);
+
+                // Now set the absolute time on the output schedule
+                $ns->setPoint($date->format('Y-m-d H:i:s'), $p['status']);
+            }
+
+            // Move to next day
+            $date->setTime(0,0);
+            $date = $date->add(new \DateInterval("P1D"));
+        }
+
+
+        $this->log("Generated Schedule:\n".$ns->prettyPrint(true));
 
         return $ns;
     }
 
-    /**
-     * Convert a schedule so that all times are relative to midnight
-     * (i.e. date information is discarded, all timestamps become times on
-     *  1970-01-01)
-     */
-    protected function normaliseSchedule(Schedule $in) {
-        $periods = $in->getChangePoints();
-
-        $out = new Schedule();
-
-        foreach($periods as $time) {
-            $midnight = strtotime(date('Y-m-d 02:00:00', $time)) - 7200; // relative to 2am copes with daylight savings
-            $timepastmidnight = $time - $midnight;
-            $out->setPoint($timepastmidnight, $in->getAt($time));
-        }
-
-        return $out;
-    }
-
-    protected function copyIntoWithOffset(Schedule $base, Schedule $new, $offset) {
-        $periods = $base->getChangePoints();
-
-        foreach($periods as $time) {
-            $status = $base->getAt($time);
-            $new->setPoint($time + $offset, $status);
-        }
-    }
 
 }
