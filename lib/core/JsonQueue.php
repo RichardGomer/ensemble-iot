@@ -34,8 +34,10 @@ class JsonQueue implements Queue {
      * shifting
      */
     public function push(Command $c, $threshold=0) {
+        $this->json->lock();
         $j = array('threshold'=>$threshold, 'cmd'=>$c->toJSON());
         $this->json->queue = array_merge($this->getQueue(), array($j));
+        $this->json->release();
     }
 
     /**
