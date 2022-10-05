@@ -19,7 +19,7 @@ class ShowerSocket extends Socket  {
     // Interrupt flow briefly as a warning
     public function warn() {
         $this->off();
-        sleep(1);
+        sleep(3);
         $this->on();
     }
 
