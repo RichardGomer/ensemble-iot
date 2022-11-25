@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7a6c7834979be13f087e60ddc8d00e1a",
+    "content-hash": "697ca79c408d28e49aab06c9e6751565",
     "packages": [
         {
             "name": "auroras-live/suncalc-php",
@@ -351,6 +351,55 @@
                 }
             ],
             "time": "2022-06-20T21:43:03+00:00"
+        },
+        {
+            "name": "mmarica/display-table",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mmarica/php-display-table.git",
+                "reference": "3c9240e1d3406d8bf38a813ed17f7f8dfa6209b4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mmarica/php-display-table/zipball/3c9240e1d3406d8bf38a813ed17f7f8dfa6209b4",
+                "reference": "3c9240e1d3406d8bf38a813ed17f7f8dfa6209b4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.0|~5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mmarica\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mihai Marica",
+                    "email": "mihai.marica82@yahoo.com",
+                    "homepage": "http://www.mihai-marica.ro"
+                }
+            ],
+            "description": "Display tables in text format",
+            "keywords": [
+                "console table",
+                "terminal table",
+                "text table"
+            ],
+            "support": {
+                "issues": "https://github.com/mmarica/php-display-table/issues",
+                "source": "https://github.com/mmarica/php-display-table/tree/master"
+            },
+            "time": "2017-01-22T20:44:08+00:00"
         },
         {
             "name": "psr/http-message",
