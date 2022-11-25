@@ -47,6 +47,7 @@ class LoggingContextDevice extends ContextDevice {
             return;
         }
 
+        echo "     Store $field = $value @ ".date('Y-m-d H:i:s', $time)."  ";
         foreach($this->statements as $s) {
             $tries = 0;
             $done = false;
@@ -59,8 +60,6 @@ class LoggingContextDevice extends ContextDevice {
                 $s->bindValue(':time', $time);
 
                 $res = $s->execute();
-
-                echo "     Store $field = $value @ ".date('Y-m-d H:i:s', $time)."  ";
 
                 if(!$res) { // On failure, try reconnecting up to 3 times
                     if($tries > 3) {

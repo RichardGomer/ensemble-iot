@@ -138,6 +138,7 @@ class CommandBroker {
             $this->getDevice($name)->poll($this);
         } catch(\Exception $e) {
             echo date('[Y-m-d H:i:s] ')."Exception during device poll:\n  ".get_class($e)." ".$e->getMessage()."\n";
+            echo $e->getTraceAsString()."\n";
         }
     }
 

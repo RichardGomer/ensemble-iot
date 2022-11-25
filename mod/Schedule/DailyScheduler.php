@@ -28,31 +28,14 @@ class DailyScheduler extends SchedulerDevice {
      */
     public function reschedule($date=false) {
 
-        $date = new \DateTime($date === false ? "now" : $date, $tz = new \DateTimeZone($this->base->getTimezone()));
-
-        $ns = new Schedule();
-        $ns->setTimezone($this->base->getTimezone());
-        $ns->setPoint(0, 'OFF');
-
-        for($i = 0; $i <= 1; $i++) {
-            foreach($this->base->getAllPeriods() as $p) {
-                // Get the clock time from the base schedule
-                $time = new \DateTime("now", $tz); $time->setTimestamp($p['start']); // There's no constructor for this!
-                $clocktime_h = $time->format('H');
-                $clocktime_m = $time->format('i');
-                $clocktime_s = $time->format('s');
-
-                // Set the clock time on the new schedule to the same
-                $date->setTime($clocktime_h, $clocktime_m, $clocktime_s);
-
-                // Now set the absolute time on the output schedule
-                $ns->setPoint($date->format('Y-m-d H:i:s'), $p['status']);
-            }
-
-            // Move to next day
-            $date->setTime(0,0);
-            $date = $date->add(new \DateInterval("P1D"));
+        if($date === false) {
+            $date = time();
+        } else {
+            $date = strtotime($date);
         }
+
+        $p = new DailyProjector($this->base);
+        $ns = $p->project($date, $date);
 
 
         $this->log("Generated Schedule:\n".$ns->prettyPrint(true));

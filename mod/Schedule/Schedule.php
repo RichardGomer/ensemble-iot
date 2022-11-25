@@ -26,7 +26,8 @@ class Schedule {
      */
     private $timezone = 'UTC';
     public function setTimezone($tz) {
-        if(count($this->periods) > 0) {
+        if(count($this->periods) > 0 && $this->periods[0]['start'] !== 0) {
+            //echo $this->prettyPrint();
             throw new \Exception("Timezone cannot be changed on a populated schedule");
         }
         $this->tzo = false; // Clear timezone object cache
@@ -38,12 +39,17 @@ class Schedule {
     }
 
     public static function fromJSON($json) {
-        $sched = new Schedule();
+        $c = get_called_class();
+        $sched = new $c();
 
         if(!is_array($json)) {
-            $arr = json_decode($json);
+            $arr = json_decode($json, true);
         } else {
             $arr = $json;
+        }
+
+        if(!is_array($arr)) {
+            throw new \Exception("Bad schedule JSON:\n".$json."\n");
         }
 
         foreach($arr as $t=>$s) {
@@ -236,6 +242,7 @@ class Schedule {
     // Return the current period in the format array($lastChangeTime => $currentStatus, $nextChangeTime => $nextStatus)
     public function getCurrentPeriod($offset=0) {
         $now = time() + $offset;
+        $lastTime = false;
         foreach($this->getChangePoints() as $time) {
             if($time > $now) {
                 if($lastTime == false) {

@@ -22,8 +22,8 @@ class OnSchedule extends Schedule {
     public static function onBetween($onTime, $offTime) {
         $s = new OnSchedule();
 
-        if($this->normaliseTime($offTime) < $this->normaliseTime($onTime)) {
-            throw new Exception("off time must be after ontime");
+        if(self::normaliseTime($offTime) < self::normaliseTime($onTime)) {
+            throw new \Exception("off time must be after ontime");
         }
 
         $s->setPeriod($onTime, $offTime, 'ON');

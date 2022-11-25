@@ -9,6 +9,7 @@ namespace Ensemble;
 use Ensemble\Schedule;
 use Ensemble\Device\Light as Light;
 use Ensemble\Device\ContextPointer as ContextPointer;
+use Ensemble\Schedule\Driver;
 
 require 'home_common.inc.php';
 
@@ -72,6 +73,29 @@ for($i = 7; $i <= 9; $i++) {
 }
 
 $conf['devices'][] = $diningdriver = new Light\RGBWCTDriver($dml, new ContextPointer('lighting.schedules', 'daylightschedule'));
+
+// Embedded LEDs
+$clouds = <<<END
+{"on":true,"bri":255,"transition":7,"mainseg":0,"seg":[{"id":0,"start":0,"stop":244,"grp":1,"spc":0,"of":0,"on":true,"bri":255,"cct":127,"col":[[255,160,0],[0,0,0],[0,0,0]],"fx":9,"sx":2,"ix":129,"pal":7,"sel":true,"rev":false,"mi":false},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0}]}
+END;
+
+$flicker = <<<END
+{"on":true,"bri":110,"transition":7,"mainseg":0,"seg":[{"id":0,"start":0,"stop":244,"grp":1,"spc":0,"of":0,"on":true,"bri":255,"cct":127,"col":[[255,185,87],[107,70,35],[0,0,0]],"fx":109,"sx":106,"ix":230,"pal":3,"sel":true,"rev":false,"mi":false},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0},{"stop":0}]}
+END;
+
+$dlsched = new Schedule\Schedule();
+$dlsched->setPoint('00:00:00', $flicker);
+$dlsched->setPoint('05:00:00',  $clouds);
+$dlsched->setPoint('20:30:00', $flicker);
+
+$sd_dleds = new Schedule\DailyScheduler('diningled.scheduler', 'lighting.schedules', 'diningledsschedule', $dlsched);
+$conf['devices'][] = $sd_dleds;
+
+
+$conf['devices'][] = $leds = new Light\WLED('diningleds', '10.0.107.212');
+$conf['devices'][] = $dleddriver = new Driver($leds, function($target, $current, $currentStart, $next, $nextStart) { 
+    $target->setScheme($current);
+}, new ContextPointer('lighting.schedules', 'diningledsschedule'));
 
 
 /**
