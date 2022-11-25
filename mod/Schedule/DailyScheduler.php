@@ -35,7 +35,7 @@ class DailyScheduler extends SchedulerDevice {
         }
 
         $p = new DailyProjector($this->base);
-        $ns = $p->project($date, $date);
+        $ns = $p->project($date, $date + 26 * 3600);
 
 
         $this->log("Generated Schedule:\n".$ns->prettyPrint(true));

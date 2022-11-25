@@ -252,6 +252,7 @@ class Schedule {
             }
             $lastTime = $time;
         }
+        return array($lastTime=>$this->getAt($time));
     }
 
     public function getNextChangeTime() {
