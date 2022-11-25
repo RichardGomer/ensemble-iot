@@ -33,7 +33,8 @@ class Client {
             'h' => $this->host,
             'p' => $this->port,
             't' => $topic,
-            'm' => $message
+            'm' => $message,
+            'q' => 1
         ));
 
         $t->waitForExit();
