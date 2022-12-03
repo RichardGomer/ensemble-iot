@@ -28,7 +28,7 @@ class TasmotaRGBWCT extends MQTT\Tasmota implements RGBWCT {
 
         $this->send($this->topic_command.'SetOption20', '1'); // Allow colours etc to be changed without turning the light on
         $this->send($this->topic_command.'Fade', '1');
-        $this->send($this->topic_command.'Speed', '5');
+        $this->send($this->topic_command.'Speed', '3');
 
         $this->setTeleInterval(30);
     }

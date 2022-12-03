@@ -45,6 +45,8 @@ abstract class Tasmota extends Async\Device {
         if($listen)
             $this->mqtt->subscribeBasic($this->topic, $this->name, self::MQTT_COMMAND);
 
+        $this->send($this->topic_command."SetOption56", "On"); // Select strongest AP on start
+        $this->send($this->topic_command."SetOption57", "On"); // Select strongest AP regularly
         $this->send($this->topic_command."teleperiod", $this->t_interval);
     }
 
