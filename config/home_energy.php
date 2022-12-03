@@ -11,11 +11,7 @@ use Ensemble\Device\ContextDevice;
 
 require 'home_common.inc.php';
 
-/**
- * Solcast solar forecast
- */
-$conf['devices'][] = $solcast = new Device\EnergyPlan\SolcastDevice('solcast', $solcast_key, $solcast_site);
-$solcast->setContext('global.context', 'solcast', Schedule\SchedulerDevice::MODE_SERIES);
+
 
 /**
  * Octopus Utility Data
@@ -68,6 +64,12 @@ $bsched->setPoint('05:00:00', 'OFF');
 $sd_opoff = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'energy.schedules', 'offpeak_opoff', $bsched);
 $conf['devices'][] = $sd_opoff;
 
+// all day
+$bsched = new Schedule\Schedule();
+$bsched->setPoint('00:00:00', 'ON');
+$sd_opoff = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'energy.schedules', 'allday', $bsched);
+$conf['devices'][] = $sd_opoff;
+
 
 /**
 * Attach sockets to schedules
@@ -98,12 +100,12 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dryer",
 
 
 // Washing machine
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-washingmachine", $bridge, new Device\ContextPointer('energy.schedules', 'offpeak_opoff'), "socket2");
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-washingmachine", $bridge, new Device\ContextPointer('energy.schedules', 'allday'), "socket2");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-washingmachine');
 
 
 // Dishwasher
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dishwasher", $bridge, new Device\ContextPointer('energy.schedules', 'offpeak_opoff'), "socket3");
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-dishwasher", $bridge, new Device\ContextPointer('energy.schedules', 'allday'), "socket3");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-dishwasher');
 
 
