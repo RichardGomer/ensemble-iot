@@ -111,8 +111,11 @@ $schemes['rainbow'] = 'rainbowschedule';
 // Cosy scheme
 $lsched = new Schedule\Schedule();
 $lsched->setPoint('00:00:00', '450 60'); // temperature, brightness percentage
+$lsched->setPoint('23:59:00', '450 60'); // temperature, brightness percentage
 $conf['devices'][] = $sd_lights = new Schedule\DailyScheduler('cosy.scheduler', 'lighting.schedules', 'cosyschedule', $lsched);
 $schemes['cosy'] = 'cosyschedule';
+
+// TODO: Also set up schemes for WLED here; same names, fallback to default if there isn't one
 
 // Add alternative schemes to the ScheduleDriver
 foreach($schemes as $sname=>$field) {
