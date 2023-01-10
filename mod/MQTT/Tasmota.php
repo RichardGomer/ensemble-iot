@@ -125,7 +125,7 @@ abstract class Tasmota extends Async\Device {
         }
     }
 
-    protected function send($topic, $message) {
-        $this->mqtt->getClient()->publish($topic, $message, 0);
+    protected function send($topic, $message, $retain=false) {
+        $this->mqtt->getClient()->publish($topic, $message, $retain);
     }
 }
