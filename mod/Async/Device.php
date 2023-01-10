@@ -23,6 +23,7 @@ abstract class Device implements \Ensemble\Module {
         return false;
     }
 
+    protected $name = false;
     final public function getDeviceName() {
         if($this->name == false) {
             throw new \Exception("Device name is not set in instance of ".get_class($this));
@@ -125,6 +126,8 @@ abstract class Device implements \Ensemble\Module {
  * The received action is returned.
  */
 class WaitForCommand implements Routine {
+
+    private $device, $actionTypes;
     public function __construct(Device $device, $actionTypes) {
         $this->device = $device;
 
@@ -154,6 +157,7 @@ class WaitForCommand implements Routine {
  * The received action is returned.
  */
 class WaitForAnyCommand implements Routine {
+    private $device;
     public function __construct(Device $device) {
         $this->device = $device;
     }
@@ -175,6 +179,7 @@ class WaitForAnyCommand implements Routine {
  * the command must already have been sent!
  */
 class WaitForReply implements Routine {
+    private $device, $command;
     public function __construct(Device $device, \Ensemble\Command $c) {
         $this->device = $device;
         $this->command = $c;
@@ -200,6 +205,7 @@ class WaitForReply implements Routine {
  * Wait until the given time
  */
 class waitUntil implements Routine {
+    private $end;
     public function __construct($time) {
         $this->end = $time;
     }

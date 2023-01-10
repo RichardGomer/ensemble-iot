@@ -29,6 +29,7 @@ abstract class Tasmota extends Async\Device {
 
     const MQTT_COMMAND = 'do_rcv_mqtt';
 
+    private $deviceName;
     public function __construct($name, Bridge $bridge, $deviceName, $listen=true) {
 
         $this->name = $name;
@@ -46,7 +47,7 @@ abstract class Tasmota extends Async\Device {
             $this->mqtt->subscribeBasic($this->topic, $this->name, self::MQTT_COMMAND);
 
         $this->send($this->topic_command."SetOption56", "On"); // Select strongest AP on start
-        $this->send($this->topic_command."SetOption57", "On"); // Select strongest AP regularly
+        $this->send($this->topic_command."SetOption57", "Off"); // Disable select strongest AP regularly; do this manually if required
         $this->send($this->topic_command."teleperiod", $this->t_interval);
     }
 

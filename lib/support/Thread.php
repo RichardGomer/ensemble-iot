@@ -28,6 +28,7 @@ class Thread
 	 * Start a background task by running $command
 	 * Optionally, an associative $args can contain arguments; in the form
 	 * array ( "flag" => "value", "flag2" => "value2" )
+	 * if value is null, the flag is added without a value
 	 * Values are escaped
 	 */
 	public function __construct($command, $args=array())
@@ -37,7 +38,11 @@ class Thread
 
 		$astr = "";
 		foreach($args as $flag=>$value) {
-			$astr .= " -{$flag} ".escapeshellarg($value);
+			if($value === null) {
+				$astr .= " -{$flag}";
+			} else {
+				$astr .= " -{$flag} ".escapeshellarg($value);
+			}
 		}
 
 		$descriptor = array ( 0 => array ( "pipe", "r" ), 1 => array ( "pipe", "w" ), 2 => array ( "pipe", "w" ) );

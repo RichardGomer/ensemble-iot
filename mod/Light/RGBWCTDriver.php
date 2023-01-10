@@ -28,6 +28,7 @@ class RGBWCTDriver extends Schedule\Driver {
         $current = $this->parseStatus($currentStatus);
         $next = $this->parseStatus($nextStatus);
 
+        $this->log("Current status:", json_encode($current));
 
         if($next !== false && $current['mode'] == $next['mode']) { // If modes match, interpolate values
             //$this->log("Interpolate from $currentStatus @ $currentTime to $nextStatus @ $nextTime\n");
@@ -43,7 +44,7 @@ class RGBWCTDriver extends Schedule\Driver {
                 );
                 $light->setBrightness($bpc);
             } elseif($current['mode'] == 'ct') { // Manual colour temperature; scale temp and brightness
-                $light->setCT($this->scale($current['ct'], $next['ct']));
+                $light->setCT($this->scale($current['ct'], $next['ct'], $currentTime, $nextTime));
                 $light->setBrightness($bpc);
             } elseif($current['mode'] == 'auto') { // Auto CT mode, only scale brightness
                 $light->setCT($this->getAutoCT());

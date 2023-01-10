@@ -12,6 +12,8 @@ use Ensemble\System\Thread;
 
 class Client {
 
+    private $host, $port;
+
     public function __construct($host, $port) {
         $this->host = $host;
         $this->port = $port;
@@ -28,20 +30,27 @@ class Client {
     /**
      * Publish a message to a topic
      */
-    public function publish($topic, $message) {
-        $t = new Thread("mosquitto_pub", array(
+    public function publish($topic, $message, $retain=false) {
+        $args = array(
             'h' => $this->host,
             'p' => $this->port,
             't' => $topic,
             'm' => $message,
             'q' => 1
-        ));
+        );
+
+        if($retain) {
+            $args['r'] = null;
+        }
+
+        $t = new Thread("mosquitto_pub", $args);
 
         $t->waitForExit();
     }
 }
 
 class MQTTSubscription {
+    private $host, $port, $topic;
     public function __construct($host, $port, $topic) {
 
         $this->host = $host;
@@ -51,6 +60,7 @@ class MQTTSubscription {
         $this->start();
     }
 
+    private $thread;
     protected function start() {
         usleep(5000);
         $this->thread = new Thread("stdbuf -i0 -o0 -e0 mosquitto_sub -R ", array(
