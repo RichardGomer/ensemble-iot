@@ -49,6 +49,7 @@ abstract class Tasmota extends Async\Device {
         // Send some tasmota configuration (as retained messages, in case devices are not currently subscribed)
         $this->send($this->topic_command."SetOption56", "On", true); // Select strongest AP on start
         $this->send($this->topic_command."SetOption57", "Off", true); // Disable select strongest AP regularly; do this manually if required
+        $this->send($this->topic_command."SetOption41", "10", true); // Make gratuitous ARP / Wifi Keepalive more agressive
         $this->send($this->topic_command."teleperiod", $this->t_interval, true);
     }
 

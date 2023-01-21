@@ -97,7 +97,8 @@ class WLED extends BasicDevice implements RGBWCT {
         $client = new Client();
 
         $res = $client->post($url, [
-            RequestOptions::JSON => $object
+            RequestOptions::JSON => $object,
+            RequestOptions::CONNECT_TIMEOUT => 0.5 // Short timeout to prevent blocking the thread for too long
         ]);
 
         $json = json_encode($object);

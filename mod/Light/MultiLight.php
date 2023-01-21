@@ -19,7 +19,7 @@ class MultiLight extends Async\Device  implements RGBWCT  {
      * All switches are operated when the MultiLight is set on/off
      *
      * $phys indicates if the switch is a physical switch - i.e. controls current
-     * to the lights. Physical switches are left ON in standby mode.
+     * to the lights. Currently not used for anything.
      */
     private $switches = array();
     public function addSwitch(LightSwitch $switch, $phys=false) {
@@ -96,23 +96,6 @@ class MultiLight extends Async\Device  implements RGBWCT  {
             $l['device']->on();
         });
     }
-
-    /**
-     * Put lights into standby - turns off bulbs and non-physical switches, but
-     * leaves physical switches on so that devices are still available
-     */
-    public function standby() {
-        // 1: Set the control switches
-        foreach($this->switches as $s) {
-            $s['switch']->off();
-        }
-
-        // 2: Set the lights themselves
-        $this->eachLight(function ($l) {
-            $l['device']->off();
-        });
-    }
-
 
     /**
      * Turn lights off
