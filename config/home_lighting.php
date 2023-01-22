@@ -9,6 +9,8 @@ namespace Ensemble;
 use Ensemble\Schedule;
 use Ensemble\Device\Light as Light;
 use Ensemble\Device\ContextPointer as ContextPointer;
+use Ensemble\Device\Light\MultiLight;
+use Ensemble\Device\Socket\Socket;
 use Ensemble\Schedule\Driver;
 
 require 'home_common.inc.php';
@@ -160,3 +162,10 @@ $bledsw->on(); // Bathroom LEDs default to on
 $bled->on();
 $conf['devices'][] = new Light\Rebooter($bledsw); // Reboot the bathroom LEDs once per day
 $conf['devices'][] = new Light\RGBWCTDriver($bled, new ContextPointer('lighting.schedules', 'daylightschedule')); // Set colour based on daylight schedule
+
+// Ceiling lights
+$conf['devices'][] = $bsw = new Light\LightSwitch("bathroom-switch", $bridge, "lightswitch3");
+$conf['devices'][] = $blp = new Light\LightSwitch("bathroom-light-pwr", $bridge, "bathroom", "2"); // Channel 1 on the bathroom 4CH
+$conf['devices'][] = $bl1 = new Light\MultiLight('bathroomlights'); // We use a multilight to sync the wall switch with the 4ch
+$bl1->addSwitch($bsw);
+$bl1->addSwitch($blp);

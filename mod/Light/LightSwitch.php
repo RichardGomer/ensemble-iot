@@ -15,6 +15,8 @@ use Ensemble\Command;
  */
 class LightSwitch extends MQTT\Tasmota {
 
+    private $powerNum;
+
     public function __construct($name, MQTT\Bridge $bridge, $deviceName, $powerNum="") {
         parent::__construct($name, $bridge, $deviceName);
 
