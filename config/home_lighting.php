@@ -157,7 +157,7 @@ $actions->expose("set_default", function() use ($drivers) {
  * Bathroom
  */
 $conf['devices'][] = $bled = new Light\WLED("bathroom-wled", "10.0.107.211");
-$conf['devices'][] = $bledsw = new Light\LightSwitch("bathroom-led-pwr", $bridge, "bathroom", "2"); // Channel 2 on the bathroom 4CH
+$conf['devices'][] = $bledsw = new Light\LightSwitch("bathroom-led-pwr", $bridge, "bathroom", "1"); // Channel 1 on the bathroom 4CH
 $bledsw->on(); // Bathroom LEDs default to on
 $bled->on();
 $conf['devices'][] = new Light\Rebooter($bledsw); // Reboot the bathroom LEDs once per day
