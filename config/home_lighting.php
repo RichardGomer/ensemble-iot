@@ -34,14 +34,14 @@ $sd_lights = new Schedule\DailyScheduler('light.scheduler', 'lighting.schedules'
 $conf['devices'][] = $sd_lights;
 
 // Create a socket to be controlled and bind it to the schedule in the broker
-$conf['devices'][] = $socket = new Light\TasmotaRGBWCT("light1", $bridge, "light1"); // Rear hallway
-$conf['devices'][] = new Light\RGBWCTDriver($socket, new ContextPointer('lighting.schedules', 'daylightschedule'));
+$conf['devices'][] = $light1 = new Light\TasmotaRGBWCT("light1", $bridge, "light1"); // Rear hallway
+$conf['devices'][] = $l1driver = new Light\RGBWCTDriver($light1, new ContextPointer('lighting.schedules', 'daylightschedule'));
 
-$conf['devices'][] = $socket = new Light\TasmotaRGBWCT("light2", $bridge, "light2"); // Front hallway
-$conf['devices'][] = new Light\RGBWCTDriver($socket, new ContextPointer('lighting.schedules', 'daylightschedule'));
+$conf['devices'][] = $light2 = new Light\TasmotaRGBWCT("light2", $bridge, "light2"); // Front hallway
+$conf['devices'][] = $l2driver = new Light\RGBWCTDriver($light2, new ContextPointer('lighting.schedules', 'daylightschedule'));
 
-$conf['devices'][] = $socket = new Light\TasmotaRGBWCT("light3", $bridge, "light3"); // Landing
-$conf['devices'][] = new Light\RGBWCTDriver($socket, new ContextPointer('lighting.schedules', 'daylightschedule'));
+$conf['devices'][] = $light3 = new Light\TasmotaRGBWCT("light3", $bridge, "light3"); // Landing
+$conf['devices'][] = $l3driver = new Light\RGBWCTDriver($light3, new ContextPointer('lighting.schedules', 'daylightschedule'));
 
 
 /**
@@ -103,7 +103,7 @@ $conf['devices'][] = $dleddriver = new Driver($leds, function($target, $current,
 /**
  * Some alternative schemes
  */
-$drivers = array($kitchendriver, $diningdriver);
+$drivers = array($kitchendriver, $diningdriver, $l1driver, $l2driver, $l3driver);
 $schemes = array();
 
 // Rainbow Scheme
@@ -113,7 +113,7 @@ $schemes['rainbow'] = 'rainbowschedule';
 // Cosy scheme
 $lsched = new Schedule\Schedule();
 $lsched->setPoint('00:00:00', '450 60'); // temperature, brightness percentage
-$lsched->setPoint('23:59:00', '450 60'); // temperature, brightness percentage
+$lsched->setPoint('23:59:59', '450 60'); // temperature, brightness percentage
 $conf['devices'][] = $sd_lights = new Schedule\DailyScheduler('cosy.scheduler', 'lighting.schedules', 'cosyschedule', $lsched);
 $schemes['cosy'] = 'cosyschedule';
 
@@ -157,7 +157,7 @@ $actions->expose("set_default", function() use ($drivers) {
  * Bathroom
  */
 $conf['devices'][] = $bled = new Light\WLED("bathroom-wled", "10.0.107.211");
-$conf['devices'][] = $bledsw = new Light\LightSwitch("bathroom-led-pwr", $bridge, "bathroom", "1"); // Channel 1 on the bathroom 4CH
+$conf['devices'][] = $bledsw = new Light\LightSwitch("bathroom-led-pwr", $bridge, "bathroom", "2"); // Channel 1 on the bathroom 4CH
 $bledsw->on(); // Bathroom LEDs default to on
 $bled->on();
 $conf['devices'][] = new Light\Rebooter($bledsw); // Reboot the bathroom LEDs once per day
