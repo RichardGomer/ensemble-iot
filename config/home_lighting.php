@@ -165,7 +165,7 @@ $conf['devices'][] = new Light\RGBWCTDriver($bled, new ContextPointer('lighting.
 
 // Ceiling lights
 $conf['devices'][] = $bsw = new Light\LightSwitch("bathroom-switch", $bridge, "lightswitch3");
-$conf['devices'][] = $blp = new Light\LightSwitch("bathroom-light-pwr", $bridge, "bathroom", "2"); // Channel 1 on the bathroom 4CH
+$conf['devices'][] = $blp = new Light\LightSwitch("bathroom-light-pwr", $bridge, "bathroom", "1"); // Channel 1 on the bathroom 4CH
 $conf['devices'][] = $bl1 = new Light\MultiLight('bathroomlights'); // We use a multilight to sync the wall switch with the 4ch
 $bl1->addSwitch($bsw);
 $bl1->addSwitch($blp);
