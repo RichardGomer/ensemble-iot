@@ -117,6 +117,16 @@ $lsched->setPoint('23:59:59', '450 60'); // temperature, brightness percentage
 $conf['devices'][] = $sd_lights = new Schedule\DailyScheduler('cosy.scheduler', 'lighting.schedules', 'cosyschedule', $lsched);
 $schemes['cosy'] = 'cosyschedule';
 
+// Violet scheme
+$lsched = new Schedule\Schedule();
+$lsched->setPoint('00:00:00', '140,94,255 50'); // temperature, brightness percentage
+$lsched->setPoint('23:59:59', '140,94,255 50'); // temperature, brightness percentage
+$conf['devices'][] = $sd_lights = new Schedule\DailyScheduler('violet.scheduler', 'lighting.schedules', 'violetschedule', $lsched);
+$schemes['violet'] = 'violetschedule';
+
+
+
+
 // TODO: Also set up schemes for WLED here; same names, fallback to default if there isn't one
 
 // Add alternative schemes to the ScheduleDriver
