@@ -85,7 +85,7 @@ $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind6", $bridge
 /**
  * The Shower Socket limits use of the power shower using a tasmota smart socket
  */
-$conf['devices'][] = $swrsocket = new Device\Socket\ShowerSocket("showersocket", $bridge, "socket4");
+$conf['devices'][] = $swrsocket = new Device\Socket\ShowerSocket("showersocket", $bridge, "socket14");
 ($conf['devices'][] = $swrsocket->getPowerMeter())->addDestination('global.context', 'power-shower');
 
 // Tie shower socket to shower extractor
