@@ -1,9 +1,27 @@
 #!/bin/bash
 # Builds a docker image of ensemble-iot
+#
+#
+# Building is split into two stages; the first creates a base image using the eiot install script
+# The second uses that image and pulls the latest copy of the source code
+#
+#
+#
 SCRIPT=`realpath $0`
 BASEPATH=`dirname $SCRIPT`
 cd $BASEPATH/..
 rm var/* #We don't want to build temporary state into the docker image!
+
+INSTALLHASH=($(md5sum bin/install.sh))
+
+# Check if the environment image needs to be rebuilt
+if [[ "$(docker images -q ensemble-iot-env:$INSTALLHASH 2> /dev/null)" == "" ]]; then
+  echo "Environment requires build $INSTALLHASH"
+  docker build -f docker/DockerfileEnv -t ensemble-iot-env:$INSTALLHASH -t ensemble-iot-env:latest .
+else
+  echo "Environment is up to date $INSTALLHASH";
+fi
+
 docker build -f docker/Dockerfile -t ensemble-iot:latest .
 
 echo ""
