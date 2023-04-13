@@ -7,6 +7,10 @@ namespace Ensemble\KeyValue;
  */
 class SubscriptionStore {
 
+    // There are different update types, which subscribers may wish to treat differently
+    public const UPTYPE_SOFT = 1; // Soft updates are contextual. best-effort, status updates. They indicate passive changes in device status.
+    public const UPTYPE_INTENT = 8; // Intentional updates represent a deliberate state changes, e.g. a button being toggled
+
     public function __set($key, $value) {
         $this->set($key, $value);
     }
@@ -19,14 +23,14 @@ class SubscriptionStore {
      * Set a value and trigger subscribed callbacks
      */
     private $data = array();
-    public function set($key, $value) {
+    public function set($key, $value, $type=self::UPTYPE_SOFT) {
         $key = strtoupper($key);
         $this->data[$key] = $value;
 
         // Notify subscribers
         if(array_key_exists($key, $this->subs)) {
             foreach($this->subs[$key] as $cb) {
-                call_user_func($cb, $key, $value);
+                call_user_func($cb, $key, $value, $type);
             }
         }
     }
