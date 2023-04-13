@@ -18,6 +18,7 @@ namespace Ensemble\MQTT;
 use Ensemble\Async as Async;
 
 use Ensemble\Device\Subscription as Subscription;
+use Ensemble\KeyValue\SubscriptionStore;
 
 abstract class Tasmota extends Async\Device {
 
@@ -95,9 +96,10 @@ abstract class Tasmota extends Async\Device {
         }
 
         switch($type) {
-            case 'stat': // stat contains single-field state updates
-                $this->status->set("STATE.$field", $message);
+            case 'stat': // stat contains single-field state updates, in response to commands
+                $this->status->set("STATE.$field", $message, SubscriptionStore::UPTYPE_INTENT);
                 break;
+
             case 'tele': // Telemetry is a JSON message
                 $json = json_decode($message, true);
 

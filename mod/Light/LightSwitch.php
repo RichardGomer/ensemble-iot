@@ -9,6 +9,7 @@ use Ensemble\MQTT;
 use Ensemble\Async;
 use Ensemble\Schedule;
 use Ensemble\Command;
+use Ensemble\KeyValue\SubscriptionStore;
 
 /**
  * Control a Tasmota light switch
@@ -27,10 +28,12 @@ class LightSwitch extends MQTT\Tasmota {
         $status = $this->getStatus();
         $device = $this;
         $lastState = false;
-        $status->sub('STATE.POWER'.$this->powerNum, function($key, $value) use ($device, &$lastState) {
+        $status->sub('STATE.POWER'.$this->powerNum, function($key, $value, $type) use ($device, &$lastState) {
 
             if($lastState !== $value) {
-                echo "{$device->getDeviceName()} {$key} CHANGED TO $value\n";
+                $typeStr = $type == SubscriptionStore::UPTYPE_SOFT ? "SOFT" : "HARD";
+                echo "{$device->getDeviceName()} {$key} {$typeStr} CHANGED TO $value\n";
+                if($type == SubscriptionStore::UPTYPE_SOFT) return; // Skip soft power changes - these usually come from telemetry and can interfere with deliberate switching
                 if($device->getBroker() !== false) {
                     $this->pubAction(Command::create($device, $device->getDeviceName(), 'POWER'.($value == 'ON' ? "ON" : "OFF")), $device->getBroker());
                     $lastState = $value;
