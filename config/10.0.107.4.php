@@ -92,8 +92,8 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-growlig
 /**
  * Irrigation
  */
-$pump = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 100); # full pwoer pumping, using soft starter
-$pumpmed = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 70); # low power pumping mode
+$pump = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 90); # full pwoer pumping, using soft starter
+$pumpmed = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 60); # low power pumping mode
 $pumplow = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 40); # v. low power pumping mode
 
 $flow = new Ir\FlowMeter(26);
@@ -109,7 +109,7 @@ $do = new IR\IrrigationDoser('irrigation.doser', $dosepump, $flow, 4/3); // dose
 
 $ic->addChannel(1, new Relay(Pin::BCM(17, Pin::OUT)), $pump);
 $ic->addChannel(2, new Relay(Pin::BCM(18, Pin::OUT)), $pump);
-$ic->addChannel(3, new Relay(Pin::BCM(27, Pin::OUT)), $pump);
+$ic->addChannel(3, new Relay(Pin::BCM(27, Pin::OUT)), $pumpmed);
 $ic->addChannel(4, new Relay(Pin::BCM(22, Pin::OUT)), $pump);
 
 $ic->addChannel('h', new Relay(array($h1 = Pin::BCM(13, Pin::OUT), $h2 = Pin::BCM(5, Pin::OUT), $h3 = Pin::BCM(12, Pin::OUT))), $pumpmed);
