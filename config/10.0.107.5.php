@@ -11,7 +11,7 @@ use Ensemble\Device\W1\TemperatureSensor;
 
 require __DIR__.'/home.php';
 
-Sensor::enable(4); // Enable 1wire on gpio4
+Sensor::enable(26); // Enable 1wire on gpio pin
 
 $temps = array(
     "boiler.temperature.flow" => "28-0835841e64ff",
