@@ -35,9 +35,9 @@ class Sensor extends \Ensemble\Device\SensorDevice {
             throw new SensorNotFoundException("Field {$this->field} not found on sensor {$this->id}");
         }
 
-        $reading = file_get_contents($fpath);
+        $reading = trim(file_get_contents($fpath));
 
-        return array('time'=>time(), 'reading'=>$reading);
+        return array('time'=>time(), 'value'=>$reading);
     }
 }
 
@@ -50,7 +50,8 @@ class TemperatureSensor extends Sensor {
     public function measure() {
         $raw = parent::measure();
 
-        $raw['reading'] = $raw['reading'] / 1000;
+	var_Dump($raw);
+        $raw['value'] = $raw['value'] / 1000;
 
         return $raw;
     }
