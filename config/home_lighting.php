@@ -136,32 +136,6 @@ foreach($schemes as $sname=>$field) {
     }
 }
 
-/**
- * Create an action controller to switch schemes
- */
-$conf['devices'][] = $actions = new \Ensemble\Actions\Controller("lighting.actions");
-
-// Set up an action to switch to each scheme
-foreach($schemes as $s=>$x) {
-    (function($s) use ($actions, $drivers) { // Trap s in a closure
-        $actions->expose("set_{$s}", function() use ($drivers, $s) {
-            echo "*** Setting scheme on drivers to $s\n";
-            foreach($drivers as $d) {
-                $d->setScheme($s);
-            }
-        }, (new \Ensemble\Actions\Documentation())->notes("Enable the {$s} lighting scheme"));
-    })($s);
-}
-
-// And an action to restore the default scheme
-$actions->expose("set_default", function() use ($drivers) {
-    foreach($drivers as $d) {
-        $d->setScheme(false);
-    }
-}, (new \Ensemble\Actions\Documentation())->notes("Reset the {$s} lighting scheme to default"));
-
-//echo json_encode($actions->getDocs());
-
 
 /**
  * Bathroom
@@ -179,3 +153,49 @@ $conf['devices'][] = $blp = new Light\LightSwitch("bathroom-light-pwr", $bridge,
 $conf['devices'][] = $bl1 = new Light\MultiLight('bathroomlights'); // We use a multilight to sync the wall switch with the 4ch
 $bl1->addSwitch($bsw);
 $bl1->addSwitch($blp);
+
+
+/**
+ * Garden
+ */
+$conf['devices'][] = $glight = new Socket('garden-lights', $bridge, 'socket15'); // Garden lights are just a socket
+
+
+
+
+/**
+ * Create an action controller to do lighting things
+ */
+$conf['devices'][] = $actions = new \Ensemble\Actions\Controller("lighting.actions");
+
+// Set up an action to switch to each indoor scheme
+foreach($schemes as $s=>$x) {
+    (function($s) use ($actions, $drivers) { // Trap s in a closure
+        $actions->expose("set_{$s}", function() use ($drivers, $s) {
+            echo "*** Setting scheme on drivers to $s\n";
+            foreach($drivers as $d) {
+                $d->setScheme($s);
+            }
+        }, (new \Ensemble\Actions\Documentation())->notes("Enable the {$s} lighting scheme"));
+    })($s);
+}
+
+// And an action to restore the default scheme
+$actions->expose("set_default", function() use ($drivers) {
+    foreach($drivers as $d) {
+        $d->setScheme(false);
+    }
+}, (new \Ensemble\Actions\Documentation())->notes("Reset the lighting scheme to default"));
+
+
+// An action to turn all the (software-switched) lights off
+$actions->expose("off", function() use ($kml, $dml, $leds, $bl1, $glight) {
+    $kml->off();
+    $dml->off();
+    $leds->off();
+    $bl1->off();
+    $glight->off();
+
+}, (new \Ensemble\Actions\Documentation())->notes("Turn off all the lights"));
+
+//echo json_encode($actions->getDocs());
