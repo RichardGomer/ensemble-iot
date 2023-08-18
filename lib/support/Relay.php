@@ -6,19 +6,25 @@ namespace Ensemble\GPIO;
  * Control something via a relay
  */
 class Relay {
+
+    private array $pins = [];
+    private int $offState;
+
     public function __construct($pins, $offState = 1) {
 
-	if($pins instanceof OutputPin)
-		$pins = array($pins);
+        if($pins instanceof OutputPin)
+            $pins = array($pins);
 
-	foreach($pins as $p) {
-		if(!$p instanceof OutputPin) {
-			throw new \Exception("Can only pass OutputPin objects to Relay");
-		}
-	}
+        foreach($pins as $p) {
+            if(!$p instanceof OutputPin) {
+                throw new \Exception("Can only pass OutputPin objects to Relay");
+            }
+        }
 
         $this->pins = $pins;
         $this->offState = $offState;
+
+        $this->off(); // Start in a known state
     }
 
     public function on() {
@@ -37,7 +43,6 @@ class Relay {
     }
 
     public function isOn() {
-        $s = $this->pins[0]->getStatus();
-        return !($s['V'] == $this->offState);
+        $s = $this->pins[0]->getValue() == 1;
     }
 }
