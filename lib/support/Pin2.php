@@ -154,7 +154,6 @@ class OutputPin extends Pin
 	public function setValue($value)
 	{
 		$this->value = $value ? 1 : 0;
-		$pin = $this->wpn;
 
 		self::exec("gpioset '{$this->chip}' {$this->line}={$this->value}");
 	}

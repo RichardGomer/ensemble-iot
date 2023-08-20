@@ -54,8 +54,20 @@ class HoseControl extends \Ensemble\Async\Device {
 }
 
 // Valve 1
-$v1 = new HoseControl("hose1", $v1_r1 = new Relay([19])); // First relay (NC) is initialised and set to off
+$v1 = new HoseControl("hose1", $v1_r1 = new Relay([Pin::bcm(19, Pin::OUT)])); // First relay (NC) is initialised and set to off
 $v1_r1->off();
-$v1_r2 = new Relay([16], 0); // Use the other relay to enable control
+$v1_r2 = new Relay([Pin::BCM(16, Pin::OUT)], 0); // Use the other relay to enable control
 $v1_r2->on();
+
+$conf['devices'][] = $v1;
+
+
+// Valve 2
+$v2 = new HoseControl("hose2", $v2_r1 = new Relay([Pin::bcm(20, Pin::OUT)])); // First relay (NC) is initialised and set to off
+$v2_r1->off();
+$v2_r2 = new Relay([Pin::BCM(26, Pin::OUT)], 0); // Use the other relay to enable control
+$v2_r2->on();
+
+$conf['devices'][] = $v2;
+
 
