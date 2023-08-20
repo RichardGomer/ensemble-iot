@@ -33,13 +33,36 @@ class HoseControl extends \Ensemble\Async\Device {
         $device = $this;
         return new Lambda( function() use ($device) {
             // Wait for actions
-           $action = yield new WaitForCommand($device, ['water']);
+            $action = yield new WaitForCommand($device, ['water', 'splash']);
 
             $seconds = $action->getArg('seconds');
 
-            $this->on();
-            yield new waitForDelay($seconds);
-            $this->off();
+            // Normal watering mode
+            if($action->getAction() == "water") {
+                $this->on();
+                yield new waitForDelay($seconds);
+                $this->off();
+            }
+            // Random splash mode for Freddie <3
+            elseif($action->getAction() == "splash") {
+                $minInterval = 3;
+                $maxInterval = 9;
+                $minLength = 0.2; // Min squirt length in s
+                $maxLength = 0.7; // Max squirt length in s
+
+                $end = time() + $seconds;
+
+                do {
+                    $pause = rand($minInterval, $maxInterval);
+                    $length = rand($minLength * 1000, $maxLength * 1000);
+
+                    $this->on();
+                    usleep($length);
+                    $this->off();
+
+                    yield new waitForDelay($pause);
+                } while(time() < $end);
+            }
         });
     }
 
