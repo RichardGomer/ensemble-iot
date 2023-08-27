@@ -109,15 +109,14 @@ $ic->setDestination('greenhouse.context'); // Send flow information to context b
 
 $do = new IR\IrrigationDoser('irrigation.doser', $dosepump, $flow, 4/3); // doser discharges 4/3ml per second
 
-$ic->addChannel(1, new Relay(Pin::BCM(17, Pin::OUT)), $pumpmed);
-$ic->addChannel(2, new Relay(Pin::BCM(18, Pin::OUT)), $pumpmed);
-$ic->addChannel(3, new Relay(Pin::BCM(27, Pin::OUT)), $pumplow);
-$ic->addChannel(4, new Relay(Pin::BCM(22, Pin::OUT)), $pumpmed);
+$ic->addChannel(1, new Relay(Pin::BCM(17, Pin::OUT)), $pump);
+$ic->addChannel(2, new Relay(Pin::BCM(18, Pin::OUT)), $pump);
+$ic->addChannel(3, new Relay(Pin::BCM(27, Pin::OUT)), $pumpmed);
+$ic->addChannel(4, new Relay(Pin::BCM(22, Pin::OUT)), $pumplow);
 
-$ic->addChannel('h', new Relay(array($h1 = Pin::BCM(13, Pin::OUT), $h2 = Pin::BCM(5, Pin::OUT), $h3 = Pin::BCM(12, Pin::OUT))), $pumplow);
-$ic->addChannel('h1', new Relay($h1), $pumplow);
+$ic->addChannel('h', new Relay(array($h1 = Pin::BCM(13, Pin::OUT), $h2 = Pin::BCM(5, Pin::OUT), $h3 = Pin::BCM(12, Pin::OUT))), $pumpmed);
 $ic->addChannel('h2', new Relay($h2), $pumplow);
-$ic->addChannel('h3', new Relay($h3), $pumplow);
+$ic->addChannel('h1', new Relay($h3), $pumplow);
 
 
 
