@@ -32,16 +32,25 @@ class SolcastDevice extends Schedule\SchedulerDevice {
         $device = $this;
 
         try {
-            $url = "https://api.solcast.com.au/rooftop_sites/{$device->scsite}/forecasts?format=json&api_key={$device->sckey}";
-            echo "Solcast GET $url\n";
-            $res = $this->client->request('GET', $url);
-            $json = $res->getBody();
+
+            $lfile = './var/solcast.json'; // Local json source
+
+            if(!file_exists($lfile)) {
+                $url = "https://api.solcast.com.au/rooftop_sites/{$device->scsite}/forecasts?format=json&api_key={$device->sckey}";
+                echo "Solcast GET $url\n";
+                $res = $this->client->request('GET', $url);
+                $json = $res->getBody();
+            } else {
+                $json = file_get_contents($lfile);
+                //var_dump($json);
+            }
+
             $data = json_decode($json, true);
 
-            $s = new Schedule\Schedule();
+            $s = new EnergySchedule();
 
             if(!array_key_exists('forecasts', $data)) {
-                throw new Exception("No forecast data in response");
+                throw new \Exception("No forecast data in response");
             }
 
             foreach($data['forecasts'] as $period) {
@@ -51,10 +60,10 @@ class SolcastDevice extends Schedule\SchedulerDevice {
                 $s->setPeriod($start, $end, $period['pv_estimate'], false);
             }
 
-            echo $s->prettyPrint();
+            //echo $s->prettyPrint();
 
             return $s;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             echo "Solcast failed: ".$e->getMessage()."\n";
         }
     }

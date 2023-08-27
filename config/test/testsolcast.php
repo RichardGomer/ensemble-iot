@@ -6,7 +6,7 @@ use Ensemble\Schedule as Schedule;
 
 
 // Create an Octopus API client
-require 'dbcreds.php'; // Keep account info out of git!
+require '../dbcreds.php'; // Keep account info out of git!
 
 // Create a context device
 $conf['devices'][] = $ctx = new Device\ContextDevice('test.context');
