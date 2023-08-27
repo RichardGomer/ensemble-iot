@@ -9,6 +9,8 @@ use \Ensemble\Device\Irrigation as Ir;
 use \Ensemble\GPIO\Pin;
 use \Ensemble\GPIO\Relay;
 
+use Ensemble\Device\W1\TemperatureSensor;
+
 date_default_timezone_set('Europe/London');
 $conf['default_endpoint'] = 'http://10.0.0.8:3107/ensemble-iot/1.0/';
 
@@ -125,3 +127,13 @@ $ic->addChannel('h3', new Relay($h3), $pumplow);
 $conf['devices'][] = $ic;
 $conf['devices'][] = $ps;
 $conf['devices'][] = $do;
+
+
+// Onboard temperature sensors
+$ts1 = new TemperatureSensor('greenhouse.w1temp-internal', '28-3c01d60775a5');
+$ts1->addDestination('global.context', 'greenhouse.temperature');
+$conf['devices'][] = $ts1;
+
+$ts2 = new TemperatureSensor('greenhouse.w1temp-external', '28-3c01d60742ac');
+$ts2->addDestination('global.context', 'outdoor.temperature');
+$conf['devices'][] = $ts2;

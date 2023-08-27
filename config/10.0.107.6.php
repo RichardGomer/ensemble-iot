@@ -8,6 +8,7 @@ namespace Ensemble;
 use Ensemble\Async\Lambda;
 use Ensemble\Async\WaitForCommand;
 use Ensemble\Async\waitForDelay;
+use Ensemble\Device\W1\TemperatureSensor;
 use \Ensemble\GPIO\Pin;
 use \Ensemble\GPIO\Relay;
 
@@ -103,3 +104,7 @@ $v2_r2->on();
 $conf['devices'][] = $v2;
 
 
+// Temperature
+$ts = new TemperatureSensor('hosecontroller.w1temp', '28-0722614f7355');
+$ts->addDestination('global.context', 'outdoor.temperature');
+$conf['devices'][] = $ts;

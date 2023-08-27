@@ -16,6 +16,7 @@ class Sensor extends \Ensemble\Device\SensorDevice {
         return 60;
     }
 
+    protected $id, $field;
     public function __construct($name, $id, $field) {
         $this->id = $id;
         $this->field = $field;
@@ -38,22 +39,6 @@ class Sensor extends \Ensemble\Device\SensorDevice {
         $reading = trim(file_get_contents($fpath));
 
         return array('time'=>time(), 'value'=>$reading);
-    }
-}
-
-class TemperatureSensor extends Sensor {
-
-    public function __construct($name, $id) {
-        parent::__construct($name, $id, "temperature");
-    }
-
-    public function measure() {
-        $raw = parent::measure();
-
-	var_Dump($raw);
-        $raw['value'] = $raw['value'] / 1000;
-
-        return $raw;
     }
 }
 
