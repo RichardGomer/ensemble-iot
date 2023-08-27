@@ -1,0 +1,26 @@
+Boiler ebus stuff
+
+Flow temp can be set via ebus. Needs a bit of setup:
+
+1) Need to add a setmode command that allows writing to the relevant settings. This mimics Vaillant's own controller.
+
+Download the config files from https://github.com/john30/ebusd-configuration
+
+Edit ebusd-configuration/ebusd-2.1.x/en/vaillant/general.csv to add:
+wi,BAI,SetModeOverride,Betriebsart,,08,B510,00,hcmode,,UCH,,,,flowtempdesired,,D1C,,,,hwctempdesired,,D1C,,,,hwcflowtempdesired,,UCH,,,,,,IGN:1,,,,disablehc,,BI0,,,,disablehwctapping,,BI1,,,,disablehwcload,,BI2,,,,,,IGN:1,,,,remoteControlHcPump,,BI0,,,,releaseBackup,,BI1,,,,releaseCooling,,BI2
+
+
+2) The hardware knob now sets the MAX flow temp. So turn it up to whatever the max should be.
+
+
+
+3) Now can do:
+
+ebusctl write -c bai SetModeOverride '0;65;0;0;0;0;0;0;0;0;0;0'
+
+NB: This differs from the original example at https://github.com/john30/ebusd/issues/179 which contained -es in some positions; otherwise ebusctl gives an error. Behaviour has changed?
+
+To read current flow temp:
+
+ebusctl read -m 0 FlowTempDesired
+
