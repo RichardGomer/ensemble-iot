@@ -1,3 +1,5 @@
 /vendor/
 /var/
+# things that contain credentials
 /config/dbcreds.php
+mod/LayZSpa/test.php 

@@ -34,13 +34,12 @@ $bsched->setPoint('12:00:00', 'auto'); // Afternoons, use the auto-closer based 
 $bsched->setPoint('21:30:00', '100'); // Close at night
 
 $sd = new Schedule\DailyScheduler('officeblind.scheduler', 'global.schedules', 'officeblindschedule', $bsched);
-$sd->vPos = 120;
-$sd->distance = 80;
-$sd->horizon = 10/180 * M_PI;
 $conf['devices'][] = $sd;
 
-$conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind1", $bridge, "blind1", new Device\ContextPointer('global.schedules', 'officeblindschedule'));
-
+$conf['devices'][] = $sdb = new Device\Blind\ScheduledBlind("blind1", $bridge, "blind1", new Device\ContextPointer('global.schedules', 'officeblindschedule'));
+$sdb->vPos = 120;
+$sdb->distance = 80;
+$sdb->horizon = 10/180 * M_PI;
 
 /**
  * Bedroom blind

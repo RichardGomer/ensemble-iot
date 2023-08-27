@@ -21,6 +21,7 @@ abstract class SensorDevice extends BasicDevice  {
         return $m;
     }
 
+    private $destinations = [];
     protected function pushToDestinations($m, \Ensemble\CommandBroker $broker) {
         if(is_null($m) || $m === false) {
             return;

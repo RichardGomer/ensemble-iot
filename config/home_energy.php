@@ -8,6 +8,9 @@
 namespace Ensemble;
 use Ensemble\Schedule;
 use Ensemble\Device\ContextDevice;
+use Ensemble\Device\LayZSpa\BestwaySpa;
+use Ensemble\Device\LayZSpa\GizWitsClient;
+use Ensemble\Device\LayZSpa\SpaDevice;
 
 require 'home_common.inc.php';
 
@@ -67,8 +70,8 @@ $conf['devices'][] = $sd_opoff;
 // all day
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', 'ON');
-$sd_opoff = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'energy.schedules', 'allday', $bsched);
-$conf['devices'][] = $sd_opoff;
+$sd_allday = new Schedule\DailyScheduler('allday.scheduler', 'energy.schedules', 'allday', $bsched);
+$conf['devices'][] = $sd_allday;
 
 
 /**
@@ -174,8 +177,8 @@ $tariffdevice->setCallback(function($tariff) use ($isched) {
         return;
     }
 
-    // 3.5p/kwh ~= 3.03p/kwh / 90% efficiency
-    $immersion = $baseTariff->between('23:00', '06:00')->lessThan(3.5)->cheapest(120)->getOnSchedule();
+    $gasPrice = 3.95; // Price per kwh of gas
+    $immersion = $baseTariff->between('23:00', '06:00')->lessThan($gasPrice / 0.85)->cheapest(120)->getOnSchedule();
 
     // For immersion as primary hot water source, use the below
     //$immersion1_t = $baseTariff->between('23:00', '08:00')->cheapest(180);
@@ -210,3 +213,15 @@ $sch_pondsched = $conf['devices'][] = new Schedule\DailyScheduler('pondpump.sche
 
 $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("pondpump", $bridge, new Device\ContextPointer('energy.schedules', 'pondpump_schedule'), "socket13");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pondpump');
+
+
+/**
+ * Hot tub
+ */
+$bestway = new GizWitsClient();
+$bestway->login($bestwayusername, $bestwaypassword);
+$bestway->getDevices();
+$spa = $bestway->getDeviceByProductKey($hottubprodkey); // This is a raw spa controller
+$spaDevice = new SpaDevice('hottub', $spa); // Wrap it in an ensemble iot device
+$conf['devices'][] = $ts = $spaDevice->getTempSensor(); // And get a temperature sensor
+$ts->addDestination('global.context', 'spa-temp'); 

@@ -10,6 +10,8 @@ use Ensemble\Async;
 
 class ScheduledBlind extends MQTT\Tasmota {
 
+    private $driver;
+
     public function __construct($name, MQTT\Bridge $client, $deviceName, \Ensemble\Device\ContextPointer $schedule) {
         parent::__construct($name, $client, $deviceName);
 
