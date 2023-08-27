@@ -8,6 +8,9 @@ namespace Ensemble\Schedule;
 
 class Schedule {
 
+    protected $periods = [];
+    protected $statuses = false;
+
     /**
      * @mixed $statuses; If provided, $statuses must be an array containing the
      * allowed statuses for the schedule; for instance, "ON", "OFF"

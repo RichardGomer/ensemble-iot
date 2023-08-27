@@ -16,6 +16,9 @@ use Ensemble\Device as Device;
  * $translator: optionally, a function to translate the retrieved schedule (see Schedule::translate())
  */
 class Driver extends Async\Device {
+
+    private $target, $setFunc, $override;
+
     public function __construct(\Ensemble\Module $target, $setFunc, Device\ContextPointer $ctxptr, $translator=false) {
         $this->target = $target;
         $this->setFunc = $setFunc;
@@ -37,7 +40,8 @@ class Driver extends Async\Device {
 
     /**
      * Schemes are effectively named ContextPointers that the driver can switch between as sources for the
-     * schedule
+     * schedule. The scheme passed in to the constructor is named ___default, and calling setScheme() with
+     * no arguments (or false, or '___default') switches back to it.
      */
     private $scheme = '___default';
     public function getScheme() {
@@ -66,6 +70,10 @@ class Driver extends Async\Device {
         $this->continue(); // Immediately call the main routine
     }
 
+    /**
+     * Add a named scheme
+     */
+    private $schemes = [];
     public function addScheme($name, Device\ContextPointer $schedulePtr) {
         $this->schemes[$name] = $schedulePtr;
     }
@@ -81,6 +89,7 @@ class Driver extends Async\Device {
         return $this->interval;
     }
 
+    private $translator;
     public function setTranslator($f) {
         $this->translator = $f;
     }
@@ -90,6 +99,7 @@ class Driver extends Async\Device {
         $this->offset = $seconds;
     }
 
+    private $refresh = false;
     public function getRoutine() {
         return new Async\Lambda(function(){
 
@@ -133,11 +143,18 @@ class Driver extends Async\Device {
 
                 $keys = array_keys($periods);
 
-                $current = $periods[$keys[0]];
-                $next = $periods[$keys[1]];
-
                 $currentStart = $keys[0];
-                $nextStart = $keys[1];
+                $current = $periods[$keys[0]];
+
+                if(count($keys) > 1) {
+                    $next = $periods[$keys[1]];
+                    $nextStart = $keys[1];
+                } elseif( count($keys) == 1) { // If there is no next period
+                    $next = false;
+                    $nextStart = false;
+                } else {
+                    throw new \Exception("Schedule returned a zero-length array from getCurrentPeriod; that should not happen!");
+                }
 
                 $this->interval = min(max(1, $schedule->getNextChangeTime() - time()), 15); // Interval is smart; it's the next change time (minimum 1 sec) or (at most) 15 seconds
 
