@@ -3,7 +3,7 @@ FROM ensemble-iot-env:latest
 # Expose HTTP
 EXPOSE 80
 
-USER pi
+#USER pi
 
 # Copy ensemble-iot into image and set permissions
 WORKDIR /home/pi

@@ -46,7 +46,8 @@ $sdb->horizon = 10/180 * M_PI;
  */
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', '100');
-$bsched->setPoint('07:50:00', '0');
+$bsched->setPoint('07:50:00', '72');
+$bsched->setPoint('08:10:00', '0');
 $bsched->setPoint('18:00:00', 'dusk');
 $bsched->setPoint('22:00:00', '100');
 
