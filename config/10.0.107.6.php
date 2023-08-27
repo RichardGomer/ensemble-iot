@@ -33,9 +33,12 @@ class HoseControl extends \Ensemble\Async\Device {
         $device = $this;
         return new Lambda( function() use ($device) {
             // Wait for actions
+	echo "Yield to wait for command\n";
             $action = yield new WaitForCommand($device, ['water', 'splash']);
 
             $seconds = $action->getArg('seconds');
+
+	echo "Received {$action->getAction()}\n";
 
             // Normal watering mode
             if($action->getAction() == "water") {
@@ -45,23 +48,29 @@ class HoseControl extends \Ensemble\Async\Device {
             }
             // Random splash mode for Freddie <3
             elseif($action->getAction() == "splash") {
-                $minInterval = 3;
-                $maxInterval = 9;
-                $minLength = 0.2; // Min squirt length in s
-                $maxLength = 0.7; // Max squirt length in s
+                $minInterval = 0.3; // Min non-squirting interval length
+                $maxInterval = 1; // and max
+                $minLength = 4; // Min squirt length in s
+                $maxLength = 8; // Max squirt length in s
 
                 $end = time() + $seconds;
 
+		echo "Begin squirting\n";
+		$this->on();
                 do {
-                    $pause = rand($minInterval, $maxInterval);
-                    $length = rand($minLength * 1000, $maxLength * 1000);
+                    $pause = rand($minInterval * 1000, $maxInterval * 1000);
+                    $length = rand($minLength * 1000, $maxLength * 1000) / 1000;
 
-                    $this->on();
-                    usleep($length);
+	            $length = min($length, $end - time()); // Cap time to the scheduled end of squirting
+		    echo "Squirt $length\n";
+                    yield new waitForDelay($length);
+
+		    echo "Pause $pause\n";
                     $this->off();
-
-                    yield new waitForDelay($pause);
+                    usleep($pause * 1000);
+                    $this->on();
                 } while(time() < $end);
+		$this->off();
             }
         });
     }
