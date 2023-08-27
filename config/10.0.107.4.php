@@ -73,7 +73,7 @@ $conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($s
     } elseif ($value < 4.8) { // If it's too cool, allow the heater to come on (based on schedule)
         $socket->getDriver()->clearOverride(365*24*3600+100);
     }
-}, new Device\ContextPointer("greenhouse.context", "greenhouse-temp"));
+}, new Device\ContextPointer("greenhouse.context", "greenhouse.w1temp-internal"));
 
 
 /**
