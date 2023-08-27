@@ -31,6 +31,9 @@ read -p "Press any key to continue"
 # Set permissions on var, so web server can edit
 chmod 0777 $VARPATH -R
 
+# Set perms on home directory so web server can find root
+chmod 0755 /home/pi
+
 # Install deps
 apt-get update
 apt-get --assume-yes install php-cli lighttpd php-cgi php-json curl
