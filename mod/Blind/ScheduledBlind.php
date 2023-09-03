@@ -11,6 +11,7 @@ use Ensemble\Async;
 class ScheduledBlind extends MQTT\Tasmota {
 
     private $driver;
+    private bool $reverse = false;
 
     public function __construct($name, MQTT\Bridge $client, $deviceName, \Ensemble\Device\ContextPointer $schedule) {
         parent::__construct($name, $client, $deviceName);
@@ -30,8 +31,20 @@ class ScheduledBlind extends MQTT\Tasmota {
             if($ext === $last) // Only send values when they change
                 return;
             $last = $ext;
+
+            if($this->reverse) {
+                $ext = 100 - $ext;
+            }
+
             $device->send($this->topic_command.'TuyaSend2', "2,$ext"); // DpID 2 sets position; TuyaSend2 sends an int to the DpID
         }, $schedule);
+    }
+
+    /**
+     * For blinds that are working in reverse; because what a PITA it is changing this through tasmota!
+     */
+    public function setReverse($reverse = true) {
+        $this->reverse = $reverse;
     }
 
     public function getChildDevices() {

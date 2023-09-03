@@ -74,6 +74,7 @@ $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind3", $bridge
 
 // Kitchen rear
 $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind4", $bridge, "blind4", new Device\ContextPointer('global.schedules', 'thermalblindschedule'));
+$socket->setReverse();
 
 // Lounge front
 $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind5", $bridge, "blind5", new Device\ContextPointer('global.schedules', 'thermalblindschedule'));

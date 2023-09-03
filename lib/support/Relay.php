@@ -7,7 +7,7 @@ namespace Ensemble\GPIO;
  */
 class Relay {
 
-    private array $pins = [];
+    protected array $pins = []; // Irrigation SoftStart extends and accesses this directly - so not private
     private int $offState;
 
     public function __construct($pins, $offState = 1) {
