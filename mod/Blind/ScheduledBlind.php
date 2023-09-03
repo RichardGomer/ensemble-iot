@@ -126,9 +126,9 @@ class ScheduledBlind extends MQTT\Tasmota {
             return $this->extMin;
         }
 
-        // If the sun is below the Horizon, set the blind to max
+        // If the sun is below the Horizon, set the blind to open
         if($sunAltitude < $this->horizon) {
-            return $this->extMax;
+            return $this->extMin;
         }
 
         // Scale blind shade based on altitude
