@@ -61,7 +61,7 @@ $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind2", $bridge
  */
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', '100');
-$bsched->setPoint('07:30:00', 'dawn');
+$bsched->setPoint('08:10:00', 'dawn');
 $bsched->setPoint('11:00:00', '0');
 $bsched->setPoint('18:00:00', 'dusk');
 $bsched->setPoint('22:00:00', '100');
@@ -90,11 +90,11 @@ $conf['devices'][] = $swrsocket = new Device\Socket\ShowerSocket("showersocket",
 ($conf['devices'][] = $swrsocket->getPowerMeter())->addDestination('global.context', 'power-shower');
 
 // Tie shower socket to shower extractor
-$conf['devices'][] = $extractor = new Device\Socket\TimedSocket("loftextractor", $bridge, "bathroom", "3"); // POWER3 on 'bathroom' MQTT device
+$conf['devices'][] = $extractor = new Device\Socket\TimedSocket("loftextractor", $bridge, "bathroom", "3", 3600); // POWER3 on 'bathroom' MQTT device
 $swrsocket->getStatus()->sub('SENSOR.ENERGY.POWER', array($extractor, 'trigger')); // Trigger the extractor when the socket current draw changes
 
 // Wall extractor similar, but comes on AFTER the shower is turned off
-$conf['devices'][] = $extractor = new Device\Socket\TimedSocket("wallextractor", $bridge, "bathroom", "4"); // POWER4 on 'bathroom' MQTT device
+$conf['devices'][] = $extractor = new Device\Socket\TimedSocket("wallextractor", $bridge, "bathroom", "4", 3600); // POWER4 on 'bathroom' MQTT device
 $swrsocket->getStatus()->sub('SENSOR.ENERGY.POWER', array($extractor, 'trigger')); // Trigger the extractor when the socket current draw changes
 $extractor->setOffOnly();
 

@@ -17,7 +17,8 @@ class ScheduledBlind extends MQTT\Tasmota {
         parent::__construct($name, $client, $deviceName);
 
         $last = null;
-        $this->driver = new \Ensemble\Schedule\Driver($this, function($device, $ext) use (&$last) {
+        $lastTime = 0;
+        $this->driver = new \Ensemble\Schedule\Driver($this, function($device, $ext) use (&$last, &$lastTime) {
 
             if($ext == 'auto') {
                 $ext = $this->getAutoSetting();
@@ -28,9 +29,11 @@ class ScheduledBlind extends MQTT\Tasmota {
             }
 
             $ext = round($ext / 2, 0) * 2; // Round to nearest 2
-            if($ext === $last) // Only send values when they change
+            if($ext === $last && $lastTime < time() - 60) // Only send values when they change / or once per minute
                 return;
+
             $last = $ext;
+            $lastTime = time();
 
             if($this->reverse) {
                 $ext = 100 - $ext;
