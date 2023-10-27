@@ -27,16 +27,21 @@ echo $s->prettyPrint(true);
 $daytime = new Schedule();
 $daytime->setTimezone('Europe/London');
 $daytime->setPoint('00:00:00', 'OFF');
-$daytime->setPoint('07:00:00', 'ON');
-$daytime->setPoint('22:00:00', 'OFF');
+$daytime->setPoint('05:00:00', '@sunrise ON');
+$daytime->setPoint('18:00:00', '@sunset OFF');
 echo $daytime->prettyPrint(true);
 
-$sd_daytime = new DailyScheduler('daytime.scheduler', 'energy.schedules', 'daytime', $daytime);
+$LAT = 50.9288;
+$LNG = -1.3372;
+$sd_daytime = new DailyScheduler('daytime.scheduler', 'energy.schedules', 'daytime', $daytime, $LAT, $LNG);
 
 $sd_daytime->reschedule();
-$sd_daytime->reschedule('2022-03-26');
-$sd_daytime->reschedule('2022-03-27');
-$sd_daytime->reschedule('2022-03-28');
-$sd_daytime->reschedule('2022-10-30');
+$sd_daytime->reschedule('2020-01-26');
+$sd_daytime->reschedule('2025-01-27');
+
+exit;
+$sd_daytime->reschedule('2024-03-28');
+$sd_daytime->reschedule('2024-08-30');
+$sd_daytime->reschedule('2024-10-30');
 
 exit;

@@ -87,10 +87,10 @@ END;
 
 $dlsched = new Schedule\Schedule();
 $dlsched->setPoint('00:00:00', $flicker);
-$dlsched->setPoint('05:00:00',  $clouds);
-$dlsched->setPoint('20:30:00', $flicker);
+$dlsched->setPoint('05:00:00',  "@dawn ".$clouds);
+$dlsched->setPoint('18:00:00', "@dusk ".$flicker);
 
-$sd_dleds = new Schedule\DailyScheduler('diningled.scheduler', 'lighting.schedules', 'diningledsschedule', $dlsched);
+$sd_dleds = new Schedule\DailyScheduler('diningled.scheduler', 'lighting.schedules', 'diningledsschedule', $dlsched, $LAT, $LNG);
 $conf['devices'][] = $sd_dleds;
 
 
@@ -119,8 +119,8 @@ $schemes['cosy'] = 'cosyschedule';
 
 // Violet scheme
 $lsched = new Schedule\Schedule();
-$lsched->setPoint('00:00:00', '140,94,255 50'); // temperature, brightness percentage
-$lsched->setPoint('23:59:59', '140,94,255 50'); // temperature, brightness percentage
+$lsched->setPoint('00:00:00', '210,94,255 50');
+$lsched->setPoint('23:59:59', '210,94,255 50');
 $conf['devices'][] = $sd_lights = new Schedule\DailyScheduler('violet.scheduler', 'lighting.schedules', 'violetschedule', $lsched);
 $schemes['violet'] = 'violetschedule';
 

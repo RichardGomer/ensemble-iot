@@ -4,6 +4,8 @@ namespace Ensemble\Schedule;
 
 class DailyScheduler extends SchedulerDevice {
 
+    private $lat, $lng, $baseschedule;
+
     /**
      * The base schedule sets the daily schedule, as if it was a template
      *
@@ -16,11 +18,16 @@ class DailyScheduler extends SchedulerDevice {
      *
      * To avoid compensating for DST, pass in a base schedule that uses a
      * non-geographic timezone; e.g. "UTC" instead of "Europe/London"
+     * 
+     * Meta-values can be used to create schedules that respond to sunrise/sunset etc.
+     * See docs on DailyProjector for more. lat/lng must be set!
      */
-    public function __construct($name, $device, $field, $baseschedule) {
+    public function __construct($name, $device, $field, $baseschedule, $lat=0, $lng=0) {
         parent::__construct($name, $device, $field);
 
         $this->base = $baseschedule;
+        $this->lat = $lat;
+        $this->lng = $lng;
     }
 
     /**
@@ -34,7 +41,7 @@ class DailyScheduler extends SchedulerDevice {
             $date = strtotime($date);
         }
 
-        $p = new DailyProjector($this->base);
+        $p = new DailyProjector($this->base, $this->lat, $this->lng);
         $ns = $p->project($date - 26 * 3600, $date + 26 * 3600);
 
 

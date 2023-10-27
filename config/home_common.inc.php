@@ -5,6 +5,9 @@ use Ensemble\MQTT as MQTT;
 
 date_default_timezone_set('Europe/London');
 
+$LAT = 50.9288;
+$LNG = -1.3372;
+
 $conf['default_endpoint'] = 'http://10.0.0.8:3107/ensemble-iot/1.0/';
 
 if(!file_exists(__DIR__.'/dbcreds.php')) {

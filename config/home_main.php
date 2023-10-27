@@ -31,12 +31,14 @@ $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', '100');
 $bsched->setPoint('08:45:00', '0'); // Reopen in the morning
 $bsched->setPoint('12:00:00', 'auto'); // Afternoons, use the auto-closer based on sun
-$bsched->setPoint('21:30:00', '100'); // Close at night
+$bsched->setPoint('18:00:00', '@dusk 100'); // Close at night
 
-$sd = new Schedule\DailyScheduler('officeblind.scheduler', 'global.schedules', 'officeblindschedule', $bsched);
+$sd = new Schedule\DailyScheduler('officeblind.scheduler', 'global.schedules', 'officeblindschedule', $bsched, $LAT, $LNG);
 $conf['devices'][] = $sd;
 
 $conf['devices'][] = $sdb = new Device\Blind\ScheduledBlind("blind1", $bridge, "blind1", new Device\ContextPointer('global.schedules', 'officeblindschedule'));
+$sdb->lat = $LAT;
+$sdb->lng = $LNG;
 $sdb->vPos = 120;
 $sdb->distance = 80;
 $sdb->horizon = 10/180 * M_PI;
@@ -48,10 +50,9 @@ $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', '100');
 $bsched->setPoint('07:50:00', '72');
 $bsched->setPoint('08:10:00', '0');
-$bsched->setPoint('18:00:00', 'dusk');
-$bsched->setPoint('22:00:00', '100');
+$bsched->setPoint('18:00:00', '@dusk 100');
 
-$sd = new Schedule\DailyScheduler('bedroomblind.scheduler', 'global.schedules', 'bedroomblindschedule', $bsched);
+$sd = new Schedule\DailyScheduler('bedroomblind.scheduler', 'global.schedules', 'bedroomblindschedule', $bsched, $LAT, $LNG);
 $conf['devices'][] = $sd;
 $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind2", $bridge, "blind2", new Device\ContextPointer('global.schedules', 'bedroomblindschedule'));
 
@@ -61,12 +62,10 @@ $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind2", $bridge
  */
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', '100');
-$bsched->setPoint('08:10:00', 'dawn');
-$bsched->setPoint('11:00:00', '0');
-$bsched->setPoint('18:00:00', 'dusk');
-$bsched->setPoint('22:00:00', '100');
+$bsched->setPoint('07:00:00', '@sunrise 0');
+$bsched->setPoint('18:00:00', '@dusk 100');
 
-$sd = new Schedule\DailyScheduler('thermalblind.scheduler', 'global.schedules', 'thermalblindschedule', $bsched);
+$sd = new Schedule\DailyScheduler('thermalblind.scheduler', 'global.schedules', 'thermalblindschedule', $bsched, $LAT, $LNG);
 $conf['devices'][] = $sd;
 
 // Kitchen front
