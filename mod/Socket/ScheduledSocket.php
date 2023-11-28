@@ -37,6 +37,8 @@ class ScheduledSocket extends Socket {
         $setFunc = function($device, $mode) {
             $mode = strtoupper($mode);
 
+		echo "Socket mode is $mode\n";
+
             // OPOFF Mode
             if($mode == 'OPOFF') {
                 if($device->isOn()) {

@@ -62,18 +62,19 @@ $s->addDestination("greenhouse.context", "raisedbed-moisture");
  */
 $conf['devices'][] = $bridge = new MQTT\Bridge('_greenhouse.mqttbridge', new MQTT\Client('10.0.0.8', 1883));
 
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenhouse", $bridge, new Device\ContextPointer('energy.schedules', 'offpeak'), "socket9");
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenhouse", $bridge, new Device\ContextPointer('energy.schedules', 'allday'), "socket16");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('greenhouse.context', 'power-greenhouse');
 $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable the heater until the driver can take over
 
 $conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($socket, $value) {
     echo "temp is $value\n";
-    if($value > 5.2) { // When it's warm enough, disable the heater
+	$target = 10;
+    if($value > $target+0.2) { // When it's warm enough, disable the heater
         $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable for a long time; a little more failsafe?!
-    } elseif ($value < 4.8) { // If it's too cool, allow the heater to come on (based on schedule)
+    } elseif ($value < $target-0.2) { // If it's too cool, allow the heater to come on (based on schedule)
         $socket->getDriver()->clearOverride(365*24*3600+100);
     }
-}, new Device\ContextPointer("greenhouse.context", "greenhouse.w1temp-internal"));
+}, new Device\ContextPointer("greenhouse.context", "greenhouse-temp"));
 
 
 /**
@@ -130,7 +131,7 @@ $conf['devices'][] = $do;
 
 // Onboard temperature sensors
 $ts1 = new TemperatureSensor('greenhouse.w1temp-internal', '28-3c01d60775a5');
-$ts1->addDestination('global.context', 'greenhouse.temperature');
+$ts1->addDestination('global.context', 'greenhouse-temp');
 $conf['devices'][] = $ts1;
 
 $ts2 = new TemperatureSensor('greenhouse.w1temp-external', '28-3c01d60742ac');
