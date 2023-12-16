@@ -113,6 +113,13 @@ for($h = 6; $h < 24; $h = $h+2) {
     $H = sprintf("%2u", $h);
     $bsched->setPoint("$H:00:00", 'ON');
     $bsched->setPoint("$H:02:00", 'OFF');
+    $bsched->setPoint("$H:15:00", 'ON');
+    $bsched->setPoint("$H:17:00", 'OFF');
+    $bsched->setPoint("$H:30:00", 'ON');
+    $bsched->setPoint("$H:32:00", 'OFF');
+    $bsched->setPoint("$H:45:00", 'ON');
+    $bsched->setPoint("$H:47:00", 'OFF');
+
 }
 $sd = new Schedule\DailyScheduler('pump2.scheduler', 'global.schedules', 'pump2', $bsched);
 $conf['devices'][] = $sd;
