@@ -77,7 +77,7 @@ class MultiLight extends Async\Device  implements RGBWCT  {
     public function on() {
 
         // Debounce changes
-        if(time() < $this->last + 3) {
+        if(time() < $this->last + 1) {
             echo "DEBOUNCE ON\n";
             return;
         }
@@ -103,7 +103,7 @@ class MultiLight extends Async\Device  implements RGBWCT  {
     public function off() {
 
         // Debounce changes
-        if(time() < $this->last + 3) {
+        if(time() < $this->last + 1) {
             echo "DEBOUNCE OFF\n";
             return;
         }

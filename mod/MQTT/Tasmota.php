@@ -113,7 +113,7 @@ abstract class Tasmota extends Async\Device {
         }
     }
 
-    public function getStatus() {
+    public function getStatus() : SubscriptionStore {
         return $this->status;
     }
 
