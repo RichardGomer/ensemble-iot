@@ -225,3 +225,18 @@ $spa = $bestway->getDeviceByProductKey($hottubprodkey); // This is a raw spa con
 $spaDevice = new SpaDevice('hottub', $spa); // Wrap it in an ensemble iot device
 $conf['devices'][] = $ts = $spaDevice->getTempSensor(); // And get a temperature sensor
 $ts->addDestination('global.context', 'spa-temp'); 
+
+// control towel warmer based on hot tub temperature - socket17
+$conf['devices'][] = $towelsocket = new Device\Socket\Socket("socket-towels", $bridge, "socket17");
+($conf['devices'][] = $towelsocket->getPowerMeter())->addDestination('global.context', 'power-towelheater');
+
+$conf['devices'][] = $toweldriver = new Device\ContextDriver($towelsocket, function($socket, $value) {
+    echo "temp is $value\n";
+	$target = 35;
+    if($value >= $target) { // When the hot tub is hot, warm the towel warmer
+        $socket->on();
+    } elseif ($value < $target) { // If it's too cool, allow the heater to come on (based on schedule)
+        $socket->off();
+    }
+}, new Device\ContextPointer("global.context", "spa-temp"));
+
