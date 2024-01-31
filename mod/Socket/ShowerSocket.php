@@ -19,7 +19,7 @@ class ShowerSocket extends Socket  {
     // Interrupt flow briefly as a warning
     public function warn() {
         $this->off();
-        sleep(3);
+        sleep(2);
         $this->on();
     }
 
@@ -71,11 +71,11 @@ class ShowerSocket extends Socket  {
                 }
             }
 
-            // 3: Wait three minutes before resetting
+            // 3: Wait before resetting
             $time = time();
             $dev->log("Yield to wait for reset\n");
             yield;
-            while(time() - $time < 180) {
+            while(time() - $time < 30) {
                 yield;
             }
 
