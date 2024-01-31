@@ -31,7 +31,7 @@ $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', '100');
 $bsched->setPoint('08:45:00', '0'); // Reopen in the morning
 $bsched->setPoint('12:00:00', 'auto'); // Afternoons, use the auto-closer based on sun
-$bsched->setPoint('18:00:00', '@dusk 100'); // Close at night
+$bsched->setPoint('17:00:00', '@dusk 100'); // Close at night
 
 $sd = new Schedule\DailyScheduler('officeblind.scheduler', 'global.schedules', 'officeblindschedule', $bsched, $LAT, $LNG);
 $conf['devices'][] = $sd;
@@ -48,9 +48,9 @@ $sdb->horizon = 10/180 * M_PI;
  */
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', '100');
-$bsched->setPoint('07:50:00', '72');
-$bsched->setPoint('08:10:00', '0');
-$bsched->setPoint('18:00:00', '@dusk 100');
+$bsched->setPoint('07:40:00', '72');
+$bsched->setPoint('07:55:00', '0');
+$bsched->setPoint('17:00:00', '@dusk 100');
 
 $sd = new Schedule\DailyScheduler('bedroomblind.scheduler', 'global.schedules', 'bedroomblindschedule', $bsched, $LAT, $LNG);
 $conf['devices'][] = $sd;
@@ -62,8 +62,8 @@ $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind2", $bridge
  */
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', '100');
-$bsched->setPoint('07:00:00', '@sunrise 0');
-$bsched->setPoint('18:00:00', '@dusk 100');
+$bsched->setPoint('08:00:00', '@sunrise 0');
+$bsched->setPoint('17:00:00', '@dusk 100');
 
 $sd = new Schedule\DailyScheduler('thermalblind.scheduler', 'global.schedules', 'thermalblindschedule', $bsched, $LAT, $LNG);
 $conf['devices'][] = $sd;
