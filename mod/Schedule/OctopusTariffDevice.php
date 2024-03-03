@@ -7,6 +7,9 @@ use Ensemble\Async as Async;
  * A device for creating a schedule of Octopus Agile rates
  */
 class OctopusTariffDevice extends SchedulerDevice {
+
+    private Octopus $client;
+
     public function __construct($name, $device, $field, Octopus $client) {
         parent::__construct($name);
         $this->client = $client;

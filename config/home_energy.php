@@ -25,7 +25,7 @@ $oct->setGasMeter($octo_gas_meter_mprn, $octo_gas_meter_serial);
 $oct->setTariff($octo_prodcode, $octo_trfcode);
 
 // Agile: $conf['devices'][] = $tariffdevice = new Schedule\OctopusTariffDevice('tariffscheduler', 'global.context', 'electariff', $oct);
-$conf['devices'][] = $tariffdevice = new Schedule\OctopusGoTariffDevice('tariffscheduler', 'global.context', 'electariff'); // Go
+$conf['devices'][] = $tariffdevice = new Schedule\OctopusTariffDevice('tariffscheduler', 'global.context', 'electariff', $oct); // Go
 $conf['devices'][] = new Schedule\OctopusGasUsageDevice('gasusagescheduler', 'global.context', 'gasusage', $oct);
 $conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', 'global.context', 'elecusage', $oct);
 
@@ -75,8 +75,8 @@ $conf['devices'][] = $sd_allday;
 
 
 /**
-* Attach sockets to schedules
-*/
+ * Attach sockets to schedules
+ */
 
 $host = gethostbyname('mosquitto');
 $mqtthost = $host == 'mosquitto' ? '10.0.0.8' : 'mosquitto'; // Hostname used in docker, IP used when testing
@@ -177,8 +177,8 @@ $tariffdevice->setCallback(function($tariff) use ($isched) {
         return;
     }
 
-    $gasPrice = 3.95; // Price per kwh of gas
-    $immersion = $baseTariff->between('23:00', '06:00')->lessThan($gasPrice / 0.85)->cheapest(120)->getOnSchedule();
+    $gasPrice = 7.52; // Price per kwh of gas
+    $immersion = $baseTariff->between('23:00', '06:00')->lessThan($gasPrice / 0.9)->cheapest(120)->getOnSchedule();
 
     // For immersion as primary hot water source, use the below
     //$immersion1_t = $baseTariff->between('23:00', '08:00')->cheapest(180);
