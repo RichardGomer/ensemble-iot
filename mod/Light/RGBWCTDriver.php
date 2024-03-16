@@ -28,8 +28,6 @@ class RGBWCTDriver extends Schedule\Driver {
         $current = $this->parseStatus($currentStatus);
         $next = $this->parseStatus($nextStatus);
 
-        $this->log("Current status:", json_encode($current));
-
         if($next !== false && $current['mode'] == $next['mode']) { // If modes match, interpolate values
             //$this->log("Interpolate from $currentStatus @ $currentTime to $nextStatus @ $nextTime\n");
 
@@ -101,8 +99,8 @@ class RGBWCTDriver extends Schedule\Driver {
      * Get a colour temperature based on time of day
      */
     protected function getAutoCT() {
-        $maxCT = 500; // Max (Warmest) CT
-        $minCT = 153; // Min (coldest) CT
+        $maxCT = 350; // Max (Warmest) CT
+        $minCT = 183; // Min (coldest) CT
 
         $lat = 50.928677;
         $lng = -1.336661;

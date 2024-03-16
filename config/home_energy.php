@@ -124,41 +124,6 @@ $conf['devices'][] = $socket = new Device\Socket\Socket("socket-tv", $bridge, "s
 
 
 /**
- * Toilet light on schedule
- */
-$conf['devices'][] = $sw_toilet = new Device\Light\LightSwitch("switch-toilet", $bridge, "lightswitch2");
-$conf['devices'][] = $toiletswdriver = new Schedule\Driver($sw_toilet, function($sw, $status, $time){ if($status == 'ON') { $sw->on(); } elseif($status == 'OFF' && $time > time() - 15) { $sw->off(); } }, new Device\ContextPointer("energy.schedules", "shortdaytime"));
-
-
-/**
-* Toilet Heater
-*/
-// Convert daily offpeak schedule to target temperatures
-$sched_heat = $offpeak->translate(function($s){
-    return $s == 'ON' ? '17' : '10';
-});
-$sd_heat = new Schedule\DailyScheduler('electric_heat.scheduler', 'energy.schedules', 'electric_heat', $sched_heat);
-$conf['devices'][] = $sd_heat;
-
-$ir1state = 'ir1-htr-temp-st';
-
-// Set the initial heater state to 17, if the context field isn't set already
-// This seems unreliable? maybe get is broken?
-//if(count($s = $ctx->get($ir1state)) < 1) {
-//    $ctx->update($ir1state, 17);
-//}
-
-/*
-// Configure the heater itself
-$conf['devices'][] = $ir1 = new Device\IR\NettaHeater("ir1-heater", $bridge, "ir1", 'global.context', $ir1state);
-
-// And add a driver to control the temperature
-$conf['devices'][]  = $ir1driver = new Schedule\Driver($ir1, function($device, $temp) {
- $device->setTemperature($temp);
-}, new Device\ContextPointer('energy.schedules', 'electric_heat'));
-*/
-
-/**
  * Immersion
  * TODO: Use the immersion when there is spare solar generation
  */

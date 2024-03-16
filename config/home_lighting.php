@@ -63,6 +63,25 @@ $conf['devices'][] = $kitchendriver = new Light\RGBWCTDriver($kml, new ContextPo
 
 
 /**
+ * Toilet light on schedule
+ */
+$conf['devices'][] = $sw_toilet = new Device\Light\LightSwitch("switch-toilet", $bridge, "lightswitch2");
+$conf['devices'][] = $toiletswdriver = new Schedule\Driver($sw_toilet, function($sw, $status, $time){ if($status == 'ON') { $sw->on(); } elseif($status == 'OFF' && $time > time() - 15) { $sw->off(); } }, new Device\ContextPointer("energy.schedules", "shortdaytime"));
+
+
+
+/**
+ * Utility
+ */
+$conf['devices'][] = $uml = new Light\MultiLight('utilitylights');
+$uml->addLight($conf['devices'][] = new Light\WLED("utlity-wled-sink", "10.0.107.216"));
+
+$conf['devices'][] = $utilitydriver = new Light\RGBWCTDriver($uml, new ContextPointer('lighting.schedules', 'daylightschedule'));
+
+// Use toilet switch to operate utility lights
+$uml->addSwitch($sw_toilet);
+
+/**
  * Dining Room
  */
 $conf['devices'][] = $dml = new Light\MultiLight('dininglights');
@@ -103,7 +122,7 @@ $conf['devices'][] = $dleddriver = new Driver($leds, function($target, $current,
 /**
  * Some alternative schemes
  */
-$drivers = array($kitchendriver, $diningdriver, $l1driver, $l2driver, $l3driver);
+$drivers = array($kitchendriver, $utilitydriver, $diningdriver, $l1driver, $l2driver, $l3driver);
 $schemes = array();
 
 // Rainbow Scheme

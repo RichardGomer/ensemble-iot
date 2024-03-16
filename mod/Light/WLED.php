@@ -61,6 +61,10 @@ class WLED extends BasicDevice implements RGBWCT {
      */
     public function setCT($ct) {
 
+        if($ct == 0) {
+            return;
+        }
+
         $k = 1000000 / $ct;
 
         $temp = $k / 100;
