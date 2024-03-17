@@ -99,7 +99,7 @@ class RGBWCTDriver extends Schedule\Driver {
      * Get a colour temperature based on time of day
      */
     protected function getAutoCT() {
-        $maxCT = 350; // Max (Warmest) CT
+        $maxCT = 480; // Max (Warmest) CT
         $minCT = 183; // Min (coldest) CT
 
         $lat = 50.928677;
