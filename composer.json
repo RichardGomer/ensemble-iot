@@ -19,7 +19,8 @@
         "guzzlehttp/guzzle": "^6.5",
         "vanilla/garden-cli": "^2.2",
         "auroras-live/suncalc-php": "dev-master",
-        "mmarica/display-table": "^1.0"
+        "mmarica/display-table": "^1.0",
+        "cboden/ratchet": "^0.4.4"
     },
     "autoload": {
         "psr-4": {
@@ -34,7 +35,8 @@
             "Ensemble\\KeyValue\\": "lib/support",
             "Ensemble\\MQTT\\": "mod/MQTT",
             "Ensemble\\Schedule\\": "mod/Schedule",
-            "Ensemble\\Actions\\": "mod/Actions"
+            "Ensemble\\Actions\\": "mod/Actions",
+            "Ensemble\\WebSocket\\": "websocket/"
         }
     }
 }
