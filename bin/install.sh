@@ -36,7 +36,7 @@ chmod 0755 /home/pi
 
 # Install deps
 apt-get update
-apt-get --assume-yes install php-cli lighttpd php-cgi php-json curl
+apt-get --assume-yes install php-cli lighttpd php-cgi php-json curl php-curl
 apt-get --assume-yes install php-zip # Helpful for composer
 apt-get --assume-yes install wiringpi # Run separately because it doesn't exist on most platforms
 apt-get --assume-yes install mosquitto-clients
