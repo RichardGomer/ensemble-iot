@@ -9,8 +9,32 @@ namespace Ensemble;
  */
 class CommandBroker {
 
+    private mixed $devices = [];
+    private mixed $polls = [];
+
+    private Queue $input;
+    private Queue $remote;
+
     public function addDevice(Module $device) {
+
+        foreach($this->devices as $d) {
+            if($d === $device) { // Skip the device if it has already been added
+                return;
+            }
+            
+            if($d->getDeviceName() == $device->getDeviceName()) {
+                throw new DuplicateDeviceNameException("Device name '{$d->getDeviceName()}' is already in use locally");
+            }
+        }
+
         $this->devices[] = $device;
+
+        // Set up initial polling
+        $name = $device->getDeviceName();
+        $ptime = $device->getPollInterval();
+        if($ptime > 0) {
+            $this->polls[$name] = rand(0, count($this->getPollingDue())) * 1 + time(); // Stagger first poll
+        }
 
         // Add any child devices
         $cds = $device->getChildDevices();
@@ -28,7 +52,7 @@ class CommandBroker {
         foreach($this->devices as $k=>$d) {
             if($d === $device) {
                 unset($this->devices[$k]); // Remove the device from the list
-                unset($this->polls[$device->getName()]); // Remove scheduled polls
+                unset($this->polls[$device->getDeviceName()]); // Remove scheduled polls
             }
         }
     }
@@ -41,6 +65,12 @@ class CommandBroker {
         $this->remote = $queue;
     }
 
+    /**
+     * Disable direct local delivery, i.e. send all commands via a network endpoint.
+     * This is mostly useful for testing the endpoints using a single broker talking
+     * to itself.
+     * @var false
+     */
     private $disabledirectlocal = false;
     public function disableDirectLocalDelivery() {
         $this->disabledirectlocal = true;
@@ -48,7 +78,7 @@ class CommandBroker {
 
     /**
      * Send a command, either by pushing it into the local queue or sending it
-     * remotely
+     * remotely.
      */
     public function send(Command $command) {
         try {
@@ -143,76 +173,101 @@ class CommandBroker {
     }
 
     /**
-     * Run the broker; this is effectively a main() loop
-     *
+     * Bootstrap the main loop, if required
+     */
+    private $bootstrapped = false;
+    protected function bootstrap() {
+        if($this->bootstrapped)
+            return;
+
+        $this->bootstrapped = true;
+
+        $this->addDevice(new StatusReportDevice($this->input));
+    }
+
+    /**
+     * Get devices that are due to be polled
+     */
+    protected function getPollingDue() : mixed {
+        $out = [];
+        $now = microtime(true);
+        foreach($this->polls as $name=>$time) {
+            if($time <= $now) {
+                $out[] = $name;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Check for devices that are due to be polled, poll them, then handle some messages
+     * i.e. step once through the main loop
+     * 
      * Module polling:
      *    Poll modules based on their declared poll interval
      *
      * Incoming commands:
      *    Take each received command and route it to the destination device
+     * 
+     */
+    private $lastpoll = 0;
+    public function step() {
+        $this->bootstrap();
+
+        $now = microtime(true);
+
+        // Check poll timers every 1 seconds for polling due
+        if($now - $this->lastpoll >= 1) {
+            $this->lastpoll = $now;
+
+            array_map(function($name) {
+                $this->poll($name);
+                $this->polls[$name] = time() + $this->getDevice($name)->getPollInterval();
+            }, $this->getPollingDue());
+        }
+
+        if(!$this->input->isEmpty()) {
+            /**
+             * We don't want to block forever consuming commands, because some devices won't actually
+             * consume them until the next poll; but we do want to make decent headway each time. This loop
+             * will consume up to 100 commands, before checking whether polling is due
+             */
+            $n = 0;
+            do {
+                $next = $this->input->shift();
+                if($next !== null)
+                    $this->handle($next);
+                $n++;
+            } while(!$this->input->isEmpty() && $n < 100);
+        }
+    }
+
+    /**
+     * Run the broker indefinitely; this is effectively a main() loop
      */
     public function run() {
 
-        $this->addDevice(new StatusReportDevice($this->input));
-
-        // Set up initial poll times for each module
-        // Poll times are staggered to try and avoid lumpy performance
-        $polls = array();
-        $n = 0;
-        foreach($this->devices as $k=>$d) {
-            $name = $d->getDeviceName();
-            $ptime = $d->getPollInterval();
-            if($ptime > 0) {
-                $polls[$name] = $n * 1 + time(); // Stagger offset + time now
-                $n++;
-                // We don't use the poll interval to begin with, because all devices get polled at startup
-            }
-        }
-
         $lastpoll = 0;
         while(true) {
-
-            // Check poll timers every 1 microsecond for polling due
-            if(microtime(true) - $lastpoll >= 1) {
-                $now = microtime(true);
-                $lastpoll = $now;
-
-                foreach($polls as $name=>$time) {
-                    if($time <= $now) {
-                        $this->poll($name);
-                        $polls[$name] = time() + $this->getDevice($name)->getPollInterval();
-                    }
-                }
-            }
-
+            $this->step();
+    
             if($this->input->isEmpty()) {
                 usleep(1000);
-                continue;
-            }
-            else {
-                /**
-                 * We don't want to block forever consuming commands, because some devices won't actually
-                 * consume them until the next poll; but we do want to make decent headway each time. This loop
-                 * will consume up to 100 commands, before checking whether polling is due
-                 */
-                $n = 0;
-                do {
-                    $next = $this->input->shift();
-                    if($next !== null)
-                        $this->handle($next);
-                    $n++;
-                } while(!$this->input->isEmpty() && $n < 100);
             }
         }
     }
 
 }
 
+class DuplicateDeviceNameException extends \Exception {}
 class DeviceNotFoundException extends \Exception {}
 class DeviceBusyException extends \Exception {}
 class ExpiredException extends \Exception {}
 
 class StatusReportDevice extends Device\BasicDevice {
+    private JsonQueue $in;
+
     public function __construct(JsonQueue $inq) {
         $this->name = "_QSTATUS";
         $this->in = $inq;

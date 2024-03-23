@@ -5,7 +5,7 @@
  */
 namespace Ensemble;
 
-require __DIR__.'/home.php';
+require __DIR__.'/home_common.inc.php';
 
 define('_NAME', 'sump');
 

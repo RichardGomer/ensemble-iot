@@ -9,7 +9,7 @@ namespace Ensemble;
 use Ensemble\Device\W1\Sensor;
 use Ensemble\Device\W1\TemperatureSensor;
 
-require __DIR__.'/home.php';
+require __DIR__.'/home_common.inc.php';
 
 Sensor::enable(26); // Enable 1wire on gpio pin
 

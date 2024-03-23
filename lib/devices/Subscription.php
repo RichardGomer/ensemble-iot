@@ -10,7 +10,7 @@ use Ensemble\CommandBroker;
  * device A can be used like events to trigger things on device B (C,D,E...)
  *
  * Some minimal wiring is required in the device itself, so that events are passed
- * in the control logid defined in this trait.
+ * in the control logic defined in this trait.
  */
 
 trait Subscription {

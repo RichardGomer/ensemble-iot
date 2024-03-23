@@ -10,6 +10,11 @@ class AnnouncerDevice implements \Ensemble\Module {
 
     private $pollInterval = 120; // Interval, in seconds, between polls i.e. announcements
 
+    private $remotes = [];
+    private string $endpointURL;
+    private $map = [];
+
+
     /**
      * Construct with our own endpoint URL (this is what will get registered remotely)
      * and, optionally, a list of remote endpoints to notify
@@ -68,6 +73,7 @@ class AnnouncerDevice implements \Ensemble\Module {
                 $client->registerDevices($devices, $this->endpointURL);
             } catch (\Exception $e) {
                 echo "Couldn't register with $r: {$e->getMessage()}\n";
+                debug_print_backtrace();
             }
         }
     }

@@ -37,13 +37,19 @@ interface RemoteClient {
     public function sendCommand(\Ensemble\Command $c);
 
     /**
-     * Announce device names and their corresponding endpoint
+     * Register device names and their corresponding endpoint
      *
      * @throws RequestException
      */
     public function registerDevices($deviceNames, $endpoint);
 }
 
+/**
+ * This client sends commands to other local ensemble instances by writing the commands straight into
+ * the other instance's incoming JSON command queue, like the HTTP API would
+ * 
+ * @package Ensemble\Remote
+ */
 class SharedQueueClient implements RemoteClient {
     public function __construct($endpoint) {
         /**
@@ -73,6 +79,10 @@ class SharedQueueClient implements RemoteClient {
     }
 }
 
+/**
+ * This client sends commands to other instances by making HTTP requests to their public API
+ * @package Ensemble\Remote
+ */
 class HttpClient implements RemoteClient {
     public function __construct($endpoint) {
             $this->client = new http\Client();

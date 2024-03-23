@@ -6,7 +6,7 @@
 
 namespace Ensemble;
 
-require __DIR__.'/home.php';
+require __DIR__.'/home_common.inc.php';
 
 $sensors = new \Ensemble\Device\Temperature\OregonSensorSet("temperature.sensors");
 
