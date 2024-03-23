@@ -53,6 +53,18 @@ class AnnouncerDevice implements \Ensemble\Module {
         // We notify the remote of all local devices
         $devices = $broker->getLocalDevices();
 
+        // Remove devices that should not be announced
+        foreach($devices as $k=>$d) {
+            if($broker->getDevice($d)->announce() === false) {
+                unset($devices[$k]);
+            }
+        }
+
+        if(count($devices) < 1) {
+            echo "No devices to announce\n";
+            return;
+        }
+
         // Combine manually added remotes with those from the device map
         $remotes = $this->remotes;
         if($this->map instanceof \Ensemble\Remote\DeviceMap) {
@@ -69,6 +81,10 @@ class AnnouncerDevice implements \Ensemble\Module {
 
         foreach($remotes as $r) {
             try {
+                echo "Announce to $r\n";
+                foreach($devices as $d) {
+                    echo " + $d\n";
+                }
                 $client = \Ensemble\Remote\ClientFactory::factory($r);
                 $client->registerDevices($devices, $this->endpointURL);
             } catch (\Exception $e) {

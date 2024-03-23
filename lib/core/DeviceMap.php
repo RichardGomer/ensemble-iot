@@ -6,10 +6,15 @@
 
 namespace Ensemble\Remote;
 
+use Ensemble\Storage\JsonStore;
+
 /**
  * Instantiate using a JsonStore so that the map can be shared
  */
 class DeviceMap {
+
+    private JsonStore $map;
+
     public function __construct(\Ensemble\Storage\JsonStore $store) {
         $this->map = $store;
     }

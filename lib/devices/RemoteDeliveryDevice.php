@@ -8,14 +8,17 @@
 
 namespace Ensemble\Device;
 
+use Ensemble\Queue;
+use Ensemble\Remote\DeviceMap;
+
 class RemoteDeliveryDevice implements \Ensemble\Module {
 
     private $maxDelivery = 5; // Maximum number of messages to deliver in a single attempt
     private $pollInterval = 0.1; // Request to be polled every this many seconds; this can be very frequent
-    private $timeout = 5; // HTTP request timeout in seconds
-    private $tries = 3; // Number of tries before backing off of an endpoint
-    private $backoff = 60; // Number of seconds to back off of an endpoint on failure
     private $defaultEndpoint = false;
+
+    private DeviceMap $map;
+    private Queue $queue;
 
     public function __construct(\Ensemble\Queue $queue, \Ensemble\Remote\DeviceMap $map) {
         $this->map = $map;
@@ -54,7 +57,8 @@ class RemoteDeliveryDevice implements \Ensemble\Module {
                 continue;
 
             // Commands may expiry while in the remote queue, they need to be
-            // discarded to prevent connectivity problems overwhelming the node
+            // discarded to prevent backlogs caused by connectivity problems overwhelming 
+            // the remote node
             if($cmd->isExpired()) {
                 echo "TX ".$cmd." [DISCARDED, EXPIRED]\n";
                 $b->send($cmd->reply(new \Ensemble\ExpiredException("Command expired before action")));

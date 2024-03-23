@@ -10,6 +10,7 @@ namespace Ensemble;
 class CommandBroker {
 
     private mixed $devices = [];
+    private bool $newdevices = false;
     private mixed $polls = [];
 
     private Queue $input;
@@ -28,6 +29,7 @@ class CommandBroker {
         }
 
         $this->devices[] = $device;
+        $this->newdevices = true; // Flag that there are new devices for the next step
 
         // Set up initial polling
         $name = $device->getDeviceName();
@@ -135,11 +137,11 @@ class CommandBroker {
     /**
      * Check for a local device that matches the given command's target
      */
-    protected function getTargetDevice(Command $cmd) {
+    protected function getTargetDevice(Command $cmd) : Module {
         return $this->getDevice($cmd->getTarget());
     }
 
-    protected function getDevice($name) {
+    public function getDevice($name) : Module {
         $name = (String) $name;
         foreach($this->devices as $d) {
             if($d->getDeviceName() === $name) {
@@ -217,6 +219,12 @@ class CommandBroker {
 
         $now = microtime(true);
 
+        // If there are new devices, announce them immediately
+        if($this->newdevices) {
+            $this->getDevice('_Announcer')->poll($this);
+            $this->newdevices = false;
+        }
+        
         // Check poll timers every 1 seconds for polling due
         if($now - $this->lastpoll >= 1) {
             $this->lastpoll = $now;
