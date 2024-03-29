@@ -70,7 +70,11 @@ abstract class Tasmota extends Async\Device {
         if($c->getAction() == self::MQTT_COMMAND) { // Handle MQTT updates immediately
             $this->processMQTT($c->getArg('mqtt_topic'), $c->getArg('mqtt_payload'));
             $this->poll($b); // Resume the routine
-        } else { // Else pop them into the heap for the async routine to pick up and trigger subscriptions
+        }
+        elseif($c->getAction() == 'getStatus') {
+            $c->reply(['status' => $this->getStatus()->getAll()]);
+        }
+        else { // Else pop them into the heap for the async routine to pick up and trigger subscriptions
             parent::action($c, $b);
             $this->pubAction($c, $b);
         }

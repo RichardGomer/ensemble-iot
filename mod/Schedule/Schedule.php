@@ -19,6 +19,7 @@ class Schedule {
         $this->periods = array();
         $this->statuses = $statuses;
         $this->setTimezone(date_default_timezone_get());
+        $this->setPoint(0, 0);
     }
 
     /**
@@ -94,6 +95,7 @@ class Schedule {
 
     /**
      * Set the status for a period of time
+     * If $tidy is true, the schedule will also be tidied up
      */
     public function setPeriod($t_from, $t_to, $status, $tidy=true) {
 
@@ -116,7 +118,7 @@ class Schedule {
         $this->setPoint($t_to, $return);
 
         if($tidy)
-        $this->tidy();
+            $this->tidy();
     }
 
     /**
@@ -126,6 +128,14 @@ class Schedule {
         $this->checkStatus($status);
         $tn = $this->normaliseTime($t);
         //echo "Normalise $t to $tn\n";
+
+        // If we already have a value set at this point, delete it
+        foreach($this->periods as $k=>$p) {
+            if($p['start'] == $tn) {
+                unset($this->periods[$k]);
+            }
+        }
+
         $this->periods[] = array('start' => $tn, 'status' => $status);
         usort($this->periods, function($a, $b) {
             return $a['start'] - $b['start'];

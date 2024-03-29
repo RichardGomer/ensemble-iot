@@ -143,7 +143,7 @@ $tariffdevice->setCallback(function($tariff) use ($isched) {
     }
 
     $gasPrice = 7.52; // Price per kwh of gas
-    $immersion = $baseTariff->between('23:00', '06:00')->lessThan($gasPrice / 0.9)->cheapest(120)->getOnSchedule();
+    $immersion = $baseTariff->between('21:00', '07:00')->lessThan($gasPrice / 0.9)->cheapest(120)->getOnSchedule();
 
     // For immersion as primary hot water source, use the below
     //$immersion1_t = $baseTariff->between('23:00', '08:00')->cheapest(180);

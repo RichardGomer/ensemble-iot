@@ -126,3 +126,8 @@ $conf['devices'][] = $sd;
 
 $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-pump2", $bridge, new Device\ContextPointer('global.schedules', 'pump2'), "socket8");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pump2');
+
+// Sump pump - temporary
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-pump1", $bridge, new Device\ContextPointer('global.schedules', 'pump2'), "socket18");
+($conf['devices'][] = $socket->getPowerMeter())->addDestination('global.context', 'power-pump1');
+

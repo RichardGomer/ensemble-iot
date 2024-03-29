@@ -56,27 +56,43 @@ class DailyProjector  {
 
         $date = new \DateTime($startDate->format('Y-m-d'), $tz = $this->base->getTZO());
 
+        // Get all periods in the base schedule, make sure they're in order
+        $periods = $this->base->getAllPeriods();
+
+        usort($periods, function($a, $b) {
+            return $a['start'] - $b['start'];
+        });
+
         // Iterate through each (whole) day that falls (at least partially) within the period, projecting
         // the schedule into it
         while($date <= $endDate) {
-            foreach($this->base->getAllPeriods() as $i=>$p) {
-                // Skip the first period, because it will be the value at epoch
-                if($i==0) continue;
+
+            foreach($periods as $i=>$p) {
+                // Skip epoch values - not sure if this is necessary?!
+                if($p['start'] == 0) {
+                    continue;
+                }
                 
                 // Get the clock time from the base schedule
                 $time = new \DateTime("now", $tz); $time->setTimestamp($p['start']); // There's no constructor for this!
+
+                // If the date of the timestamp is not actually within the start date, we must have overflowed; skip the period
+                if($time->format('d') !== $startDate->format('d')) {
+                    continue;
+                }
+
+                // Set the clock time on our current date object
                 $clocktime_h = $time->format('H');
                 $clocktime_m = $time->format('i');
                 $clocktime_s = $time->format('s');
-
-                // Set the clock time on the new schedule to the same
                 $date->setTime($clocktime_h, $clocktime_m, $clocktime_s);
 
                 // Now set the absolute time on the output schedule
-                $temp->setPoint($date->format('Y-m-d H:i:s'), $p['status']);
+                $temp->setPoint($st = $date->format('Y-m-d H:i:s'), $p['status']);
             }
 
             // Move to next day
+            echo "*** Day +1\n";
             $date->setTime(0,0);
             $date = $date->add(new \DateInterval("P1D"));
         }
