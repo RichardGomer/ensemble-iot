@@ -67,6 +67,8 @@ class DailyProjector  {
         // the schedule into it
         while($date <= $endDate) {
 
+            $lastTime = "00:00:00";
+
             foreach($periods as $i=>$p) {
                 // Skip epoch values - not sure if this is necessary?!
                 if($p['start'] == 0) {
@@ -76,15 +78,25 @@ class DailyProjector  {
                 // Get the clock time from the base schedule
                 $time = new \DateTime("now", $tz); $time->setTimestamp($p['start']); // There's no constructor for this!
 
-                // If the date of the timestamp is not actually within the start date, we must have overflowed; skip the period
-                if($time->format('d') !== $startDate->format('d')) {
-                    continue;
-                }
+                // We must set time points in order
+                // This check is necessary to prevent schedules that span multiple days from overwriting themselves
+                // when projected
+                // TODO!
 
                 // Set the clock time on our current date object
                 $clocktime_h = $time->format('H');
                 $clocktime_m = $time->format('i');
                 $clocktime_s = $time->format('s');
+
+                $clockTime = "$clocktime_h:$clocktime_m:$clocktime_s";
+
+                if(strtotime($clockTime) < strtotime($lastTime)) {
+                    trigger_error("Cannot project $clockTime into schedule; $lastTime was already set");
+                    continue;
+                }
+
+                $lastTime = $clockTime;
+
                 $date->setTime($clocktime_h, $clocktime_m, $clocktime_s);
 
                 // Now set the absolute time on the output schedule
@@ -96,6 +108,8 @@ class DailyProjector  {
             $date->setTime(0,0);
             $date = $date->add(new \DateInterval("P1D"));
         }
+
+        echo $temp->prettyPrint();
 
         // Now process meta values
         foreach($temp->getAllPeriods() as &$period) {

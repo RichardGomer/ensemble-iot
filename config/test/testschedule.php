@@ -1,18 +1,40 @@
 <?php
 
-
-
 namespace Ensemble;
 use Ensemble\Schedule\Schedule;
 use Ensemble\Schedule\DailyScheduler;
 
+var_dump(getenv('XDEBUG_MODE'));
+xdebug_connect_to_client();
+
+
+date_default_timezone_set('Europe/London');
+$conf['default_endpoint'] = 'http://10.0.0.8:3107/ensemble-iot/1.0/';
+
+
+
 $s = new Schedule();
 $s->setTimezone('UTC');
 $s->setPoint(0, 0);
-$s->setPeriod('00:00', '00:30', 1);
-$s->setPeriod('12:00', '13:30', 2);
+$s->setPoint('00:00', 'ON');
+//$s->setPeriod('12:00', '13:30', 2);
 echo $s->prettyPrint(true);
 
+
+$daytime = new Schedule();
+$daytime->setPoint('00:00:00', 'OFF');
+$daytime->setPoint('07:00:00', 'ON');
+$daytime->setPoint('22:00:00', 'OFF');
+echo $daytime->prettyPrint();
+
+
+$LAT = 50.9288;
+$LNG = -1.3372;
+$sd_daytime = new DailyScheduler('daytime.scheduler', 'energy.schedules', 'daytime', $daytime, $LAT, $LNG);
+
+$sd_daytime->reschedule();
+
+exit;
 
 $s = new Schedule();
 $s->setTimezone('Europe/London');

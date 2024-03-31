@@ -29,8 +29,11 @@ class ScheduledBlind extends MQTT\Tasmota {
             }
 
             $ext = round($ext / 2, 0) * 2; // Round to nearest 2
-            if($ext === $last && $lastTime < time() - 60) // Only send values when they change / or once per minute
+            if($ext === $last && $lastTime > (time() - 60)) { // Only send values when they change / or once per minute 
                 return;
+            } else {
+                $time = time();
+            }
 
             $last = $ext;
             $lastTime = time();

@@ -4,7 +4,7 @@ namespace Ensemble\Schedule;
 
 class DailyScheduler extends SchedulerDevice {
 
-    private $lat, $lng, $baseschedule;
+    private $lat, $lng, $base;
 
     /**
      * The base schedule sets the daily schedule, as if it was a template

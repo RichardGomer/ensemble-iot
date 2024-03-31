@@ -2,6 +2,7 @@
 
 namespace Ensemble;
 use Ensemble\MQTT\Client as MQTTClient;
+use Ensemble\MQTT\Bridge as MQTTBridge;
 use Ensemble\Schedule as Schedule;
 use Ensemble\Device\Light as Light;
 
@@ -25,4 +26,5 @@ $conf['devices'][] = $sd;
 
 // Create a socket to be controlled and bind it to the schedule in the broker
 $client = new MQTTClient('10.0.0.8', 1883);
-$conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind1-test", $client, "blind1", new Device\ContextPointer('test.schedules', 'testblindschedule'));
+$conf['devices'][] = $bridge = new MQTTBridge('test-bridge', $client);
+$conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind1-test", $bridge, "blind1", new Device\ContextPointer('test.schedules', 'testblindschedule'));
