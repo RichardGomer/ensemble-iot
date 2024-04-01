@@ -27,7 +27,7 @@ class OctopusTariffDevice extends SchedulerDevice {
             echo "Tariff received, no callback defined\n";
         }
 
-        //echo "Tariff data\n".$s->prettyPrint();
+        echo "Tariff data\n".$s->prettyPrint();
 
         return $s;
     }
