@@ -45,25 +45,25 @@ $conf['devices'][] = $sd_daytime;
 // Short Daytime
 $shdaytime = new Schedule\Schedule();
 $shdaytime->setPoint('00:00:00', 'OFF');
-$shdaytime->setPoint('07:00:00', 'ON');
-$shdaytime->setPoint('17:00:00', 'OFF');
+$shdaytime->setPoint('06:00:00', 'ON');
+$shdaytime->setPoint('16:00:00', 'OFF');
 $sd_shdaytime = new Schedule\DailyScheduler('shortdaytime.scheduler', 'energy.schedules', 'shortdaytime', $shdaytime);
 $conf['devices'][] = $sd_shdaytime;
 
 // offpeak
 $offpeak = new Schedule\Schedule();
-$offpeak->setPoint('00:00:00', 'OFF');
-$offpeak->setPoint('00:30:00', 'ON');
-$offpeak->setPoint('04:30:00', 'OFF');
+$offpeak->setPoint('00:00:00', 'ON');
+$offpeak->setPoint('15:00:00', 'OFF');
+$offpeak->setPoint('19:30:00', 'ON');
 $sd_offpeak = new Schedule\DailyScheduler('offpeak.scheduler', 'energy.schedules', 'offpeak', $offpeak);
 $conf['devices'][] = $sd_offpeak;
 
 // offpeak oppoff
 $bsched = new Schedule\Schedule();
-$bsched->setPoint('00:00:00', 'OFF');
-$bsched->setPoint('00:30:00', 'ON');
-$bsched->setPoint('02:30:30', 'OPOFF');
-$bsched->setPoint('05:00:00', 'OFF');
+$bsched->setPoint('00:00:00', 'ON');
+$bsched->setPoint('14:00:00', 'OPOFF');
+$bsched->setPoint('16:00:00', 'OFF');
+$bsched->setPoint('19:30:30', 'ON');
 $sd_opoff = new Schedule\DailyScheduler('offpeak_opoff.scheduler', 'energy.schedules', 'offpeak_opoff', $bsched);
 $conf['devices'][] = $sd_opoff;
 
