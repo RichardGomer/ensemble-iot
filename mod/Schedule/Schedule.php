@@ -19,7 +19,7 @@ class Schedule {
         $this->periods = array();
         $this->statuses = $statuses;
         $this->setTimezone(date_default_timezone_get());
-        $this->setPoint(0, 0);
+        $this->setPoint(0, $statuses === false ? 0 : $statuses[0]);
     }
 
     /**
