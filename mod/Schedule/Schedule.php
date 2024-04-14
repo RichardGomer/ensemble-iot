@@ -256,9 +256,11 @@ class Schedule {
     public function getCurrentPeriod($offset=0) {
         $now = time() + $offset;
         $lastTime = false;
-        foreach($this->getChangePoints() as $time) {
+        $cps = $this->getChangePoints();
+        var_dump($cps);
+        foreach($cps as $time) {
             if($time > $now) {
-                if($lastTime == false) {
+                if($lastTime === false) {
                     return array($time=>$this->getAt($time));
                 }
                 return array($lastTime => $this->getAt($lastTime), $time=>$this->getAt($time));
