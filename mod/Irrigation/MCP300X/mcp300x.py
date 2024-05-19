@@ -16,7 +16,8 @@ def bprint(list):
 # Read MCP3008 data
 def analogInput():
   spi.max_speed_hz = 100000
-  msg = [1, (0+7)<<4, 0, 0, 0, 0] # double ended reading on channel 6(-) & 7(+) 
+#  msg = [1, (0+7)<<4, 0, 0, 0, 0] # double ended reading on channel 6(-) & 7(+) 
+  msg = [1, (8+0)<<4, 0, 0, 0, 0] # single ended reading on channel 0
   bprint(msg)
   adc = spi.xfer2(msg)
   bprint(adc)

@@ -62,13 +62,13 @@ $s->addDestination("greenhouse.context", "raisedbed-moisture");
  */
 $conf['devices'][] = $bridge = new MQTT\Bridge('_greenhouse.mqttbridge', new MQTT\Client('10.0.0.8', 1883));
 
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenhouse", $bridge, new Device\ContextPointer('energy.schedules', 'allday'), "socket16");
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-greenhouse", $bridge, new Device\ContextPointer('energy.schedules', 'offpeak'), "socket16");
 ($conf['devices'][] = $socket->getPowerMeter())->addDestination('greenhouse.context', 'power-greenhouse');
 $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable the heater until the driver can take over
 
 $conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($socket, $value) {
     echo "temp is $value\n";
-	$target = 10;
+	$target = 5.5;
     if($value > $target+0.2) { // When it's warm enough, disable the heater
         $socket->getDriver()->setOverride('OFF', 365 * 24 * 3600); // Disable for a long time; a little more failsafe?!
     } elseif ($value < $target-0.2) { // If it's too cool, allow the heater to come on (based on schedule)
@@ -81,10 +81,13 @@ $conf['devices'][] = $heatdriver = new Device\ContextDriver($socket, function($s
  * Greenhouse Growlight
  */
 // Use a custom schedule, 0600-1600 = 10hours of light per day
+//  This is currently the water heater!
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', 'OFF');
-$bsched->setPoint('06:00:00', 'ON');
-$bsched->setPoint('16:00:00', 'OFF');
+//$bsched->setPoint('06:00:00', 'ON');
+//$bsched->setPoint('16:00:00', 'OFF');
+$bsched->setPoint('00:31:00', 'ON');
+$bsched->setPoint('04:29:00', 'OFF');
 $sd_growlight = new Schedule\DailyScheduler('growlight1.scheduler', 'greenhouse.schedules', 'growlight', $bsched);
 $conf['devices'][] = $sd_growlight;
 
@@ -95,12 +98,12 @@ $conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("socket-growlig
 /**
  * Irrigation
  */
-$pump = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 90); # full pwoer pumping, using soft starter
-$pumpmed = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 60); # low power pumping mode
-$pumplow = new Ir\SoftStart(Pin::BCM(21, Pin::OUT), 40); # v. low power pumping mode
+$pump = new Ir\SoftStart(Pin::BCM(18, Pin::OUT), 70); # full pwoer pumping, using soft starter
+$pumpmed = new Ir\SoftStart(Pin::BCM(18, Pin::OUT), 50); # low power pumping mode
+$pumplow = new Ir\SoftStart(Pin::BCM(18, Pin::OUT), 30); # v. low power pumping mode
 
-$flow = new Ir\FlowMeter(26);
-$dosepump = new Relay(Pin::BCM(6, Pin::OUT));
+$flow = new Ir\FlowMeter(5);
+//$dosepump = new Relay(Pin::BCM(6, Pin::OUT));
 
 $ps = new Ir\PressureSensor('irrigation.pressure', $pump);
 $ps->addDestination('greenhouse.context', 'buttpressure');
@@ -108,16 +111,14 @@ $ps->addDestination('greenhouse.context', 'buttpressure');
 $ic = new IR\IrrigationController('irrigation.controller', $flow);
 $ic->setDestination('greenhouse.context'); // Send flow information to context broker
 
-$do = new IR\IrrigationDoser('irrigation.doser', $dosepump, $flow, 4/3); // doser discharges 4/3ml per second
+//$do = new IR\IrrigationDoser('irrigation.doser', $dosepump, $flow, 4/3); // doser discharges 4/3ml per second
 
-$ic->addChannel(1, new Relay(Pin::BCM(17, Pin::OUT)), $pump);
-$ic->addChannel(2, new Relay(Pin::BCM(18, Pin::OUT)), $pump);
-$ic->addChannel(3, new Relay(Pin::BCM(27, Pin::OUT)), $pumpmed);
-$ic->addChannel(4, new Relay(Pin::BCM(22, Pin::OUT)), $pumplow);
-
-$ic->addChannel('h', new Relay(array($h1 = Pin::BCM(13, Pin::OUT), $h2 = Pin::BCM(5, Pin::OUT), $h3 = Pin::BCM(12, Pin::OUT))), $pumpmed);
-$ic->addChannel('h2', new Relay($h2), $pumplow);
-$ic->addChannel('h1', new Relay($h3), $pumplow);
+$ic->addChannel(1, new Relay(Pin::BCM(20, Pin::OUT)), $pump);
+$ic->addChannel(2, new Relay(Pin::BCM(19, Pin::OUT)), $pump);
+$ic->addChannel(3, new Relay(Pin::BCM(21, Pin::OUT)), $pump);
+$ic->addChannel(4, new Relay(Pin::BCM(16, Pin::OUT)), $pump);
+$ic->addChannel(5, new Relay(Pin::BCM(26, Pin::OUT)), $pumplow);
+$ic->addChannel(6, new Relay(Pin::BCM(12, Pin::OUT)), $pumplow);
 
 
 
@@ -126,7 +127,7 @@ $ic->addChannel('h1', new Relay($h3), $pumplow);
 
 $conf['devices'][] = $ic;
 $conf['devices'][] = $ps;
-$conf['devices'][] = $do;
+//$conf['devices'][] = $do;
 
 
 // Onboard temperature sensors
