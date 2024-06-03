@@ -175,10 +175,13 @@ $bl1->addSwitch($blp);
 
 
 /**
- * Garden
+ * Garden lights
  */
-$conf['devices'][] = $glight = new Socket('garden-lights', $bridge, 'socket15'); // Garden lights are just a socket
-
+$conf['devices'][] = $glight = new Light\LightSwitch('gardenlights-socket', $bridge, 'socket15'); // Garden lights are just a socket
+$conf['devices'][] = $gdns   = new Light\LightSwitch("rearhall-switch-1", $bridge, "rearhall-switch", "1"); // Channel 1 on the rearhall 2CH switch
+$conf['devices'][] = $gdnml = new Light\MultiLight('gardenlights'); // We use a multilight to sync the wall switch with the socket
+$gdnml->addSwitch($glight);
+$gdnml->addSwitch($gdns);
 
 
 
