@@ -60,8 +60,14 @@ class Bridge extends BasicDevice {
     /**
      * Create a basic subscription - shorthand for creating a BasicTranslator and subscribing it
      */
-    public function subscribeBasic($topic, $destination, $commandName, $payloadField="mqtt_payload") {
-        $this->subscribe($topic, new BasicTranslator($destination, $commandName, $payloadField));
+    public function subscribeBasic($topics, $destination, $commandName, $payloadField="mqtt_payload") {
+        if(!is_array($topics)) {
+            $topics = [$topics];
+        }
+        
+        foreach($topics as $topic) {
+            $this->subscribe($topic, new BasicTranslator($destination, $commandName, $payloadField));
+        }
     }
 
 }

@@ -3,6 +3,7 @@
 /**
  * This Module is for interfacing with Tasmota smart sockets using MQTT.
  * Tasmota can be used on hardware like Sonoff and Tuya WiFi switches.
+ * It also implements support for OpenBeken, which is similar enough to Tasmota.
  *
  * State and telemetry data are stored in a SubscriptionStore so changes can be
  * detected.
@@ -38,7 +39,7 @@ abstract class Tasmota extends Async\Device {
         $this->deviceName = $deviceName;
 
         $this->topic_command = "cmnd/$deviceName/";
-        $this->topic = "+/$deviceName/+";
+        $this->topic = ["+/$deviceName/+", "$deviceName/+/+"]; // Subscribe to Tasmota and OpenBeken format topics
 
         $this->status = new \Ensemble\KeyValue\SubscriptionStore();
 
@@ -85,14 +86,31 @@ abstract class Tasmota extends Async\Device {
      */
     protected function processMQTT($topic, $message) {
 
+        echo "MQTT: $topic $message\n";
+
         // Split topic into components
-        if(!preg_match('@([a-z]{4})/(.+)/(.+)@i', $topic, $matches)) {
+        if(preg_match('@(stat|tele)/(.+)/(.+)@i', $topic, $matches)) {
+            $type = $matches[1];
+            $device = $matches[2];
+            $field = $matches[3];
+        }
+        // OpenBeken uses a different format for some events - we can translate
+        elseif(preg_match('@(.+)/(.+)/get@i', $topic, $matches)) {
+            // Translate the format to match Tasmota
+            $type = 'stat';
+            $device = $matches[1];
+            $field = $matches[2];
+
+            if($field == "1" || $field == "2" || $field == "3") {
+                $field = 'POWER'.$field;
+                $message = $message == "1" ? "ON" : "OFF";
+            }
+        }
+        else {
             return; // Skip messages that don't have a correctly formatted topic
         }
 
-        $type = $matches[1];
-        $device = $matches[2];
-        $field = $matches[3];
+
 
         if($device !== $this->deviceName) {
             echo "Message is not for us. '{$device}' != '{$this->deviceName}' ";
