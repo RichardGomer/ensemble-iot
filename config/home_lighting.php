@@ -71,15 +71,19 @@ $conf['devices'][] = $toiletswdriver = new Schedule\Driver($sw_toilet, function(
 
 
 /**
- * Utility
+ * Utility + Rear Hall
  */
 $conf['devices'][] = $uml = new Light\MultiLight('utilitylights');
-$uml->addLight($conf['devices'][] = new Light\WLED("utlity-wled-sink", "10.0.107.216"));
 
-$conf['devices'][] = $utilitydriver = new Light\RGBWCTDriver($uml, new ContextPointer('lighting.schedules', 'daylightschedule'));
+$uml->addLight($conf['devices'][] = new Light\WLED("utility-wled-sink", "10.0.107.216"));
 
-// Use toilet switch to operate utility lights
-$uml->addSwitch($sw_toilet);
+$conf['devices'][] = $sw_utility = new Device\Light\LightSwitch("utility-switch", $bridge, "utility-switch");
+$conf['devices'][] = $sw_rearhall = new Light\LightSwitch("rearhall-switch-2", $bridge, "rearhall-switch", "2"); // Channel 2 on the rearhall 2CH switch
+$uml->addSwitch($sw_utility);
+$uml->addSwitch($sw_rearhall);
+
+$conf['devices'][] = $utilitydriver = new Light\RGBWCTDriver($uml, new ContextPointer('lighting.schedules', 'daylightschedule')); 
+
 
 /**
  * Dining Room
@@ -211,9 +215,10 @@ $actions->expose("set_default", function() use ($drivers) {
 
 
 // An action to turn all the (software-switched) lights off
-$actions->expose("off", function() use ($kml, $dml, $leds, $bl1, $glight) {
+$actions->expose("off", function() use ($kml, $dml, $uml, $leds, $bl1, $glight) {
     $kml->off();
     $dml->off();
+    $uml->off();
     $leds->off();
     $bl1->off();
     $glight->off();
