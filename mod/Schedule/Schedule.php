@@ -257,7 +257,7 @@ class Schedule {
         $now = time() + $offset;
         $lastTime = false;
         $cps = $this->getChangePoints();
-        var_dump($cps);
+        //var_dump($cps);
         foreach($cps as $time) {
             if($time > $now) {
                 if($lastTime === false) {
