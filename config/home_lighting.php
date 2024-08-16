@@ -77,7 +77,7 @@ $conf['devices'][] = $uml = new Light\MultiLight('utilitylights');
 
 $uml->addLight($conf['devices'][] = new Light\WLED("utility-wled-sink", "10.0.107.216"));
 
-$conf['devices'][] = $sw_utility = new Device\Light\LightSwitch("utility-switch", $bridge, "utility-switch");
+$conf['devices'][] = $sw_utility = new Light\LightSwitch("utility-switch", $bridge, "utility-switch", "1"); // The channel is named 1, even though there's only one; OpenBeken...
 $conf['devices'][] = $sw_rearhall = new Light\LightSwitch("rearhall-switch-2", $bridge, "rearhall-switch", "2"); // Channel 2 on the rearhall 2CH switch
 $uml->addSwitch($sw_utility);
 $uml->addSwitch($sw_rearhall);
