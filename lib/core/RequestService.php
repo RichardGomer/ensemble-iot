@@ -39,10 +39,10 @@ class RequestService {
         $worker->tell($command."\n");
 
         // For debugging we can print a few lines of what happens
-        for($i = 0; $i < 5; $i++) {
+        /*for($i = 0; $i < 5; $i++) {
             usleep(100000);
             var_dump($worker->read());
-        }
+        }*/
 
     }
 
@@ -55,25 +55,29 @@ class RequestService {
         
         // Clean up dead workers; and find busy workers
         $available = [];
+
         foreach($this->workers as $n=>$worker) {
+            echo "      Worker [$n]: ";
+
             if(!$worker->isRunning()) {
-                echo "Worker [$n] is dead?\n";
-                var_Dump($worker->read());
-                $this->worker = null;
+                echo "DEAD\n";
+                //var_Dump($worker->read());
+                unset($this->workers[$n]);
             }
 
             if($worker->isStalled()) {
-                echo "Stalled worker [$n]\n";
+                echo "STALLED\n";
                 $worker->tell("exit\n");
             }
 
             if(!$worker->isBusy()) {
+                echo "AVAILABLE\n";
                 $available[] = $worker;
             }
         }
         
         if(count($available) == 0) {
-            echo "Create worker\n";
+            echo "Create new worker\n";
             $this->workers[] = $w = new RequestWorker();
         } else {
             $w = $available[0];
