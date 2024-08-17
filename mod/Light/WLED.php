@@ -3,6 +3,7 @@
 namespace Ensemble\Device\Light;
 use Ensemble\Device\BasicDevice;
 use Ensemble\Async;
+use Ensemble\RequestService;
 use Ensemble\Schedule;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
@@ -99,16 +100,20 @@ class WLED extends BasicDevice implements RGBWCT {
     protected function applyJSON($object) {
         $url = "http://{$this->ip}/json/state";
 
+    
+        /*
         $client = new Client();
-
         $res = $client->post($url, [
             RequestOptions::JSON => $object,
             RequestOptions::TIMEOUT => 5 // Short timeout to prevent blocking the thread for too long
         ]);
-
         $json = json_encode($object);
+        echo "WLED POST {$json} {$res->getStatusCode()} {$res->getReasonPhrase()}\n";*/
 
-        echo "WLED POST {$json} {$res->getStatusCode()} {$res->getReasonPhrase()}\n";
+        $rs = RequestService::getInstance();
+
+        $rs->request('POST-JSON', $url, $object);
+    
     }
 
 }
