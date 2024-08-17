@@ -31,11 +31,18 @@ class RequestService {
         $command = sprintf(
             "%s %s %s\n",
             strtoupper($method),
-            escapeshellarg($url),
-            !empty($args) ? escapeshellarg(json_encode($args)) : ''
+            $url,
+            !empty($args) ? json_encode($args) : ''
         );
 
-        $this->getWorker()->tell($command);
+        $worker = $this->getWorker();
+        $worker->tell($command."\n");
+
+        // For debugging we can print a few lines of what happens
+        /*for($i = 0; $i < 10; $i++) {
+            usleep(100000);
+            var_dump($worker->read());
+        }*/
 
     }
 

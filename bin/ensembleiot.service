@@ -12,8 +12,8 @@ Type=simple
 RemainAfterExit=no
 User=USER
 
-ExecStop=
-User=USER
+Restart=on-failure
+RestartSec=30s
 
 [Install]
 WantedBy=multi-user.target

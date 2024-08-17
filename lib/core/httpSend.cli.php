@@ -34,22 +34,22 @@ while (true) {
 
     // If there is input, process it
     if ($input !== '') {
-        // Parse the input
-        $args = explode(' ', $input, 3);
+        $valid = preg_match('/([a-z\-]+) (https?:[^\ ]+)(.*)$/i', $input, $matches);
 
-        if (count($args) < 2) {
-            echo "Invalid command. Usage: <HTTP_METHOD> <URL> [<JSON_FORM_PARAMETERS>]\n";
+        if (!$valid) {
+            echo "Invalid command: $input\n";
             continue;
         }
 
-        $method = strtoupper($args[0]);
-        $url = $args[1];
+        $method = strtoupper($matches[1]);
+        $url = $matches[2];
         $formParams = [];
 
-        if (isset($args[2])) {
-            $formParams = json_decode($args[2], true);
+        $payload = $matches[3];
+        if (strlen($payload) > 0) {
+            $formParams = json_decode($payload, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                echo "Invalid JSON for form parameters.\n";
+                echo "Invalid JSON for form parameters.\n'$payload'\n";
                 continue;
             }
         }
