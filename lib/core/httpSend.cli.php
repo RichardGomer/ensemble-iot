@@ -10,9 +10,15 @@ require __DIR__.'/../../vendor/autoload.php';
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\RequestOptions;
 
-$client = new Client();
+
+$handler = new CurlHandler();
+$stack = HandlerStack::create($handler); // Wrap w/ middleware
+$client = new Client(['handler' => $stack]);
+
 $promises = [];
 
 echo "Interactive HTTP client started. Enter commands in the format: <HTTP_METHOD> <URL> [<JSON_FORM_PARAMETERS>]\n";

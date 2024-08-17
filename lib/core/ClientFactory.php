@@ -9,7 +9,9 @@
 
 namespace Ensemble\Remote;
 
+use Ensemble\RequestService;
 use GuzzleHttp as http;
+use GuzzleHttp\Client as GuzzleHttpClient;
 
 class ClientFactory {
     /**
@@ -51,6 +53,9 @@ interface RemoteClient {
  * @package Ensemble\Remote
  */
 class SharedQueueClient implements RemoteClient {
+
+    private $queue;
+
     public function __construct($endpoint) {
         /**
          * Endpoint string format is:
@@ -84,6 +89,10 @@ class SharedQueueClient implements RemoteClient {
  * @package Ensemble\Remote
  */
 class HttpClient implements RemoteClient {
+
+    protected http\Client $client;
+    protected string $endpoint;
+
     public function __construct($endpoint) {
             $this->client = new http\Client();
             $this->endpoint = $endpoint;
@@ -98,10 +107,17 @@ class HttpClient implements RemoteClient {
     }
 
     public function registerDevices($deviceNames, $endpoint) {
-        return $this->makeRequest(array(
+        $args = array(
             'register'=>json_encode($deviceNames),
             'endpoint'=>$endpoint
-        ));
+        );
+
+        /*return $this->makeRequest($args);*/
+
+        // Use the request service to make this request, because it's potentially blocky
+        // and we don't care about the result
+        $rs = RequestService::getInstance();
+        $rs->request('POST', $this->endpoint, $args);
     }
 
     protected function makeRequest($args) {

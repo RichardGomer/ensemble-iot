@@ -112,6 +112,7 @@ class WLED extends BasicDevice implements RGBWCT {
 
         $rs = RequestService::getInstance();
 
+        echo "WLED: POST-JSON $url ".json_encode($object)."\n";
         $rs->request('POST-JSON', $url, $object);
     
     }
