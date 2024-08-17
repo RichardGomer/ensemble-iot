@@ -109,7 +109,7 @@ while (true) {
             echo "------\n";
             unset($promises[$requestId]); // Remove the completed or failed promise
         } else {
-            echo ".";
+            echo ".\n";
         }
     }
 

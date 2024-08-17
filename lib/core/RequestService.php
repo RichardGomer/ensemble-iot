@@ -39,10 +39,10 @@ class RequestService {
         $worker->tell($command."\n");
 
         // For debugging we can print a few lines of what happens
-        /*for($i = 0; $i < 10; $i++) {
+        for($i = 0; $i < 5; $i++) {
             usleep(100000);
             var_dump($worker->read());
-        }*/
+        }
 
     }
 
@@ -55,14 +55,15 @@ class RequestService {
         
         // Clean up dead workers; and find busy workers
         $available = [];
-        foreach($this->workers as $worker) {
+        foreach($this->workers as $n=>$worker) {
             if(!$worker->isRunning()) {
-                echo "Worker is dead?\n";
+                echo "Worker [$n] is dead?\n";
                 var_Dump($worker->read());
                 $this->worker = null;
             }
 
             if($worker->isStalled()) {
+                echo "Stalled worker [$n]\n";
                 $worker->tell("exit\n");
             }
 
@@ -72,6 +73,7 @@ class RequestService {
         }
         
         if(count($available) == 0) {
+            echo "Create worker\n";
             $this->workers[] = $w = new RequestWorker();
         } else {
             $w = $available[0];
@@ -97,15 +99,25 @@ class RequestWorker extends Thread {
     }
 
     public function isBusy() {
-        $this->read();
-        $rows = $this->getBuffer();
 
         // The worker prints out .s while it is busy; then ----- after each request
         // So if the last line contains a ., it must be busy!
-        $lastline = array_pop($rows);
+        $lastline = $this->lastOutput();
         if(strstr($lastline, '.')) {
             return true;
         }
+    }
+
+    protected function lastOutput() {
+        $buffer= $this->read();
+
+        foreach(array_reverse($buffer) as $row) {
+            if(strlen(trim($row)) > 1) {
+                return trim($row);
+            }
+        }
+
+        return false;
     }
 
     /**
