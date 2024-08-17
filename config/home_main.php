@@ -63,7 +63,7 @@ $conf['devices'][] = $socket = new Device\Blind\ScheduledBlind("blind2", $bridge
 $bsched = new Schedule\Schedule();
 $bsched->setPoint('00:00:00', '100');
 $bsched->setPoint('08:00:00', '@sunrise 0');
-$bsched->setPoint('17:00:00', '@dusk 100');
+$bsched->setPoint('17:00:00', '@sunset+120 100');
 
 $sd = new Schedule\DailyScheduler('thermalblind.scheduler', 'global.schedules', 'thermalblindschedule', $bsched, $LAT, $LNG);
 $conf['devices'][] = $sd;
