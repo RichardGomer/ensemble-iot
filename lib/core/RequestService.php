@@ -46,19 +46,78 @@ class RequestService {
 
     }
 
+    /**
+     * Get a worker, and also do some worker management
+     * @return Thread 
+     */
+    private $workers = [];
     protected function getWorker() : Thread {
-        if($this->worker instanceof Thread && !$this->worker->isRunning()) {
-            echo "Worker is dead?\n";
-            var_Dump($this->worker->read());
-            $this->worker = null;
+        
+        // Clean up dead workers; and find busy workers
+        $available = [];
+        foreach($this->workers as $worker) {
+            if(!$worker->isRunning()) {
+                echo "Worker is dead?\n";
+                var_Dump($worker->read());
+                $this->worker = null;
+            }
+
+            if($worker->isStalled()) {
+                $worker->tell("exit\n");
+            }
+
+            if(!$worker->isBusy()) {
+                $available[] = $worker;
+            }
+        }
+        
+        if(count($available) == 0) {
+            $this->workers[] = $w = new RequestWorker();
+        } else {
+            $w = $available[0];
         }
 
-        if(!$this->worker instanceof Thread) {
-            $this->worker = new Thread('php '.escapeShellArg(__DIR__.'/httpSend.cli.php'));
-        }
-
-        return $this->worker;
+        return $w;
     }
 
+}
+
+class RequestWorker extends Thread {
+
+    private $lastInput = 0;
+
+    public function __construct() {
+        $this->lastInput = time();
+        parent::__construct('php '.escapeShellArg(__DIR__.'/httpSend.cli.php'));
+    }
+
+    public function tell($thought) {
+        $this->lastInput = time();
+        parent::tell($thought);
+    }
+
+    public function isBusy() {
+        $this->read();
+        $rows = $this->getBuffer();
+
+        // The worker prints out .s while it is busy; then ----- after each request
+        // So if the last line contains a ., it must be busy!
+        $lastline = array_pop($rows);
+        if(strstr($lastline, '.')) {
+            return true;
+        }
+    }
+
+    /**
+     * Check if the worker is stalled - i.e. it is still busy 15s after the last input
+     * @var Ensemble\isStalled
+     */
+    public function isStalled() {
+        if(($this->lastInput < time() - 15) && $this->isBusy()) {
+            return true;
+        }
+
+        return false;
+    }
 }
 
