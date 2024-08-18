@@ -19,8 +19,6 @@ $handler = new CurlHandler();
 $stack = HandlerStack::create($handler); // Wrap w/ middleware
 $client = new Client(['handler' => $stack]);
 
-$promises = [];
-
 echo "Interactive HTTP client started. Enter commands in the format: <HTTP_METHOD> <URL> [<JSON_FORM_PARAMETERS>]\n";
 echo "Type 'exit' to quit.\n------\n";
 
@@ -96,8 +94,6 @@ while (true) {
     }
 
     usleep(10000);
-
-
 }
 
 echo "Exiting\n";

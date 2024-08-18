@@ -57,30 +57,40 @@ class RequestService {
         $available = [];
 
         foreach($this->workers as $n=>$worker) {
-            echo "      Worker [$n]: ";
+            echo "    Worker [$n]: ";
+
+            $ll = substr(trim($worker->lastInputLog), 0, 100);
 
             if(!$worker->isRunning()) {
                 echo "DEAD\n";
                 //var_Dump($worker->read());
                 unset($this->workers[$n]);
             }
-
-            if($worker->isStalled()) {
-                echo "STALLED\n";
+            elseif($worker->isStalled()) {
+                echo "STALLED  $ll\n";
                 $worker->tell("exit\n");
-            }
 
-            if(!$worker->isBusy()) {
+                foreach($worker->getBuffer() as $l) {
+                    echo " Worker [$n]:     ".trim($l)."\n";
+                }
+
+            }
+            elseif(!$worker->isBusy()) {
                 echo "AVAILABLE\n";
                 $available[] = $worker;
+            } else {
+                echo "BUSY     $ll\n";
             }
         }
         
         if(count($available) == 0) {
-            echo "Create new worker\n";
             $this->workers[] = $w = new RequestWorker();
+            $n = array_key_last($this->workers);
+            echo "  * Created Worker [$n]\n";
         } else {
             $w = $available[0];
+            $id = array_search($w, $this->workers);
+            echo "    Use Worker [$id]\n";
         }
 
         return $w;
@@ -91,6 +101,7 @@ class RequestService {
 class RequestWorker extends Thread {
 
     private $lastInput = 0;
+    public $lastInputLog = false;
 
     public function __construct() {
         $this->lastInput = time();
@@ -99,25 +110,29 @@ class RequestWorker extends Thread {
 
     public function tell($thought) {
         $this->lastInput = time();
+        $this->lastInputLog = $thought;
         parent::tell($thought);
     }
 
     public function isBusy() {
 
-        // The worker prints out .s while it is busy; then ----- after each request
-        // So if the last line contains a ., it must be busy!
+        // The worker prints out ----- after each request is complete
         $lastline = $this->lastOutput();
-        if(strstr($lastline, '.')) {
-            return true;
+        if(strstr($lastline, '------') !== false) {
+            return false;
         }
+
+        return true;
     }
 
     protected function lastOutput() {
-        $buffer= $this->read();
+        $this->read();
+        $buffer = $this->getBuffer();
 
         foreach(array_reverse($buffer) as $row) {
-            if(strlen(trim($row)) > 1) {
-                return trim($row);
+            $row = trim($row);
+            if(strlen($row) > 1) {
+                return $row;
             }
         }
 
