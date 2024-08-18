@@ -53,7 +53,8 @@ class WLED extends BasicDevice implements RGBWCT {
                     'col' => [ [ $r, $g, $b ] ],
                 ],
             //'transition' => 100 // doesn't work?
-            ]
+            ],
+            'on'=>$this->on
         ]);
     }
 
