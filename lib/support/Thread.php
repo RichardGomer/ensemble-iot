@@ -18,7 +18,7 @@ class Thread
 	var $process; // process reference
 	var $pipes; // stdio
 	var $buffer = array(); // stdout buffer
-	var $bufferlen = 15; // Lines to store in buffer
+	var $bufferlen = 25; // Lines to store in buffer
 	var $output;
 	var $error;
 	var $timeout;
@@ -53,7 +53,9 @@ class Thread
 		// exec replaces the spawned shell, rather than starting a sub-process; makes close() work as expected!
 		$this->process = proc_open( "exec ".$command.$astr, $descriptor, $this->pipes );
 
-		// Set STDOUT and STDERR to non-blocking
+		// Set STDIN, STDOUT and STDERR to non-blocking
+		// STDIN blocking normally makes little difference, but it can cause tell() to block in some conditions, potentially indefinitely!
+		stream_set_blocking( $this->pipes[1], 0 );
 		stream_set_blocking( $this->pipes[1], 0 );
 		stream_set_blocking( $this->pipes[2], 0 );
 	}
@@ -112,7 +114,8 @@ class Thread
 		fwrite( $this->pipes[0], $thought );
 	}
 
-	// Get the command output produced since last read, as an array of lines
+	// Read new output from the process and return it. New output is appended to the
+	// read buffer; use readBuffer() to access that buffer
 	public function read($pipe=1)
 	{
 		$buffer = array();
@@ -129,7 +132,8 @@ class Thread
 	}
 
 	// Get buffered lines
-	public function getBuffer() {
+	public function getBuffer()
+	{
 		return $this->buffer;
 	}
 
