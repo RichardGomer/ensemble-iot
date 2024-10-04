@@ -147,7 +147,12 @@ $lsched->setPoint('23:59:59', '210,94,255 50');
 $conf['devices'][] = $sd_lights = new Schedule\DailyScheduler('violet.scheduler', 'lighting.schedules', 'violetschedule', $lsched);
 $schemes['violet'] = 'violetschedule';
 
-
+// Autumn scheme
+$lsched = new Schedule\Schedule();
+$lsched->setPoint('00:00:00', '209,126,48 50');
+$lsched->setPoint('23:59:59', '209,126,48 50');
+$conf['devices'][] = $sd_lights = new Schedule\DailyScheduler('autumn.scheduler', 'lighting.schedules', 'autumnschedule', $lsched);
+$schemes['autumn'] = 'autumnschedule';
 
 
 // TODO: Also set up schemes for WLED here; same names, fallback to default if there isn't one
