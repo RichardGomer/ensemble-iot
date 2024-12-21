@@ -43,6 +43,14 @@ $pumpdevice->setDimensions($width, $length);
 $pumpdevice->setMinimumDepth($pump_off);
 $pumpdevice->setAdvisoryPumping($pump_on, $pump_on_interval);
 $pumpdevice->setMandatoryPumping($pump_force);
-$pumpdevice->setLogDevice('global.log', $conf['broker']); // Log to global.log via the main broker
 
 $conf['devices'][] = $pumpdevice;
+
+
+// Diverter - is a two-way valve controlled by a double relay.
+// The first relay provides isolation, the second sets the valve position
+// Isolation = gpio26; Direction = gpio19
+// Valve is set to either both (pin=0) or single (bottom) (pin=1)
+
+// Operating the valve seems to bork the pi - noise problem? - fine when the
+// box is open...
