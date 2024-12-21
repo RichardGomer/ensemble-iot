@@ -70,7 +70,7 @@ class SolcastPredictor implements SolarEnergyPredictor {
         } catch (\Exception $e) {
             echo "Solcast failed: ".$e->getMessage()."\n";
             $s = new EnergySchedule();
-            $s->setPeriods(time() - 1800, time() + 24 * 3600, 0);
+            $s->setPeriods(floor(time() / 1800) * 1800, ceil((time() + 24 * 3600) / 1800) * 1800, 0);
             return $s;
         }
     }
