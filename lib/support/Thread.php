@@ -109,13 +109,17 @@ class Thread
 
 
 	// Send a message to the command running
-	public function tell( $thought )
+	public function tell( $thought, $eof=false )
 	{
 		fwrite( $this->pipes[0], $thought );
+
+		if($eof) {
+			fclose($this->pipes[0]);
+		}
 	}
 
 	// Read new output from the process and return it. New output is appended to the
-	// read buffer; use readBuffer() to access that buffer
+	// read buffer; use getBuffer() to access that buffer
 	public function read($pipe=1)
 	{
 		$buffer = array();

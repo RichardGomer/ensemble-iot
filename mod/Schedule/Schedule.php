@@ -6,6 +6,8 @@
  */
 namespace Ensemble\Schedule;
 
+use DateTimeZone;
+
 class Schedule {
 
     protected $periods = [];
@@ -201,7 +203,7 @@ class Schedule {
     }
 
     protected $tzo = false;
-    public function getTZO(){
+    public function getTZO() : \DateTimeZone {
         if($this->tzo === false) {
             $this->tzo = new \DateTimeZone($this->timezone);
         }
@@ -321,7 +323,7 @@ class Schedule {
             $tend = strtotime("tomorrow {$end}");
         }
 
-        echo date("Y-m-d H:i:s", $tstart)." - ".date('Y-m-d H:i:s', $tend)."\n";
+        //echo date("Y-m-d H:i:s", $tstart)." - ".date('Y-m-d H:i:s', $tend)."\n";
 
         $out = $this->factory();
 
@@ -389,6 +391,40 @@ class Schedule {
         }
 
         return $out;
+    }
+
+    /**
+     * Reduce this schedule to a single value using the provided callback.
+     * 
+     */
+    public function reduceValue(callable $reducer) {
+
+        $carry = null;
+        foreach($this->getPeriods() as $p) {
+            
+            $carry = $reducer($p, $carry);
+
+        }
+
+        return $carry;
+    }
+
+    /**
+     * Get the minimum value in the schedule
+     */
+    public function minValue() {
+        return $this->reduceValue(function ($p, $carry) {
+            return min($p['status'], $carry == null ? INF : $carry);
+        });
+    }
+
+    /**
+     * Get the maximum value in the schedule
+     */
+    public function maxValue() {
+        return $this->reduceValue(function ($p, $carry) {
+            return max($p['status'], $carry == null ? -INF : $carry);
+        });
     }
 
 }

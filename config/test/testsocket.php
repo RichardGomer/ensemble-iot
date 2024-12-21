@@ -19,11 +19,7 @@ $conf['devices'][] = $ctx = new Device\ContextDevice('test.schedules');
 
 // Daily offpeak
 $doffpeak = new Schedule\Schedule();
-$doffpeak->setPoint(0, 'OFF');
-$doffpeak->setPoint(time() + 5, 'ON');
-$doffpeak->setPoint(time() + 30, 'OFF');
-$doffpeak->setPoint(time() + 50, 'ON');
-$doffpeak->setPoint(time() + 60, 'OFF');
+$doffpeak->setPoint(0, 'ON');
 $sd_doffpeak = new Schedule\DailyScheduler('test.scheduler', 'test.schedules', 'testschedule', $doffpeak);
 $conf['devices'][] = $sd_doffpeak;
 
@@ -31,7 +27,7 @@ $conf['devices'][] = $sd_doffpeak;
 $client = new MQTTClient('10.0.0.8', 1883);
 $conf['devices'][] = $bridge = new MQTT\Bridge("mqttbridge", new MQTT\Client('10.0.0.8', '1883'));
 
-$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("testsocket", $bridge, new Device\ContextPointer('test.schedules', 'testschedule'), "immersion");
+$conf['devices'][] = $socket = new Device\Socket\ScheduledSocket("testsocket", $bridge, new Device\ContextPointer('energy.schedules', 'allday'), "x");
 
 
 class SocketTestDevice extends Device\BasicDevice {

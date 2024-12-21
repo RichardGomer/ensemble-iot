@@ -5,21 +5,18 @@
  */
 
 namespace Ensemble\Device\EnergyPlan;
-use Ensemble\Schedule;
-use Ensemble\Async as Async;
 use GuzzleHttp\Client;
 
 
-class SolcastDevice extends Schedule\SchedulerDevice {
+class SolcastPredictor implements SolarEnergyPredictor {
+
+    private $sckey, $scsite, $client;
 
     /**
-    * $name - A name for this device
     * $sckey - A solcast API key
     * $scsite - A solcast site ID
     */
-    public function __construct($name, $sckey, $scsite) {
-        $this->name = $name;
-
+    public function __construct($sckey, $scsite) {
         $this->sckey = $sckey;
         $this->scsite = $scsite;
 
@@ -28,25 +25,34 @@ class SolcastDevice extends Schedule\SchedulerDevice {
         ]);
     }
 
-    public function reschedule() {
+    public function getSolarPrediction(): EnergySchedule
+    {
         $device = $this;
 
         try {
 
             $lfile = './var/solcast.json'; // Local json source
 
-            if(!file_exists($lfile)) {
+            // Fetch data from the cache if possible, or make a request
+            if(!file_exists($lfile) || time() - filemtime($lfile) > 3600) { // Refresh once per hour
+
+                if(!touch($lfile)) {
+                    throw new \Exception("Cannot create cache file for solcast data. Quitting until that's fixed to avoid API overage.");
+                }
+
                 $url = "https://api.solcast.com.au/rooftop_sites/{$device->scsite}/forecasts?format=json&api_key={$device->sckey}";
                 echo "Solcast GET $url\n";
                 $res = $this->client->request('GET', $url);
                 $json = $res->getBody();
+                file_put_contents($lfile, $json);
+
             } else {
                 $json = file_get_contents($lfile);
-                //var_dump($json);
             }
 
             $data = json_decode($json, true);
 
+            // Convert the data to an EnergySchedule
             $s = new EnergySchedule();
 
             if(!array_key_exists('forecasts', $data)) {
@@ -59,8 +65,6 @@ class SolcastDevice extends Schedule\SchedulerDevice {
 
                 $s->setPeriod($start, $end, $period['pv_estimate'], false);
             }
-
-            //echo $s->prettyPrint();
 
             return $s;
         } catch (\Exception $e) {

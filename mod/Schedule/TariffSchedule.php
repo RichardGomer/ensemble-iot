@@ -11,7 +11,11 @@
  */
 namespace Ensemble\Schedule;
 
-class TariffSchedule extends Schedule {
+use Ensemble\Device\EnergyPlan\TariffSource;
+
+class TariffSchedule extends Schedule implements TariffSource {
+
+    
 
     public function __construct(Schedule $tariff = null) {
         parent::__construct(false);
@@ -23,6 +27,11 @@ class TariffSchedule extends Schedule {
                 $this->setPoint($p['start'], $p['status']);
             }
         }
+    }
+
+    // For convenience allow a bare TariffSchedule to be used as a TariffSource, by returning itself
+    public function getTariff(): TariffSchedule {
+        return $this;
     }
 
     // Get periods where the price is less or equal to than $max

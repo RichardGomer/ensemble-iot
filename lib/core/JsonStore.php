@@ -64,7 +64,7 @@ class JsonStore extends JsonReader
        }
    }
 
-   private $locked = false;
+   private $locked = 0;
    public function lock()
    {
        $this->locked++;

@@ -2,13 +2,14 @@
 
 namespace Ensemble\Schedule;
 use Ensemble\Async;
+use Ensemble\Device\EnergyPlan\TariffSource;
 use GuzzleHttp\Client;
 
 /**
  * A client for the Octopus energy API
  *
  */
-class Octopus {
+class Octopus implements TariffSource {
 
     public function __construct($key) {
         $this->url = 'https://api.octopus.energy';
@@ -55,7 +56,7 @@ class Octopus {
     }
 
     /**
-     * Get the Agile tariff data from Octopus as a Schedule object
+     * Get the tariff data from Octopus as a Schedule object; based on the configured product and tariff codes
      * The schedule will contain all available tariff data - usually 24 or 48 hours
      */
     public function getTariffSchedule($num=192) {
@@ -63,7 +64,7 @@ class Octopus {
         $path = "/v1/products/{$this->productcode}/electricity-tariffs/$this->tariffcode/standard-unit-rates";
         $res = $this->request($path, array('page_size'=>$num));
 
-        $s = new Schedule();
+        $s = new TariffSchedule();
 
         //var_dump($res['results']);
 
@@ -74,6 +75,10 @@ class Octopus {
         //echo $s->prettyPrint();
 
         return $s;
+    }
+
+    public function getTariff() : TariffSchedule {
+        return $this->getTariffSchedule();
     }
 
     public function setTariff($productcode, $tariffcode) {

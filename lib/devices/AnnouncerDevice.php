@@ -8,7 +8,10 @@ namespace Ensemble\Device;
 
 class AnnouncerDevice implements \Ensemble\Module {
 
-    private $pollInterval = 120; // Interval, in seconds, between polls i.e. announcements
+    private $announceInterval = 120; // Interval between announcements to each endpoint
+    private $epsPerPoll = 3; // Number of remotes to announce to on each poll
+
+    private $pollInterval = 10; // This is re-calculated on the first poll
 
     private $remotes = [];
     private string $endpointURL;
@@ -50,6 +53,10 @@ class AnnouncerDevice implements \Ensemble\Module {
     }
 
     public function poll(\Ensemble\CommandBroker $broker) {
+
+        // Recalculate poll interval to announce at the right frequency
+        $this->pollInterval = $this->announceInterval / max(1, ceil((count($this->remotes) / $this->epsPerPoll))); // max avoids a div by zero problem
+
         // We notify the remote of all local devices
         $devices = $broker->getLocalDevices();
 
@@ -81,10 +88,8 @@ class AnnouncerDevice implements \Ensemble\Module {
 
         foreach($remotes as $r) {
             try {
-                echo "Announce to $r\n";
-                foreach($devices as $d) {
-                    echo " + $d\n";
-                }
+                $cd = count($devices);
+                echo "Announce $cd devices to $r\n";
                 $client = \Ensemble\Remote\ClientFactory::factory($r);
                 $client->registerDevices($devices, $this->endpointURL);
             } catch (\Exception $e) {

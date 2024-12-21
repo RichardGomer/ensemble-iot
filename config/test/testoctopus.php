@@ -19,12 +19,12 @@ $conf['devices'][] = $ctx = new Device\ContextDevice('store.context');
 
 
 // Create the tariff scheduler
-$conf['devices'][] = new Schedule\OctopusGoTariffDevice('tariffscheduler', 'store.context', 'electariff', $oct);
+//$conf['devices'][] = new Schedule\OctopusTariffDevice('tariffscheduler', 'store.context', 'electariff', $oct);
 
 
 // Create the usage schedulers
-$conf['devices'][] = new Schedule\OctopusGasUsageDevice('gasusagescheduler', 'store.context', 'gasusage', $oct);
-$conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', 'store.context', 'elecusage', $oct);
+//$conf['devices'][] = new Schedule\OctopusGasUsageDevice('gasusagescheduler', 'store.context', 'gasusage', $oct);
+//$conf['devices'][] = new Schedule\OctopusElecUsageDevice('elecusagescheduler', 'store.context', 'elecusage', $oct);
 
 class ForecastTestDevice extends Async\Device {
 
@@ -37,8 +37,9 @@ class ForecastTestDevice extends Async\Device {
         $device = $this;
         return new Async\Lambda(function() use ($device) {
 
-            //var_dump($device->client->getGasUsage());
+            var_dump($s = $device->client->getElecUsage());
             //var_dump($device->client->getTariffSchedule());
+            echo $s->prettyPrint();
             yield;
 
         });

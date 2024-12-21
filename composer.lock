@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "28d5ac333d89f47a5d15a21899f56500",
+    "content-hash": "87983d13e60ae47599d6113ee9ed5eab",
     "packages": [
         {
             "name": "auroras-live/suncalc-php",
@@ -451,6 +451,58 @@
                 }
             ],
             "time": "2023-04-17T16:00:37+00:00"
+        },
+        {
+            "name": "hi-folks/statistics",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Hi-Folks/statistics.git",
+                "reference": "e32a0b46becd4faa6f9eb3d39394fc605a738645"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Hi-Folks/statistics/zipball/e32a0b46becd4faa6f9eb3d39394fc605a738645",
+                "reference": "e32a0b46becd4faa6f9eb3d39394fc605a738645",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1|^8.2|^8.3|^8.4"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.13",
+                "pestphp/pest": "^2.0",
+                "phpstan/phpstan": "^1.3",
+                "rector/rector": "^1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "HiFolks\\Statistics\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Roberto B.",
+                    "email": "roberto.butti@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP package that provides functions for calculating mathematical statistics of numeric data.",
+            "homepage": "https://github.com/hi-folks/statistics",
+            "keywords": [
+                "hi-folks",
+                "statistics"
+            ],
+            "support": {
+                "issues": "https://github.com/Hi-Folks/statistics/issues",
+                "source": "https://github.com/Hi-Folks/statistics/tree/v1.0.1"
+            },
+            "time": "2024-11-21T18:19:04+00:00"
         },
         {
             "name": "mmarica/display-table",

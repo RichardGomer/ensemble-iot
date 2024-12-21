@@ -25,13 +25,14 @@ class EnergySchedule extends Schedule {
     }
 
 
-    // Disable tidying, which can change the length of periods
+    // Disable tidying, because it can change the length of periods which is
+    // undesirable in an energy schedule that we expect to have 30minute slots
     protected function tidy() {
         
     }
 
 
-    public function setPeriod($from, $to, $value) {
+    public function setPeriod($from, $to, $value, $tidy = false) {
 
         $t_from = $this->normaliseTime($from);
         $t_to = $this->normaliseTime($to);
@@ -45,7 +46,7 @@ class EnergySchedule extends Schedule {
             throw new \Exception("In an EnergySchedule, periods must be 30 minutes long; $t_from -> $t_to = $d");
         }
 
-        parent::setPeriod($from, $to, $value);
+        parent::setPeriod($from, $to, $value, $tidy);
     }
 
     /**
