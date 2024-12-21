@@ -5,6 +5,7 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+
 SCRIPT=`realpath $0`
 BASEPATH=`dirname $( dirname $SCRIPT )`
 WWWPATH="$BASEPATH/www"
