@@ -18,7 +18,7 @@ class Thread
 	var $process; // process reference
 	var $pipes; // stdio
 	var $buffer = array(); // stdout buffer
-	var $bufferlen = 25; // Lines to store in buffer
+	var $bufferlen = 255; // Lines to store in buffer
 	var $output;
 	var $error;
 	var $timeout;
@@ -105,6 +105,19 @@ class Thread
 	                usleep(1000);
 	                $s = $this->getStatus();
 	        } while($s !== false && $s['running'] == true);
+	}
+
+
+	// Wait for the process to exit, but also print any output
+	function waitForExitAndPrint() {
+		do {
+			usleep(1000);
+			$out = $this->read();
+			foreach($out as $l) {
+				echo trim($l)."\n";
+			}
+			$s = $this->getStatus();
+		} while($s !== false && $s['running'] == true);
 	}
 
 

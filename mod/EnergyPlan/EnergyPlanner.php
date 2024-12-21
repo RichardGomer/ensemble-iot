@@ -81,8 +81,8 @@ class EnergyPlanner {
         $json = json_encode(['options' => $opts, 'data' => $ts], true);
         //echo $json;
         $t->tell($json, true); // Send the JSON and close the pipe
-        $t->waitForExit();
-        $out = $t->read();
+        $t->waitForExitAndPrint();
+        $out = $t->getBuffer();
 
         if($t->getStatus()['exitcode'] == 0) {
             $plan = array_filter($out, function($line) {
@@ -91,7 +91,7 @@ class EnergyPlanner {
                 if($ret) {
                     return true;
                 } else {
-                    echo $line;
+                    //echo $line;
                     return false;
                 }
 
