@@ -108,10 +108,10 @@ class RequestWorker extends Thread {
         parent::__construct('php '.escapeShellArg(__DIR__.'/httpSend.cli.php'));
     }
 
-    public function tell($thought) {
+    public function tell($thought, $eof=false) {
         $this->lastInput = time();
         $this->lastInputLog = $thought;
-        parent::tell($thought);
+        parent::tell($thought, $eof);
     }
 
     public function isBusy() {
