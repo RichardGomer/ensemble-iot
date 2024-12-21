@@ -55,7 +55,7 @@ class SolcastPredictor implements SolarEnergyPredictor {
             // Convert the data to an EnergySchedule
             $s = new EnergySchedule();
 
-            if(!array_key_exists('forecasts', $data)) {
+            if(!is_array($data) || !array_key_exists('forecasts', $data)) {
                 throw new \Exception("No forecast data in response");
             }
 
